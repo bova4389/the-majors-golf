@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Majors Golf Pool — Submit Picks</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <h1 class="site-title">⛳ Majors Golf Pool</h1>
+      <nav class="header-nav">
+        <a href="index.html" class="nav-link">Standings</a>
+        <a href="picks.html" class="nav-link active">Submit Picks</a>
+        <a href="admin.html" class="nav-link nav-admin">Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Loading state -->
+    <div id="loadingMsg" class="loading-msg">Loading tournament info...</div>
+
+    <!-- Picks locked state -->
+    <section id="lockedMsg" class="locked-banner hidden">
+      <div class="locked-icon">🔒</div>
+      <h2>Picks Are Locked</h2>
+      <p>The pick window has closed for this tournament. Check the <a href="index.html">standings page</a> to follow along.</p>
+    </section>
+
+    <!-- No active tournament -->
+    <section id="noTournament" class="no-data hidden">
+      <p>No active tournament found. Check back soon or visit the <a href="index.html">standings page</a>.</p>
+    </section>
+
+    <!-- Pick submission form -->
+    <section id="pickForm" class="hidden">
+      <div class="form-header">
+        <h2 id="formTournamentName" class="form-title"></h2>
+        <p id="formDeadline" class="form-deadline"></p>
+      </div>
+
+      <form id="picksForm" class="picks-form" onsubmit="submitPicks(event)">
+
+        <!-- Entry info -->
+        <div class="form-section">
+          <h3 class="form-section-title">Your Info</h3>
+          <div class="form-row">
+            <label for="entrantName">Your Name <span class="required">*</span></label>
+            <input type="text" id="entrantName" placeholder="First Last" required maxlength="60" />
+          </div>
+          <div class="form-row">
+            <label for="entrantEmail">Email (optional — for confirmation)</label>
+            <input type="email" id="entrantEmail" placeholder="you@email.com" />
+          </div>
+          <div class="form-row">
+            <label for="entryPassword">Pool Entry Code <span class="required">*</span></label>
+            <input type="password" id="entryPassword" placeholder="Enter the code shared by the pool admin" required />
+          </div>
+        </div>
+
+        <!-- Tier picks -->
+        <div class="form-section">
+          <h3 class="form-section-title">Your Picks</h3>
+          <p class="picks-instruction">Select 1 golfer from each tier. Each golfer appears in only one tier.</p>
+
+          <div id="tierPicksContainer" class="tier-picks-container">
+            <!-- Tier rows injected by picks.js -->
+          </div>
+        </div>
+
+        <div class="form-submit-row">
+          <button type="submit" id="submitBtn" class="btn btn-primary btn-lg">Submit My Picks</button>
+        </div>
+
+        <p id="formError" class="form-error hidden"></p>
+      </form>
+    </section>
+
+    <!-- Success state -->
+    <section id="successMsg" class="success-banner hidden">
+      <div class="success-icon">✅</div>
+      <h2>Picks Submitted!</h2>
+      <p id="successDetail"></p>
+      <a href="index.html" class="btn btn-primary">View Standings</a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Majors Golf Pool &copy; <span id="footerYear"></span></p>
+  </footer>
+
+  <script type="module">
+    import { initFirebase } from './js/firebase-config.js';
+    import { loadPickForm, submitPicks } from './js/picks.js';
+    initFirebase();
+    window.submitPicks = submitPicks;
+    document.getElementById('footerYear').textContent = new Date().getFullYear();
+    loadPickForm();
+  </script>
+</body>
+</html>

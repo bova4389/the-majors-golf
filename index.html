@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Majors Golf Pool — Standings</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <h1 class="site-title">⛳ Majors Golf Pool</h1>
+      <nav class="header-nav">
+        <a href="index.html" class="nav-link active">Standings</a>
+        <a href="picks.html" class="nav-link">Submit Picks</a>
+        <a href="admin.html" class="nav-link nav-admin">Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Tournament selector -->
+    <section class="tournament-bar">
+      <select id="tournamentSelect" class="tournament-select">
+        <option value="">Loading tournaments...</option>
+      </select>
+      <div id="lockCountdown" class="lock-countdown hidden"></div>
+    </section>
+
+    <!-- Prize breakdown -->
+    <section id="prizeSection" class="prize-section hidden">
+      <h2 class="section-title">Prize Breakdown</h2>
+      <div id="prizeGrid" class="prize-grid"></div>
+    </section>
+
+    <!-- Status bar -->
+    <div class="status-bar">
+      <span id="statusLabel" class="status-label"></span>
+      <div class="status-right">
+        <span id="lastUpdated" class="last-updated"></span>
+        <button id="refreshBtn" class="btn btn-sm" onclick="manualRefresh()">Refresh</button>
+      </div>
+    </div>
+
+    <!-- Leaderboard -->
+    <section class="table-wrapper">
+      <div id="loadingMsg" class="loading-msg">Loading standings...</div>
+      <table id="standingsTable" class="standings-table hidden">
+        <thead>
+          <tr>
+            <th class="col-rank sortable" data-col="rank" onclick="sortBy('rank')">Rank <span class="sort-icon">▼</span></th>
+            <th class="col-name sortable" data-col="name" onclick="sortBy('name')">Entry <span class="sort-icon"></span></th>
+            <th class="col-total sortable" data-col="total" onclick="sortBy('total')">Total <span class="sort-icon"></span></th>
+            <th class="col-tier">T1</th>
+            <th class="col-tier">T2</th>
+            <th class="col-tier">T3</th>
+            <th class="col-tier">T4</th>
+            <th class="col-tier">T5</th>
+            <th class="col-tier">T6</th>
+          </tr>
+        </thead>
+        <tbody id="standingsBody"></tbody>
+      </table>
+      <div id="noDataMsg" class="no-data hidden">No picks found for this tournament.</div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Majors Golf Pool &copy; <span id="footerYear"></span></p>
+  </footer>
+
+  <!-- Firebase SDK (CDN) -->
+  <script type="module">
+    import { initFirebase } from './js/firebase-config.js';
+    import { loadStandings, sortBy, manualRefresh } from './js/standings.js';
+    initFirebase();
+    window.sortBy = sortBy;
+    window.manualRefresh = manualRefresh;
+    document.getElementById('footerYear').textContent = new Date().getFullYear();
+    loadStandings();
+  </script>
+</body>
+</html>

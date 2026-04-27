@@ -1,0 +1,11 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.code-workspace
+
+# Secrets — never commit real Firebase keys to a public repo
+# Keep firebase-config.js out of git if it has real credentials
+# (use a firebase-config.example.js as a template instead)

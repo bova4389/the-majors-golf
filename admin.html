@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Basic Bros - Majors Golf — Admin</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <h1 class="site-title">⛳ Basic Bros - Majors Golf</h1>
+      <nav class="header-nav">
+        <a href="index.html" class="nav-link">Standings</a>
+        <a href="picks.html" class="nav-link">Submit Picks</a>
+        <a href="admin.html" class="nav-link nav-admin active">Admin</a>
+        <button id="logoutBtn" class="btn btn-sm hidden" onclick="adminLogout()">Log Out</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Login panel -->
+    <section id="loginPanel" class="auth-panel">
+      <h2>Admin Login</h2>
+      <form id="loginForm" class="auth-form" onsubmit="adminLogin(event)">
+        <div class="form-row">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" required />
+        </div>
+        <div class="form-row">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" required />
+        </div>
+        <p id="loginError" class="form-error hidden"></p>
+        <button type="submit" class="btn btn-primary">Log In</button>
+      </form>
+    </section>
+
+    <!-- Admin dashboard (shown after login) -->
+    <section id="adminDashboard" class="hidden">
+
+      <!-- Tab navigation -->
+      <div class="admin-tabs">
+        <button class="tab-btn active" onclick="showTab('tournaments')">Tournaments</button>
+        <button class="tab-btn" onclick="showTab('tiers')">Tiers &amp; Golfers</button>
+        <button class="tab-btn" onclick="showTab('picks')">Picks</button>
+        <button class="tab-btn" onclick="showTab('scores')">Score Overrides</button>
+        <button class="tab-btn" onclick="showTab('prizes')">Prize Calculator</button>
+      </div>
+
+      <!-- TOURNAMENTS TAB -->
+      <div id="tab-tournaments" class="tab-panel active">
+        <div class="panel-header">
+          <h2>Tournaments</h2>
+          <button class="btn btn-primary" onclick="openTournamentModal()">+ New Tournament</button>
+        </div>
+        <div id="tournamentList" class="card-list">Loading...</div>
+      </div>
+
+      <!-- TIERS & GOLFERS TAB -->
+      <div id="tab-tiers" class="tab-panel hidden">
+        <div class="panel-header">
+          <h2>Tiers &amp; Golfers</h2>
+          <select id="tierTournamentSelect" class="tournament-select" onchange="loadTiersForAdmin()">
+            <option value="">Select a tournament...</option>
+          </select>
+        </div>
+        <div id="tiersEditor" class="tiers-editor">
+          <p class="muted">Select a tournament above to manage its tiers.</p>
+        </div>
+      </div>
+
+      <!-- PICKS TAB -->
+      <div id="tab-picks" class="tab-panel hidden">
+        <div class="panel-header">
+          <h2>Picks</h2>
+          <select id="picksTournamentSelect" class="tournament-select" onchange="loadPicksForAdmin()">
+            <option value="">Select a tournament...</option>
+          </select>
+          <button class="btn btn-primary" onclick="openAddPickModal()">+ Add Pick</button>
+        </div>
+        <div id="picksAdminTable" class="table-wrapper">
+          <p class="muted">Select a tournament to view picks.</p>
+        </div>
+      </div>
+
+      <!-- SCORE OVERRIDES TAB -->
+      <div id="tab-scores" class="tab-panel hidden">
+        <div class="panel-header">
+          <h2>Score Overrides</h2>
+          <select id="scoresTournamentSelect" class="tournament-select" onchange="loadScoresForAdmin()">
+            <option value="">Select a tournament...</option>
+          </select>
+        </div>
+        <div id="scoresAdminTable" class="table-wrapper">
+          <p class="muted">Select a tournament to view and override scores.</p>
+        </div>
+      </div>
+
+      <!-- PRIZE CALCULATOR TAB -->
+      <div id="tab-prizes" class="tab-panel hidden">
+        <div class="panel-header">
+          <h2>Prize Calculator</h2>
+          <select id="prizeTournamentSelect" class="tournament-select" onchange="loadPrizesForAdmin()">
+            <option value="">Select a tournament...</option>
+          </select>
+        </div>
+        <div id="prizeCalcResults" class="prize-calc">
+          <p class="muted">Select a final tournament to calculate payouts.</p>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Tournament Modal -->
+  <div id="tournamentModal" class="modal hidden">
+    <div class="modal-box">
+      <h3 id="modalTitle">New Tournament</h3>
+      <form id="tournamentForm" onsubmit="saveTournament(event)">
+        <input type="hidden" id="tFormId" />
+        <div class="form-row">
+          <label>Tournament Name</label>
+          <input type="text" id="tFormName" placeholder="2026 Masters" required />
+        </div>
+        <div class="form-row">
+          <label>Major Type</label>
+          <select id="tFormMajor">
+            <option value="masters">The Masters</option>
+            <option value="us-open">US Open</option>
+            <option value="the-open">The Open Championship</option>
+            <option value="pga">PGA Championship</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Year</label>
+          <input type="number" id="tFormYear" min="2020" max="2099" required />
+        </div>
+        <div class="form-row">
+          <label>Entry Fee ($)</label>
+          <input type="number" id="tFormEntryFee" min="0" step="1" />
+        </div>
+        <div class="form-row">
+          <label>MC/WD Penalty (strokes)</label>
+          <input type="number" id="tFormMcPenalty" value="20" min="0" max="100" />
+        </div>
+        <div class="form-row">
+          <label>Pick Deadline (local time)</label>
+          <input type="datetime-local" id="tFormDeadline" required />
+        </div>
+        <div class="form-row">
+          <label>Entry Password</label>
+          <input type="text" id="tFormPassword" placeholder="Shared with entrants" required />
+        </div>
+        <div class="form-row">
+          <label>ESPN Event ID</label>
+          <input type="text" id="tFormEspnId" placeholder="e.g. 401353230" />
+          <small class="field-hint">Find this in the ESPN golf API URL for the tournament.</small>
+        </div>
+        <div class="form-row">
+          <label>Status</label>
+          <select id="tFormStatus">
+            <option value="open">Open (accepting picks)</option>
+            <option value="locked">Locked (in progress)</option>
+            <option value="final">Final</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Prize Payouts (JSON)</label>
+          <textarea id="tFormPrizes" rows="4" placeholder='[{"place":1,"pct":40},{"place":2,"pct":25},{"place":3,"pct":15}]'></textarea>
+          <small class="field-hint">Array of place + percentage. Remaining % goes to pool admin.</small>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn" onclick="closeTournamentModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Pick Modal -->
+  <div id="addPickModal" class="modal hidden">
+    <div class="modal-box">
+      <h3>Add / Edit Pick</h3>
+      <form id="addPickForm" onsubmit="saveAdminPick(event)">
+        <input type="hidden" id="apFormId" />
+        <input type="hidden" id="apFormTournament" />
+        <div class="form-row">
+          <label>Entrant Name</label>
+          <input type="text" id="apFormName" required />
+        </div>
+        <div class="form-row">
+          <label>Email</label>
+          <input type="email" id="apFormEmail" />
+        </div>
+        <div id="apTierSelects"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn" onclick="closeAddPickModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Pick</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="modalOverlay" class="modal-overlay hidden" onclick="closeAllModals()"></div>
+
+  <footer class="site-footer">
+    <p>Majors Golf Pool &copy; <span id="footerYear"></span></p>
+  </footer>
+
+  <script type="module">
+    import { initFirebase } from './js/firebase-config.js';
+    import {
+      adminLogin, adminLogout, showTab,
+      openTournamentModal, closeTournamentModal, saveTournament,
+      loadTiersForAdmin,
+      loadPicksForAdmin, openAddPickModal, closeAddPickModal, saveAdminPick,
+      loadScoresForAdmin,
+      loadPrizesForAdmin,
+      closeAllModals
+    } from './js/admin.js';
+
+    initFirebase();
+    window.adminLogin = adminLogin;
+    window.adminLogout = adminLogout;
+    window.showTab = showTab;
+    window.openTournamentModal = openTournamentModal;
+    window.closeTournamentModal = closeTournamentModal;
+    window.saveTournament = saveTournament;
+    window.loadTiersForAdmin = loadTiersForAdmin;
+    window.loadPicksForAdmin = loadPicksForAdmin;
+    window.openAddPickModal = openAddPickModal;
+    window.closeAddPickModal = closeAddPickModal;
+    window.saveAdminPick = saveAdminPick;
+    window.loadScoresForAdmin = loadScoresForAdmin;
+    window.loadPrizesForAdmin = loadPrizesForAdmin;
+    window.closeAllModals = closeAllModals;
+    document.getElementById('footerYear').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

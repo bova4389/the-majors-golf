@@ -67,8 +67,16 @@ Primary endpoint (no key required):
 ```
 https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?event={espnEventId}
 ```
-The `espnEventId` for each tournament is set by the admin when creating the tournament.
 Scores are cached in Firestore to avoid hammering the API; browser refreshes pull from Firestore.
+
+**2026 confirmed event IDs:**
+- Masters Tournament: `401811941`
+- PGA Championship:   `401811947`
+- U.S. Open:          `401811952`
+- The Open:           `401811957`
+
+Per-round data is available via `competitors[n].linescores` array: each entry has `period` (1-4),
+`value` (raw score), `displayValue` (to-par string), `inScore`, `outScore`, `currentPosition`.
 
 ## Admin Workflow
 1. Log in at `admin.html` with Firebase email/password

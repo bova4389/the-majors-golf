@@ -1,83 +1,407 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Majors Golf Pool — Standings</title>
+  <title>Basic Bros — Majors Pick'em</title>
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
+
+  <!-- ===== PERSISTENT HEADER ===== -->
   <header class="site-header">
     <div class="header-inner">
-      <h1 class="site-title">⛳ Majors Golf Pool</h1>
-      <nav class="header-nav">
-        <a href="index.html" class="nav-link active">Standings</a>
-        <a href="picks.html" class="nav-link">Submit Picks</a>
-        <a href="admin.html" class="nav-link nav-admin">Admin</a>
-      </nav>
+      <div class="header-brand">
+        <!-- Logo placeholder — replace src with actual logo file when available -->
+        <div class="logo-mark">BB</div>
+        <div class="site-title-block">
+          <span class="site-name">Basic Bros</span>
+          <span class="site-tagline">Majors Pick'em</span>
+        </div>
+      </div>
+      <div class="header-controls">
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark/light mode">☀️</button>
+        <a href="picks.html" class="btn btn-sm btn-picks-header">Submit Picks</a>
+        <a href="admin.html" class="nav-admin-link">Admin</a>
+      </div>
     </div>
   </header>
 
-  <main class="container">
-    <!-- Tournament selector -->
-    <section class="tournament-bar">
-      <select id="tournamentSelect" class="tournament-select">
-        <option value="">Loading tournaments...</option>
-      </select>
-      <div id="lockCountdown" class="lock-countdown hidden"></div>
-    </section>
-
-    <!-- Prize breakdown -->
-    <section id="prizeSection" class="prize-section hidden">
-      <h2 class="section-title">Prize Breakdown</h2>
-      <div id="prizeGrid" class="prize-grid"></div>
-    </section>
-
-    <!-- Status bar -->
-    <div class="status-bar">
-      <span id="statusLabel" class="status-label"></span>
-      <div class="status-right">
-        <span id="lastUpdated" class="last-updated"></span>
-        <button id="refreshBtn" class="btn btn-sm" onclick="manualRefresh()">Refresh</button>
-      </div>
+  <!-- ===== MAJOR NAVIGATION ===== -->
+  <nav class="major-nav" aria-label="Tournament navigation">
+    <div class="major-nav-inner">
+      <button class="major-tab tab-home active" data-major="home"    onclick="switchMajor('home')">Home</button>
+      <button class="major-tab tab-masters"      data-major="masters" onclick="switchMajor('masters')">The Masters</button>
+      <button class="major-tab tab-pga"          data-major="pga"     onclick="switchMajor('pga')">PGA Championship</button>
+      <button class="major-tab tab-usopen"       data-major="usopen"  onclick="switchMajor('usopen')">U.S. Open</button>
+      <button class="major-tab tab-theopen"      data-major="theopen" onclick="switchMajor('theopen')">The Open</button>
+      <button class="major-tab tab-season"       data-major="season"  onclick="switchMajor('season')">Season Leaderboard</button>
     </div>
+  </nav>
 
-    <!-- Leaderboard -->
-    <section class="table-wrapper">
-      <div id="loadingMsg" class="loading-msg">Loading standings...</div>
-      <table id="standingsTable" class="standings-table hidden">
-        <thead>
-          <tr>
-            <th class="col-rank sortable" data-col="rank" onclick="sortBy('rank')">Rank <span class="sort-icon">▼</span></th>
-            <th class="col-name sortable" data-col="name" onclick="sortBy('name')">Entry <span class="sort-icon"></span></th>
-            <th class="col-total sortable" data-col="total" onclick="sortBy('total')">Total <span class="sort-icon"></span></th>
-            <th class="col-tier">T1</th>
-            <th class="col-tier">T2</th>
-            <th class="col-tier">T3</th>
-            <th class="col-tier">T4</th>
-            <th class="col-tier">T5</th>
-            <th class="col-tier">T6</th>
-          </tr>
-        </thead>
-        <tbody id="standingsBody"></tbody>
-      </table>
-      <div id="noDataMsg" class="no-data hidden">No picks found for this tournament.</div>
+  <main class="main-content">
+
+    <!-- ================================================================
+         HOME PANEL
+    ================================================================ -->
+    <section id="panel-home" class="major-panel panel-active" data-major="home">
+      <div class="container">
+
+        <div class="home-hero">
+          <div class="logo-hero-mark">BB</div>
+          <h1 class="home-title">Basic Bros — Majors Pick'em</h1>
+          <p class="home-subtitle">The unofficial Major tournament golf pool for the Basic Bros crew.</p>
+        </div>
+
+        <div class="home-grid">
+
+          <!-- How to play -->
+          <div class="home-card">
+            <h2 class="home-card-title">How to Play</h2>
+            <ol class="rules-list">
+              <li>Pay your $25 entry fee. Multiple entries allowed — $25 each, no maximum.</li>
+              <li>Submit your picks before the tournament lock time (first tee time, Day 1).</li>
+              <li>Select one golfer from each of the 6 tiers. Choose a backup per tier in case your pick WDs before play.</li>
+              <li>Your score = sum of your <strong>best 4 of 6</strong> golfers' scores (to par). Lowest total wins.</li>
+              <li>Daily high score (single round, best 4 golfers) pays $25/day × 4 days.</li>
+              <li>$1 per entry per tournament funds the Season Bonus Pool — best average finish across all 4 majors wins it.</li>
+            </ol>
+          </div>
+
+          <!-- Scoring rules -->
+          <div class="home-card">
+            <h2 class="home-card-title">Scoring Notes</h2>
+            <ul class="rules-list">
+              <li><strong>Best 4 of 6:</strong> Your 4 lowest golfer scores count each day. All 6 remain active throughout.</li>
+              <li><strong>CUT penalty:</strong> (Day 1 score + Day 2 score) × 2, applied to Days 3 &amp; 4.</li>
+              <li><strong>WD mid-tournament:</strong> Worst combined D1+D2 in the full field × 2.</li>
+              <li><strong>Late WD (pre-tournament):</strong> Backup pick activates automatically — no penalty.</li>
+              <li><strong>Tiebreaker:</strong> Best 5 of 6, then best 6 of 6.</li>
+            </ul>
+          </div>
+
+          <!-- Payout structure -->
+          <div class="home-card">
+            <h2 class="home-card-title">Payout Structure</h2>
+            <ul class="rules-list">
+              <li>$25 per entry × number of entries = total pot.</li>
+              <li>$100 reserved for daily high score payouts ($25 × 4 days).</li>
+              <li>$1 per entry goes to the Season Bonus Pool.</li>
+              <li>Remaining pot split (top 5): ~50% · 25% · 13% · 7% · 5%.</li>
+              <li>Season Bonus Pool: paid out after The Open Championship concludes.</li>
+            </ul>
+          </div>
+
+          <!-- Contacts + submission count -->
+          <div class="home-card">
+            <h2 class="home-card-title">Key Contacts</h2>
+            <ul class="contacts-list">
+              <li><strong>Matt</strong> — Commissioner</li>
+              <li><strong>Ryne</strong> — Co-admin</li>
+              <li><strong>Cody</strong> — Co-admin</li>
+            </ul>
+            <div class="submission-count-display">
+              <span class="count-label">Submissions received</span>
+              <span id="countValue" class="count-value">—</span>
+            </div>
+            <a href="picks.html" class="btn btn-primary home-submit-btn" id="homeSubmitBtn">Submit Your Picks →</a>
+          </div>
+
+        </div>
+      </div>
     </section>
+
+    <!-- ================================================================
+         THE MASTERS PANEL
+    ================================================================ -->
+    <section id="panel-masters" class="major-panel hidden" data-major="masters">
+
+      <div class="major-banner masters-banner">
+        <h2 class="major-title">The Masters</h2>
+        <span class="major-year">2026</span>
+      </div>
+
+      <div class="container">
+
+        <!-- Inner tab bar -->
+        <div class="inner-tab-bar">
+          <button class="inner-tab active" data-inner="total"      onclick="switchInnerTab('masters','total')">Total</button>
+          <button class="inner-tab"        data-inner="day1"       onclick="switchInnerTab('masters','day1')">Day 1</button>
+          <button class="inner-tab"        data-inner="day2"       onclick="switchInnerTab('masters','day2')">Day 2</button>
+          <button class="inner-tab"        data-inner="day3"       onclick="switchInnerTab('masters','day3')">Day 3</button>
+          <button class="inner-tab"        data-inner="day4"       onclick="switchInnerTab('masters','day4')">Day 4</button>
+          <button class="inner-tab"        data-inner="scoreboard" onclick="switchInnerTab('masters','scoreboard')">PGA Scoreboard</button>
+        </div>
+
+        <!-- TOTAL — existing leaderboard lives here -->
+        <div id="masters-total" class="inner-panel inner-panel-active">
+
+          <!-- Tournament selector (year switcher) -->
+          <section class="tournament-bar">
+            <select id="tournamentSelect" class="tournament-select">
+              <option value="">Loading tournaments...</option>
+            </select>
+            <div id="lockCountdown" class="lock-countdown hidden"></div>
+          </section>
+
+          <!-- Prize breakdown -->
+          <section id="prizeSection" class="prize-section hidden">
+            <h2 class="section-title">Prize Breakdown</h2>
+            <div id="prizeGrid" class="prize-grid"></div>
+          </section>
+
+          <!-- Status bar -->
+          <div class="status-bar">
+            <span id="statusLabel" class="status-label"></span>
+            <div class="status-right">
+              <span id="lastUpdated" class="last-updated"></span>
+              <button id="refreshBtn" class="btn btn-sm" onclick="manualRefresh()">Refresh</button>
+            </div>
+          </div>
+
+          <!-- Leaderboard table -->
+          <section class="table-wrapper">
+            <div id="loadingMsg" class="loading-msg">Loading standings...</div>
+            <table id="standingsTable" class="standings-table hidden">
+              <thead>
+                <tr>
+                  <th class="col-rank sortable" data-col="rank"  onclick="sortBy('rank')">Rank <span class="sort-icon">▼</span></th>
+                  <th class="col-name sortable" data-col="name"  onclick="sortBy('name')">Entry <span class="sort-icon"></span></th>
+                  <th class="col-total sortable" data-col="total" onclick="sortBy('total')">Total <span class="sort-icon"></span></th>
+                  <th class="col-tier">T1</th>
+                  <th class="col-tier">T2</th>
+                  <th class="col-tier">T3</th>
+                  <th class="col-tier">T4</th>
+                  <th class="col-tier">T5</th>
+                  <th class="col-tier">T6</th>
+                </tr>
+              </thead>
+              <tbody id="standingsBody"></tbody>
+            </table>
+            <div id="noDataMsg" class="no-data hidden">No picks found for this tournament.</div>
+          </section>
+        </div>
+
+        <!-- DAY 1 -->
+        <div id="masters-day1" class="inner-panel hidden">
+          <div class="coming-soon">Day 1 pool standings — coming soon.</div>
+        </div>
+
+        <!-- DAY 2 -->
+        <div id="masters-day2" class="inner-panel hidden">
+          <div class="coming-soon">Day 2 pool standings — coming soon.</div>
+        </div>
+
+        <!-- DAY 3 -->
+        <div id="masters-day3" class="inner-panel hidden">
+          <div class="coming-soon">Day 3 pool standings — coming soon.</div>
+        </div>
+
+        <!-- DAY 4 -->
+        <div id="masters-day4" class="inner-panel hidden">
+          <div class="coming-soon">Day 4 pool standings — coming soon.</div>
+        </div>
+
+        <!-- PGA SCOREBOARD -->
+        <div id="masters-scoreboard" class="inner-panel hidden">
+          <div class="coming-soon">Official tournament field scoreboard — coming soon.</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================================================================
+         PGA CHAMPIONSHIP PANEL
+    ================================================================ -->
+    <section id="panel-pga" class="major-panel hidden" data-major="pga">
+
+      <div class="major-banner pga-banner">
+        <h2 class="major-title">PGA Championship</h2>
+        <span class="major-year">2026</span>
+      </div>
+
+      <div class="container">
+        <div class="inner-tab-bar">
+          <button class="inner-tab active" data-inner="total"      onclick="switchInnerTab('pga','total')">Total</button>
+          <button class="inner-tab"        data-inner="day1"       onclick="switchInnerTab('pga','day1')">Day 1</button>
+          <button class="inner-tab"        data-inner="day2"       onclick="switchInnerTab('pga','day2')">Day 2</button>
+          <button class="inner-tab"        data-inner="day3"       onclick="switchInnerTab('pga','day3')">Day 3</button>
+          <button class="inner-tab"        data-inner="day4"       onclick="switchInnerTab('pga','day4')">Day 4</button>
+          <button class="inner-tab"        data-inner="scoreboard" onclick="switchInnerTab('pga','scoreboard')">PGA Scoreboard</button>
+        </div>
+        <div id="pga-total"      class="inner-panel inner-panel-active"><div class="coming-soon">PGA Championship pool leaderboard — coming soon.</div></div>
+        <div id="pga-day1"       class="inner-panel hidden"><div class="coming-soon">Day 1 pool standings — coming soon.</div></div>
+        <div id="pga-day2"       class="inner-panel hidden"><div class="coming-soon">Day 2 pool standings — coming soon.</div></div>
+        <div id="pga-day3"       class="inner-panel hidden"><div class="coming-soon">Day 3 pool standings — coming soon.</div></div>
+        <div id="pga-day4"       class="inner-panel hidden"><div class="coming-soon">Day 4 pool standings — coming soon.</div></div>
+        <div id="pga-scoreboard" class="inner-panel hidden"><div class="coming-soon">Official tournament field scoreboard — coming soon.</div></div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         U.S. OPEN PANEL
+    ================================================================ -->
+    <section id="panel-usopen" class="major-panel hidden" data-major="usopen">
+
+      <div class="major-banner usopen-banner">
+        <h2 class="major-title">U.S. Open</h2>
+        <span class="major-year">2026</span>
+      </div>
+
+      <div class="container">
+        <div class="inner-tab-bar">
+          <button class="inner-tab active" data-inner="total"      onclick="switchInnerTab('usopen','total')">Total</button>
+          <button class="inner-tab"        data-inner="day1"       onclick="switchInnerTab('usopen','day1')">Day 1</button>
+          <button class="inner-tab"        data-inner="day2"       onclick="switchInnerTab('usopen','day2')">Day 2</button>
+          <button class="inner-tab"        data-inner="day3"       onclick="switchInnerTab('usopen','day3')">Day 3</button>
+          <button class="inner-tab"        data-inner="day4"       onclick="switchInnerTab('usopen','day4')">Day 4</button>
+          <button class="inner-tab"        data-inner="scoreboard" onclick="switchInnerTab('usopen','scoreboard')">PGA Scoreboard</button>
+        </div>
+        <div id="usopen-total"      class="inner-panel inner-panel-active"><div class="coming-soon">U.S. Open pool leaderboard — coming soon.</div></div>
+        <div id="usopen-day1"       class="inner-panel hidden"><div class="coming-soon">Day 1 pool standings — coming soon.</div></div>
+        <div id="usopen-day2"       class="inner-panel hidden"><div class="coming-soon">Day 2 pool standings — coming soon.</div></div>
+        <div id="usopen-day3"       class="inner-panel hidden"><div class="coming-soon">Day 3 pool standings — coming soon.</div></div>
+        <div id="usopen-day4"       class="inner-panel hidden"><div class="coming-soon">Day 4 pool standings — coming soon.</div></div>
+        <div id="usopen-scoreboard" class="inner-panel hidden"><div class="coming-soon">Official tournament field scoreboard — coming soon.</div></div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         THE OPEN CHAMPIONSHIP PANEL
+    ================================================================ -->
+    <section id="panel-theopen" class="major-panel hidden" data-major="theopen">
+
+      <div class="major-banner theopen-banner">
+        <h2 class="major-title">The Open Championship</h2>
+        <span class="major-year">2026</span>
+      </div>
+
+      <div class="container">
+        <div class="inner-tab-bar">
+          <button class="inner-tab active" data-inner="total"      onclick="switchInnerTab('theopen','total')">Total</button>
+          <button class="inner-tab"        data-inner="day1"       onclick="switchInnerTab('theopen','day1')">Day 1</button>
+          <button class="inner-tab"        data-inner="day2"       onclick="switchInnerTab('theopen','day2')">Day 2</button>
+          <button class="inner-tab"        data-inner="day3"       onclick="switchInnerTab('theopen','day3')">Day 3</button>
+          <button class="inner-tab"        data-inner="day4"       onclick="switchInnerTab('theopen','day4')">Day 4</button>
+          <button class="inner-tab"        data-inner="scoreboard" onclick="switchInnerTab('theopen','scoreboard')">PGA Scoreboard</button>
+        </div>
+        <div id="theopen-total"      class="inner-panel inner-panel-active"><div class="coming-soon">The Open Championship pool leaderboard — coming soon.</div></div>
+        <div id="theopen-day1"       class="inner-panel hidden"><div class="coming-soon">Day 1 pool standings — coming soon.</div></div>
+        <div id="theopen-day2"       class="inner-panel hidden"><div class="coming-soon">Day 2 pool standings — coming soon.</div></div>
+        <div id="theopen-day3"       class="inner-panel hidden"><div class="coming-soon">Day 3 pool standings — coming soon.</div></div>
+        <div id="theopen-day4"       class="inner-panel hidden"><div class="coming-soon">Day 4 pool standings — coming soon.</div></div>
+        <div id="theopen-scoreboard" class="inner-panel hidden"><div class="coming-soon">Official tournament field scoreboard — coming soon.</div></div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         SEASON LEADERBOARD PANEL
+    ================================================================ -->
+    <section id="panel-season" class="major-panel hidden" data-major="season">
+
+      <div class="major-banner season-banner">
+        <h2 class="major-title">Season Leaderboard</h2>
+        <span class="major-year">2026</span>
+      </div>
+
+      <div class="container">
+
+        <div class="season-header-bar">
+          <div class="season-pool-display">
+            <span class="pool-label">Aggregate Bonus Pool</span>
+            <span class="pool-amount" id="bonusPoolAmount">$0</span>
+          </div>
+          <p class="season-rule">Ranked by average finishing position across all 4 majors. Must submit at least one entry in <em>every completed major</em> to remain eligible. Best submission per major is used.</p>
+        </div>
+
+        <div class="table-wrapper">
+          <div class="coming-soon">Season leaderboard will populate as tournaments complete. Eligibility is re-evaluated after each major closes.</div>
+        </div>
+
+      </div>
+    </section>
+
   </main>
 
   <footer class="site-footer">
-    <p>Majors Golf Pool &copy; <span id="footerYear"></span></p>
+    <p>Basic Bros — Majors Pick'em &copy; <span id="footerYear"></span></p>
   </footer>
 
-  <!-- Firebase SDK (CDN) -->
+  <!-- ===== FIREBASE + APP SCRIPTS ===== -->
   <script type="module">
     import { initFirebase } from './js/firebase-config.js';
     import { loadStandings, sortBy, manualRefresh } from './js/standings.js';
+
     initFirebase();
     window.sortBy = sortBy;
     window.manualRefresh = manualRefresh;
     document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+    // Load existing Masters leaderboard data (populates #standingsTable inside masters-total)
     loadStandings();
+
+    // ── Major tab navigation ──────────────────────────────────────────────────
+    // Shows the selected major panel and updates nav tab state and body theme class
+    window.switchMajor = function(major) {
+      document.querySelectorAll('.major-panel').forEach(p => {
+        p.classList.remove('panel-active');
+        p.classList.add('hidden');
+      });
+      document.querySelectorAll('.major-tab').forEach(t => t.classList.remove('active'));
+
+      const panel = document.getElementById('panel-' + major);
+      if (panel) { panel.classList.remove('hidden'); panel.classList.add('panel-active'); }
+
+      const tab = document.querySelector('.major-tab[data-major="' + major + '"]');
+      if (tab) tab.classList.add('active');
+
+      // Swap body theme class so per-major CSS variables take effect
+      document.body.className = document.body.className.replace(/\btheme-\S+/g, '').trim();
+      if (major !== 'home' && major !== 'season') document.body.classList.add('theme-' + major);
+
+      sessionStorage.setItem('activeMajor', major);
+    };
+
+    // ── Inner (day) tab navigation ────────────────────────────────────────────
+    // Shows the selected inner panel within a major section
+    window.switchInnerTab = function(major, inner) {
+      const majorPanel = document.getElementById('panel-' + major);
+      if (!majorPanel) return;
+
+      majorPanel.querySelectorAll('.inner-panel').forEach(p => {
+        p.classList.remove('inner-panel-active');
+        p.classList.add('hidden');
+      });
+      majorPanel.querySelectorAll('.inner-tab').forEach(t => t.classList.remove('active'));
+
+      const innerPanel = document.getElementById(major + '-' + inner);
+      if (innerPanel) { innerPanel.classList.remove('hidden'); innerPanel.classList.add('inner-panel-active'); }
+
+      const btn = majorPanel.querySelector('.inner-tab[data-inner="' + inner + '"]');
+      if (btn) btn.classList.add('active');
+    };
+
+    // ── Dark / light mode toggle ──────────────────────────────────────────────
+    window.toggleTheme = function() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      const next = isDark ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('themeToggle').textContent = isDark ? '☀️' : '🌙';
+      localStorage.setItem('theme', next);
+    };
+
+    // ── Restore saved preferences on page load ────────────────────────────────
+    (function init() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.getElementById('themeToggle').textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+
+      // Restore last active major tab from this session
+      const savedMajor = sessionStorage.getItem('activeMajor');
+      if (savedMajor && savedMajor !== 'home') window.switchMajor(savedMajor);
+    })();
   </script>
+
 </body>
 </html>

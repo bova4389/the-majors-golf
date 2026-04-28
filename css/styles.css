@@ -189,8 +189,8 @@ a:hover { text-decoration: underline; }
   display: flex;
   align-items: center;
   gap: 1.25rem;
-  padding: 1.1rem 1.5rem;
-  color: white;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
 }
 .major-logo {
   height: 64px;
@@ -198,28 +198,28 @@ a:hover { text-decoration: underline; }
   width: auto;
   object-fit: contain;
   flex-shrink: 0;
-  /* White card container — all 4 logos have white backgrounds, so this
-     turns the white into an intentional badge sitting in the banner */
-  background: #ffffff;
-  border-radius: 8px;
-  padding: 6px 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,.3);
+  /* No background needed — banners are light so white-bg logos sit naturally */
 }
 .major-banner-info {
   display: flex;
   flex-direction: column;
   gap: .2rem;
 }
-.major-title  { font-size: 1.35rem; font-weight: 800; letter-spacing: .02em; line-height: 1.2; }
-.major-detail { font-size: .82rem; opacity: .85; font-weight: 400; }
-/* Keep legacy .major-year working if referenced elsewhere */
-.major-year   { font-size: .95rem; opacity: .7; font-weight: 500; }
 
-.masters-banner { background: linear-gradient(135deg, #1a6b3c 0%, #2d9a4e 100%); }
-.pga-banner     { background: linear-gradient(135deg, #003087 0%, #1a4daa 100%); }
-.usopen-banner  { background: linear-gradient(135deg, #3c638e 0%, #4a7cb0 100%); }
-.theopen-banner { background: linear-gradient(135deg, #1a2456 0%, #2b3875 100%); }
-.season-banner  { background: linear-gradient(135deg, #3a2800 0%, #7a5a1a 100%); }
+/* Light tinted backgrounds per major — all logos have white backgrounds so
+   they sit naturally on a light surface. Per-major identity comes from the
+   colored left accent stripe.                                               */
+.masters-banner  { background: #f0faf3; border-left: 5px solid #1a6b3c; }
+.pga-banner      { background: #eef1fa; border-left: 5px solid #003087; }
+.usopen-banner   { background: #eef3fa; border-left: 5px solid #3c638e; }
+.theopen-banner  { background: #eeeffe; border-left: 5px solid #1a2456; }
+.season-banner   { background: #faf5e0; border-left: 5px solid #c9a227; }
+
+/* Text always dark on light banners */
+.major-title  { font-size: 1.35rem; font-weight: 800; letter-spacing: .02em; line-height: 1.2; color: #1a1a2e; }
+.major-detail { font-size: .82rem; font-weight: 400; color: #5a6070; }
+/* Keep legacy .major-year working if referenced elsewhere */
+.major-year   { font-size: .95rem; font-weight: 500; color: #5a6070; }
 
 
 /* ===== INNER TAB BAR (Day tabs within each major) ===== */
@@ -802,7 +802,7 @@ a:hover { text-decoration: underline; }
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .major-tab       { padding: .65rem .8rem; font-size: .82rem; }
-  .major-logo      { height: 48px; padding: 5px 8px; }
+  .major-logo      { height: 48px; max-width: 160px; }
   .major-title     { font-size: 1.05rem; }
   .home-title      { font-size: 1.35rem; }
   .home-grid       { grid-template-columns: 1fr; }

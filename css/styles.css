@@ -188,12 +188,27 @@ a:hover { text-decoration: underline; }
 .major-banner {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 1.25rem;
   padding: 1.1rem 1.5rem;
   color: white;
 }
-.major-title { font-size: 1.35rem; font-weight: 800; letter-spacing: .02em; }
-.major-year  { font-size: .95rem; opacity: .7; font-weight: 500; }
+.major-logo {
+  height: 72px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+  /* Drop shadow so logos pop against colored backgrounds */
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,.35));
+}
+.major-banner-info {
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+}
+.major-title  { font-size: 1.35rem; font-weight: 800; letter-spacing: .02em; line-height: 1.2; }
+.major-detail { font-size: .82rem; opacity: .85; font-weight: 400; }
+/* Keep legacy .major-year working if referenced elsewhere */
+.major-year   { font-size: .95rem; opacity: .7; font-weight: 500; }
 
 .masters-banner { background: linear-gradient(135deg, #1a6b3c 0%, #2d9a4e 100%); }
 .pga-banner     { background: linear-gradient(135deg, #003087 0%, #1a4daa 100%); }
@@ -782,7 +797,8 @@ a:hover { text-decoration: underline; }
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .major-tab       { padding: .65rem .8rem; font-size: .82rem; }
-  .major-title     { font-size: 1.15rem; }
+  .major-logo      { height: 52px; }
+  .major-title     { font-size: 1.05rem; }
   .home-title      { font-size: 1.35rem; }
   .home-grid       { grid-template-columns: 1fr; }
   .inner-tab       { padding: .45rem .75rem; font-size: .82rem; }

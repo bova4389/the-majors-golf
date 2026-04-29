@@ -245,7 +245,7 @@ function renderTable(results, scoresMap) {
       const cls = scoreClass(t.score, t.status);
       const label = t.status === 'cut' ? 'MC' : t.status === 'wd' ? 'WD' : formatScore(t.score, t.status);
       const top4Class = t.isTop4 ? 'top-4-pick' : '';
-      return `<td class="col-tier ${top4Class}" title="${t.golfer}"><span class="player-name-cell">${shortName(t.golfer)}</span><br><small class="score-val ${cls}">${label}</small></td>`;
+      return `<td class="col-tier ${top4Class}" title="${t.golfer}"><div class="tier-cell-card"><span class="player-name-cell">${shortName(t.golfer)}</span><small class="score-val ${cls}">${label}</small></div></td>`;
     }).join('');
 
     const allPlayers = [1,2,3,4,5,6].map(i => r.tierScores[`t${i}`]?.golfer || '').join(' ');

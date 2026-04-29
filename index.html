@@ -119,16 +119,26 @@
           <span class="major-detail">Augusta National Golf Club · Augusta, Georgia</span>
         </div>
       </div>
+      <div class="tournament-pot-strip">
+        <span class="pot-strip-label">Pool Structure</span>
+        <span>Entry: $25/pick</span>
+        <span class="pot-divider">|</span>
+        <span>Daily High Score: $25 × 4 rounds</span>
+        <span class="pot-divider">|</span>
+        <span>Season Bonus: $1/entry</span>
+        <span class="pot-divider">|</span>
+        <span>Payouts (top 5): <strong>~50%</strong> · <strong>~25%</strong> · <strong>~13%</strong> · <strong>~7%</strong> · <strong>~5%</strong></span>
+      </div>
 
       <div class="container">
 
         <!-- Year selector tabs (above inner day tabs) -->
         <div class="year-tab-bar" id="masters-year-tabs">
-          <button class="year-tab" data-year="2025" onclick="switchMajorYear('masters', 2025)">2025</button>
           <button class="year-tab active" data-year="2026" onclick="switchMajorYear('masters', 2026)">2026</button>
+          <button class="year-tab" data-year="2025" onclick="switchMajorYear('masters', 2025)">2025</button>
         </div>
 
-        <!-- Inner day tab bar -->
+        <!-- Inner day tab bar — statusLabel lives here so "Final" shows inline with tabs -->
         <div class="inner-tab-bar">
           <button class="inner-tab active" data-inner="total"      onclick="switchInnerTab('masters','total')">Total</button>
           <button class="inner-tab"        data-inner="day1"       onclick="switchInnerTab('masters','day1')">Day 1</button>
@@ -136,6 +146,7 @@
           <button class="inner-tab"        data-inner="day3"       onclick="switchInnerTab('masters','day3')">Day 3</button>
           <button class="inner-tab"        data-inner="day4"       onclick="switchInnerTab('masters','day4')">Day 4</button>
           <button class="inner-tab"        data-inner="scoreboard" onclick="switchInnerTab('masters','scoreboard')">PGA Scoreboard</button>
+          <span id="statusLabel" class="status-label inner-tab-status"></span>
         </div>
 
         <!-- TOTAL -->
@@ -149,7 +160,6 @@
           </section>
 
           <div class="status-bar">
-            <span id="statusLabel" class="status-label"></span>
             <div class="status-right">
               <span id="lastUpdated" class="last-updated"></span>
               <button id="refreshBtn" class="btn btn-sm" onclick="manualRefresh()">Refresh</button>
@@ -224,11 +234,21 @@
           <span class="major-detail">Aronimink Golf Club · Newtown Square, Pennsylvania</span>
         </div>
       </div>
+      <div class="tournament-pot-strip">
+        <span class="pot-strip-label">Pool Structure</span>
+        <span>Entry: $25/pick</span>
+        <span class="pot-divider">|</span>
+        <span>Daily High Score: $25 × 4 rounds</span>
+        <span class="pot-divider">|</span>
+        <span>Season Bonus: $1/entry</span>
+        <span class="pot-divider">|</span>
+        <span>Payouts (top 5): <strong>~50%</strong> · <strong>~25%</strong> · <strong>~13%</strong> · <strong>~7%</strong> · <strong>~5%</strong></span>
+      </div>
 
       <div class="container">
         <div class="year-tab-bar" id="pga-year-tabs">
-          <button class="year-tab" data-year="2025" onclick="switchMajorYear('pga', 2025)">2025</button>
           <button class="year-tab active" data-year="2026" onclick="switchMajorYear('pga', 2026)">2026</button>
+          <button class="year-tab" data-year="2025" onclick="switchMajorYear('pga', 2025)">2025</button>
         </div>
         <div class="inner-tab-bar">
           <button class="inner-tab active" data-inner="total"      onclick="switchInnerTab('pga','total')">Total</button>
@@ -260,11 +280,21 @@
           <span class="major-detail">Shinnecock Hills Golf Club · Southampton, New York</span>
         </div>
       </div>
+      <div class="tournament-pot-strip">
+        <span class="pot-strip-label">Pool Structure</span>
+        <span>Entry: $25/pick</span>
+        <span class="pot-divider">|</span>
+        <span>Daily High Score: $25 × 4 rounds</span>
+        <span class="pot-divider">|</span>
+        <span>Season Bonus: $1/entry</span>
+        <span class="pot-divider">|</span>
+        <span>Payouts (top 5): <strong>~50%</strong> · <strong>~25%</strong> · <strong>~13%</strong> · <strong>~7%</strong> · <strong>~5%</strong></span>
+      </div>
 
       <div class="container">
         <div class="year-tab-bar" id="usopen-year-tabs">
-          <button class="year-tab" data-year="2025" onclick="switchMajorYear('usopen', 2025)">2025</button>
           <button class="year-tab active" data-year="2026" onclick="switchMajorYear('usopen', 2026)">2026</button>
+          <button class="year-tab" data-year="2025" onclick="switchMajorYear('usopen', 2025)">2025</button>
         </div>
         <div class="inner-tab-bar">
           <button class="inner-tab active" data-inner="total"      onclick="switchInnerTab('usopen','total')">Total</button>
@@ -296,11 +326,21 @@
           <span class="major-detail">Royal Birkdale Golf Club · Southport, England</span>
         </div>
       </div>
+      <div class="tournament-pot-strip">
+        <span class="pot-strip-label">Pool Structure</span>
+        <span>Entry: $25/pick</span>
+        <span class="pot-divider">|</span>
+        <span>Daily High Score: $25 × 4 rounds</span>
+        <span class="pot-divider">|</span>
+        <span>Season Bonus: $1/entry</span>
+        <span class="pot-divider">|</span>
+        <span>Payouts (top 5): <strong>~50%</strong> · <strong>~25%</strong> · <strong>~13%</strong> · <strong>~7%</strong> · <strong>~5%</strong></span>
+      </div>
 
       <div class="container">
         <div class="year-tab-bar" id="theopen-year-tabs">
-          <button class="year-tab" data-year="2025" onclick="switchMajorYear('theopen', 2025)">2025</button>
           <button class="year-tab active" data-year="2026" onclick="switchMajorYear('theopen', 2026)">2026</button>
+          <button class="year-tab" data-year="2025" onclick="switchMajorYear('theopen', 2025)">2025</button>
         </div>
         <div class="inner-tab-bar">
           <button class="inner-tab active" data-inner="total"      onclick="switchInnerTab('theopen','total')">Total</button>

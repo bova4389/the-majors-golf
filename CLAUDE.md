@@ -87,6 +87,13 @@ Per-round data is available via `competitors[n].linescores` array: each entry ha
 6. During tournament: scores refresh automatically; admin can override individual scores
 7. After final round: flip status to `final` → prize calculator shows payouts
 
+## Completed Tournament Lockdown (TODO — not yet fully built)
+When a tournament's status is set to `final`, the following must be enforced:
+- **Auto-refresh stops**: `standings.js` already skips the `setInterval` for non-`locked` tournaments ✓
+- **Refresh button disabled**: `updateRefreshButton()` in `standings.js` greys out the Refresh button when `status === 'final'` ✓
+- **ESPN API calls blocked**: `fetchOrRefreshScores()` skips the ESPN fetch for non-`locked` tournaments ✓
+- **Per-tournament page**: each major panel will eventually need its own Refresh button scoped to that panel's tournament — wire up the same `status === 'final'` guard when that work is done
+
 ## Prize Payout Logic
 - Total pool = entryFee × number of entries
 - Admin defines payout percentages per place (e.g., 1st 40%, 2nd 25%, 3rd 15%, ...)

@@ -4,46 +4,96 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { calculateStandings, formatScore, scoreClass } from './scoring.js';
 
-const REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 let currentTournamentId = null;
+let currentTournamentStatus = null;
 let sortColumn = 'rank';
 let sortAsc = true;
 let cachedResults = [];
+let cachedScoresMap = {};
 let refreshTimer = null;
+let tournamentsByMajor = {};
 
 // ─── Entry point ─────────────────────────────────────────────────────────────
 export async function loadStandings() {
-  await populateTournamentSelect();
-  const select = document.getElementById('tournamentSelect');
-  select.addEventListener('change', () => {
-    currentTournamentId = select.value;
-    if (currentTournamentId) loadTournamentData(currentTournamentId);
-  });
-  if (currentTournamentId) loadTournamentData(currentTournamentId);
+  await loadAllTournaments();
+
+  // Auto-load best Masters tournament (open > locked > final, newest year)
+  const mastersList = tournamentsByMajor['masters'] || [];
+  if (mastersList.length) {
+    currentTournamentId = mastersList[0].id;
+    setYearTabActive('masters', mastersList[0].year);
+    await loadTournamentData(mastersList[0].id);
+  }
+
+  const searchInput = document.getElementById('standingsSearch');
+  if (searchInput) {
+    searchInput.addEventListener('input', () => filterTable(searchInput.value));
+  }
 }
 
-// ─── Populate tournament dropdown ────────────────────────────────────────────
-async function populateTournamentSelect() {
+// ─── Load and group all tournaments by major ──────────────────────────────────
+async function loadAllTournaments() {
   const db = getDb();
   const snap = await getDocs(collection(db, 'tournaments'));
   const tournaments = [];
   snap.forEach(d => tournaments.push({ id: d.id, ...d.data() }));
 
-  // Sort: open first, then locked, then final; within group sort by year desc
-  const order = { open: 0, locked: 1, final: 2 };
-  tournaments.sort((a, b) =>
-    (order[a.status] ?? 3) - (order[b.status] ?? 3) || b.year - a.year
-  );
-
-  const select = document.getElementById('tournamentSelect');
-  select.innerHTML = tournaments.length
-    ? tournaments.map(t => `<option value="${t.id}">${t.name} (${t.year})</option>`).join('')
-    : '<option value="">No tournaments found</option>';
-
-  if (tournaments.length) {
-    currentTournamentId = tournaments[0].id;
-    select.value = currentTournamentId;
+  tournamentsByMajor = {};
+  for (const t of tournaments) {
+    const key = normalizeMajorKey(t.major);
+    if (!tournamentsByMajor[key]) tournamentsByMajor[key] = [];
+    tournamentsByMajor[key].push(t);
   }
+
+  const order = { open: 0, locked: 1, final: 2 };
+  for (const key of Object.keys(tournamentsByMajor)) {
+    tournamentsByMajor[key].sort((a, b) =>
+      (order[a.status] ?? 3) - (order[b.status] ?? 3) || b.year - a.year
+    );
+  }
+
+  for (const [major, ts] of Object.entries(tournamentsByMajor)) {
+    markYearTabsAvailable(major, ts.map(t => t.year));
+  }
+}
+
+function normalizeMajorKey(major) {
+  if (!major) return 'masters';
+  const m = major.toLowerCase();
+  if (m.includes('master')) return 'masters';
+  if (m.includes('pga')) return 'pga';
+  if (m.includes('us') || m.includes('u.s')) return 'usopen';
+  if (m.includes('open')) return 'theopen';
+  return major;
+}
+
+// ─── Year tab helpers ─────────────────────────────────────────────────────────
+function setYearTabActive(major, year) {
+  const bar = document.getElementById(major + '-year-tabs');
+  if (!bar) return;
+  bar.querySelectorAll('.year-tab').forEach(btn => {
+    btn.classList.toggle('active', parseInt(btn.dataset.year) === year);
+  });
+}
+
+function markYearTabsAvailable(major, years) {
+  const bar = document.getElementById(major + '-year-tabs');
+  if (!bar) return;
+  bar.querySelectorAll('.year-tab').forEach(btn => {
+    const y = parseInt(btn.dataset.year);
+    btn.disabled = !years.includes(y);
+    btn.classList.toggle('year-tab-empty', !years.includes(y));
+  });
+}
+
+export function switchMajorYear(major, year) {
+  const ts = tournamentsByMajor[major] || [];
+  const t = ts.find(x => x.year === year);
+  if (!t) return;
+  currentTournamentId = t.id;
+  setYearTabActive(major, year);
+  loadTournamentData(t.id);
 }
 
 // ─── Load full tournament data ────────────────────────────────────────────────
@@ -53,34 +103,29 @@ async function loadTournamentData(tournamentId) {
 
   try {
     const db = getDb();
-
-    // Fetch tournament doc
     const tSnap = await getDoc(doc(db, 'tournaments', tournamentId));
     if (!tSnap.exists()) { showLoading(false); return; }
     const tournament = { id: tSnap.id, ...tSnap.data() };
+    currentTournamentStatus = tournament.status;
 
-    // Show status label + countdown
     renderStatusLabel(tournament);
     renderCountdown(tournament);
     renderPrizes(tournament);
+    updateRefreshButton(tournament);
 
-    // Fetch picks
     const picksSnap = await getDocs(
       query(collection(db, 'picks'), where('tournamentId', '==', tournamentId))
     );
     const picks = [];
     picksSnap.forEach(d => picks.push({ id: d.id, ...d.data() }));
 
-    // Fetch or refresh scores from ESPN
     const scoresMap = await fetchOrRefreshScores(tournament);
-
-    // Calculate and render
+    cachedScoresMap = scoresMap;
     cachedResults = calculateStandings(picks, scoresMap, tournament.mcPenalty ?? 20);
     renderTable(cachedResults, scoresMap);
     updateLastUpdated();
     showLoading(false);
 
-    // Auto-refresh during active tournament
     if (tournament.status === 'locked') {
       refreshTimer = setInterval(() => refreshScores(tournament), REFRESH_INTERVAL_MS);
     }
@@ -91,13 +136,21 @@ async function loadTournamentData(tournamentId) {
   }
 }
 
+function updateRefreshButton(tournament) {
+  const btn = document.getElementById('refreshBtn');
+  if (!btn) return;
+  const isFinal = tournament.status === 'final';
+  btn.disabled = isFinal;
+  btn.title = isFinal ? 'Tournament is final — live updates are disabled' : '';
+  btn.classList.toggle('btn-disabled', isFinal);
+}
+
 // ─── ESPN API: fetch scores, cache in Firestore ───────────────────────────────
 async function fetchOrRefreshScores(tournament) {
   const db = getDb();
   const scoreDoc = doc(db, 'scores', tournament.id);
   const scoreSnap = await getDoc(scoreDoc);
 
-  // Use cached scores if less than 5 min old (during locked/active tournament)
   if (scoreSnap.exists()) {
     const data = scoreSnap.data();
     const lastUpdated = data._lastUpdated?.toMillis?.() ?? 0;
@@ -108,8 +161,10 @@ async function fetchOrRefreshScores(tournament) {
     }
   }
 
-  // Fetch from ESPN API
-  if (!tournament.espnEventId) return scoreSnap.exists() ? scoreSnap.data() : {};
+  if (!tournament.espnEventId) {
+    if (scoreSnap.exists()) { const { _lastUpdated, ...s } = scoreSnap.data(); return s; }
+    return {};
+  }
   const freshScores = await fetchEspnScores(tournament.espnEventId);
   if (Object.keys(freshScores).length) {
     await setDoc(scoreDoc, { ...freshScores, _lastUpdated: new Date() });
@@ -138,8 +193,7 @@ function parseEspnLeaderboard(data) {
     const scoreStr = c.score?.displayValue ?? 'E';
     const status = c.status?.type?.name?.toLowerCase() ?? 'active';
     let score = 0;
-    if (scoreStr === 'E') score = 0;
-    else if (!isNaN(Number(scoreStr))) score = Number(scoreStr);
+    if (scoreStr !== 'E' && !isNaN(Number(scoreStr))) score = Number(scoreStr);
 
     let normalizedStatus = 'active';
     if (status.includes('cut')) normalizedStatus = 'cut';
@@ -155,13 +209,13 @@ async function refreshScores(tournament) {
   const fresh = await fetchEspnScores(tournament.espnEventId);
   if (Object.keys(fresh).length) {
     await setDoc(doc(db, 'scores', tournament.id), { ...fresh, _lastUpdated: new Date() });
-    const { _lastUpdated, ...scoresMap } = fresh;
+    cachedScoresMap = fresh;
     cachedResults = calculateStandings(
       cachedResults.map(r => r.pick),
-      scoresMap,
+      fresh,
       tournament.mcPenalty ?? 20
     );
-    renderTable(cachedResults, scoresMap);
+    renderTable(cachedResults, fresh);
     updateLastUpdated();
   }
 }
@@ -184,24 +238,42 @@ function renderTable(results, scoresMap) {
   tbody.innerHTML = results.map(r => {
     const rankClass = r.rank <= 3 ? `rank-${r.rank}` : '';
     const rankDisplay = r.rank <= 3 ? ['🥇', '🥈', '🥉'][r.rank - 1] : r.rank;
-    const totalClass = scoreClass(r.total, null);
+    const totalCls = scoreClass(r.total, null);
 
     const tierCells = [1,2,3,4,5,6].map(i => {
       const t = r.tierScores[`t${i}`];
       const cls = scoreClass(t.score, t.status);
       const label = t.status === 'cut' ? 'MC' : t.status === 'wd' ? 'WD' : formatScore(t.score, t.status);
-      return `<td class="col-tier ${cls}" title="${t.golfer}">${shortName(t.golfer)}<br><small>${label}</small></td>`;
+      const top4Class = t.isTop4 ? 'top-4-pick' : '';
+      return `<td class="col-tier ${top4Class}" title="${t.golfer}"><span class="player-name-cell">${shortName(t.golfer)}</span><br><small class="score-val ${cls}">${label}</small></td>`;
     }).join('');
 
+    const allPlayers = [1,2,3,4,5,6].map(i => r.tierScores[`t${i}`]?.golfer || '').join(' ');
+
     return `
-      <tr>
+      <tr data-entry="${escapeHtml(r.pick.entrantName).toLowerCase()}" data-players="${escapeHtml(allPlayers).toLowerCase()}">
         <td class="col-rank ${rankClass}">${rankDisplay}</td>
-        <td class="col-name"><strong>${escapeHtml(r.pick.entrantName)}</strong></td>
-        <td class="col-total ${totalClass}">${formatScore(r.total, null)}</td>
+        <td class="col-name">${escapeHtml(r.pick.entrantName)}</td>
+        <td class="col-total"><span class="score-val ${totalCls}">${formatScore(r.total, null)}</span></td>
         ${tierCells}
       </tr>
     `;
   }).join('');
+
+  // Re-apply active search filter after re-render
+  const searchInput = document.getElementById('standingsSearch');
+  if (searchInput && searchInput.value) filterTable(searchInput.value);
+}
+
+function filterTable(query) {
+  const q = (query || '').toLowerCase().trim();
+  const tbody = document.getElementById('standingsBody');
+  if (!tbody) return;
+  tbody.querySelectorAll('tr').forEach(row => {
+    const entry = row.dataset.entry || '';
+    const players = row.dataset.players || '';
+    row.style.display = (!q || entry.includes(q) || players.includes(q)) ? '' : 'none';
+  });
 }
 
 function renderPrizes(tournament) {
@@ -213,8 +285,7 @@ function renderPrizes(tournament) {
   const total = tournament.entryFee * (tournament.entryCount ?? 0);
   if (!total) { section.classList.add('hidden'); return; }
 
-  const payouts = tournament.prizePayouts;
-  grid.innerHTML = payouts.map(p => {
+  grid.innerHTML = tournament.prizePayouts.map(p => {
     const amt = Math.round(total * p.pct / 100);
     return `<div class="prize-item"><strong>$${amt}</strong> — ${ordinal(p.place)}</div>`;
   }).join('');
@@ -265,26 +336,24 @@ export function sortBy(col) {
 
   const sorted = [...cachedResults].sort((a, b) => {
     let va, vb;
-    if (col === 'rank') { va = a.rank; vb = b.rank; }
+    if (col === 'rank')  { va = a.rank; vb = b.rank; }
     else if (col === 'total') { va = a.total; vb = b.total; }
-    else if (col === 'name') { va = a.pick.entrantName.toLowerCase(); vb = b.pick.entrantName.toLowerCase(); }
+    else if (col === 'name')  { va = a.pick.entrantName.toLowerCase(); vb = b.pick.entrantName.toLowerCase(); }
     if (va < vb) return sortAsc ? -1 : 1;
     if (va > vb) return sortAsc ? 1 : -1;
     return 0;
   });
 
-  // Update sort icons in header
   document.querySelectorAll('.standings-table th[data-col]').forEach(th => {
     th.querySelector('.sort-icon').textContent =
       th.dataset.col === col ? (sortAsc ? '▲' : '▼') : '';
   });
 
-  const tbody = document.getElementById('standingsBody');
-  const rows = sorted.map(r => tbody.querySelector(`tr`) ); // re-render
-  renderTable(sorted, {});
+  renderTable(sorted, cachedScoresMap);
 }
 
 export function manualRefresh() {
+  if (currentTournamentStatus === 'final') return;
   if (currentTournamentId) loadTournamentData(currentTournamentId);
 }
 

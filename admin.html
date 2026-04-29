@@ -1,21 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Basic Bros - Majors Golf — Admin</title>
+  <title>Basic Bros — Majors Pick'em · Admin</title>
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
+
+  <!-- ===== PERSISTENT HEADER (matches index.html) ===== -->
   <header class="site-header">
     <div class="header-inner">
-      <h1 class="site-title">⛳ Basic Bros - Majors Golf</h1>
-      <nav class="header-nav">
-        <a href="index.html" class="nav-link">Standings</a>
-        <a href="picks.html" class="nav-link">Submit Picks</a>
-        <a href="admin.html" class="nav-link nav-admin active">Admin</a>
+      <div class="header-brand">
+        <div class="logo-mark">BB</div>
+        <div class="site-title-block">
+          <span class="site-name">Basic Bros</span>
+          <span class="site-tagline">Majors Pick'em</span>
+        </div>
+      </div>
+      <div class="header-controls">
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark/light mode">☀️</button>
+        <a href="index.html" class="btn btn-sm btn-nav-header">Standings</a>
+        <a href="picks.html" class="btn btn-sm btn-picks-header">Submit Picks</a>
+        <a href="admin.html" class="nav-admin-link nav-admin-active">Admin</a>
         <button id="logoutBtn" class="btn btn-sm hidden" onclick="adminLogout()">Log Out</button>
-      </nav>
+      </div>
     </div>
   </header>
 
@@ -41,7 +50,6 @@
     <!-- Admin dashboard (shown after login) -->
     <section id="adminDashboard" class="hidden">
 
-      <!-- Tab navigation -->
       <div class="admin-tabs">
         <button class="tab-btn active" onclick="showTab('tournaments')">Tournaments</button>
         <button class="tab-btn" onclick="showTab('tiers')">Tiers &amp; Golfers</button>
@@ -207,7 +215,7 @@
   <div id="modalOverlay" class="modal-overlay hidden" onclick="closeAllModals()"></div>
 
   <footer class="site-footer">
-    <p>Majors Golf Pool &copy; <span id="footerYear"></span></p>
+    <p>Basic Bros — Majors Pick'em &copy; <span id="footerYear"></span></p>
   </footer>
 
   <script type="module">
@@ -238,6 +246,21 @@
     window.loadPrizesForAdmin = loadPrizesForAdmin;
     window.closeAllModals = closeAllModals;
     document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+    window.toggleTheme = function() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      const next = isDark ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('themeToggle').textContent = isDark ? '☀️' : '🌙';
+      localStorage.setItem('theme', next);
+    };
+
+    (function init() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.getElementById('themeToggle').textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+    })();
   </script>
 </body>
 </html>

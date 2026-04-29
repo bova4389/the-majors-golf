@@ -12,7 +12,6 @@
   <header class="site-header">
     <div class="header-inner">
       <div class="header-brand">
-        <!-- Logo placeholder — replace src with actual logo file when available -->
         <div class="logo-mark">BB</div>
         <div class="site-title-block">
           <span class="site-name">Basic Bros</span>
@@ -55,7 +54,6 @@
 
         <div class="home-grid">
 
-          <!-- How to play -->
           <div class="home-card">
             <h2 class="home-card-title">How to Play</h2>
             <ol class="rules-list">
@@ -68,7 +66,6 @@
             </ol>
           </div>
 
-          <!-- Scoring rules -->
           <div class="home-card">
             <h2 class="home-card-title">Scoring Notes</h2>
             <ul class="rules-list">
@@ -80,7 +77,6 @@
             </ul>
           </div>
 
-          <!-- Payout structure -->
           <div class="home-card">
             <h2 class="home-card-title">Payout Structure</h2>
             <ul class="rules-list">
@@ -92,7 +88,6 @@
             </ul>
           </div>
 
-          <!-- Contacts + submission count -->
           <div class="home-card">
             <h2 class="home-card-title">Key Contacts</h2>
             <ul class="contacts-list">
@@ -127,7 +122,13 @@
 
       <div class="container">
 
-        <!-- Inner tab bar -->
+        <!-- Year selector tabs (above inner day tabs) -->
+        <div class="year-tab-bar" id="masters-year-tabs">
+          <button class="year-tab" data-year="2025" onclick="switchMajorYear('masters', 2025)">2025</button>
+          <button class="year-tab active" data-year="2026" onclick="switchMajorYear('masters', 2026)">2026</button>
+        </div>
+
+        <!-- Inner day tab bar -->
         <div class="inner-tab-bar">
           <button class="inner-tab active" data-inner="total"      onclick="switchInnerTab('masters','total')">Total</button>
           <button class="inner-tab"        data-inner="day1"       onclick="switchInnerTab('masters','day1')">Day 1</button>
@@ -137,24 +138,16 @@
           <button class="inner-tab"        data-inner="scoreboard" onclick="switchInnerTab('masters','scoreboard')">PGA Scoreboard</button>
         </div>
 
-        <!-- TOTAL — existing leaderboard lives here -->
+        <!-- TOTAL -->
         <div id="masters-total" class="inner-panel inner-panel-active">
 
-          <!-- Tournament selector (year switcher) -->
-          <section class="tournament-bar">
-            <select id="tournamentSelect" class="tournament-select">
-              <option value="">Loading tournaments...</option>
-            </select>
-            <div id="lockCountdown" class="lock-countdown hidden"></div>
-          </section>
+          <div id="lockCountdown" class="lock-countdown hidden"></div>
 
-          <!-- Prize breakdown -->
           <section id="prizeSection" class="prize-section hidden">
             <h2 class="section-title">Prize Breakdown</h2>
             <div id="prizeGrid" class="prize-grid"></div>
           </section>
 
-          <!-- Status bar -->
           <div class="status-bar">
             <span id="statusLabel" class="status-label"></span>
             <div class="status-right">
@@ -163,7 +156,11 @@
             </div>
           </div>
 
-          <!-- Leaderboard table -->
+          <!-- Search bar -->
+          <div class="search-bar">
+            <input type="text" id="standingsSearch" class="standings-search" placeholder="Search entry name or player..." />
+          </div>
+
           <section class="table-wrapper">
             <div id="loadingMsg" class="loading-msg">Loading standings...</div>
             <table id="standingsTable" class="standings-table hidden">
@@ -172,12 +169,12 @@
                   <th class="col-rank sortable" data-col="rank"  onclick="sortBy('rank')">Rank <span class="sort-icon">▼</span></th>
                   <th class="col-name sortable" data-col="name"  onclick="sortBy('name')">Entry <span class="sort-icon"></span></th>
                   <th class="col-total sortable" data-col="total" onclick="sortBy('total')">Total <span class="sort-icon"></span></th>
-                  <th class="col-tier">T1</th>
-                  <th class="col-tier">T2</th>
-                  <th class="col-tier">T3</th>
-                  <th class="col-tier">T4</th>
-                  <th class="col-tier">T5</th>
-                  <th class="col-tier">T6</th>
+                  <th class="col-tier">Tier 1</th>
+                  <th class="col-tier">Tier 2</th>
+                  <th class="col-tier">Tier 3</th>
+                  <th class="col-tier">Tier 4</th>
+                  <th class="col-tier">Tier 5</th>
+                  <th class="col-tier">Tier 6</th>
                 </tr>
               </thead>
               <tbody id="standingsBody"></tbody>
@@ -229,6 +226,10 @@
       </div>
 
       <div class="container">
+        <div class="year-tab-bar" id="pga-year-tabs">
+          <button class="year-tab" data-year="2025" onclick="switchMajorYear('pga', 2025)">2025</button>
+          <button class="year-tab active" data-year="2026" onclick="switchMajorYear('pga', 2026)">2026</button>
+        </div>
         <div class="inner-tab-bar">
           <button class="inner-tab active" data-inner="total"      onclick="switchInnerTab('pga','total')">Total</button>
           <button class="inner-tab"        data-inner="day1"       onclick="switchInnerTab('pga','day1')">Day 1</button>
@@ -261,6 +262,10 @@
       </div>
 
       <div class="container">
+        <div class="year-tab-bar" id="usopen-year-tabs">
+          <button class="year-tab" data-year="2025" onclick="switchMajorYear('usopen', 2025)">2025</button>
+          <button class="year-tab active" data-year="2026" onclick="switchMajorYear('usopen', 2026)">2026</button>
+        </div>
         <div class="inner-tab-bar">
           <button class="inner-tab active" data-inner="total"      onclick="switchInnerTab('usopen','total')">Total</button>
           <button class="inner-tab"        data-inner="day1"       onclick="switchInnerTab('usopen','day1')">Day 1</button>
@@ -293,6 +298,10 @@
       </div>
 
       <div class="container">
+        <div class="year-tab-bar" id="theopen-year-tabs">
+          <button class="year-tab" data-year="2025" onclick="switchMajorYear('theopen', 2025)">2025</button>
+          <button class="year-tab active" data-year="2026" onclick="switchMajorYear('theopen', 2026)">2026</button>
+        </div>
         <div class="inner-tab-bar">
           <button class="inner-tab active" data-inner="total"      onclick="switchInnerTab('theopen','total')">Total</button>
           <button class="inner-tab"        data-inner="day1"       onclick="switchInnerTab('theopen','day1')">Day 1</button>
@@ -346,18 +355,17 @@
   <!-- ===== FIREBASE + APP SCRIPTS ===== -->
   <script type="module">
     import { initFirebase } from './js/firebase-config.js';
-    import { loadStandings, sortBy, manualRefresh } from './js/standings.js';
+    import { loadStandings, sortBy, manualRefresh, switchMajorYear } from './js/standings.js';
 
     initFirebase();
     window.sortBy = sortBy;
     window.manualRefresh = manualRefresh;
+    window.switchMajorYear = switchMajorYear;
     document.getElementById('footerYear').textContent = new Date().getFullYear();
 
-    // Load existing Masters leaderboard data (populates #standingsTable inside masters-total)
     loadStandings();
 
     // ── Major tab navigation ──────────────────────────────────────────────────
-    // Shows the selected major panel and updates nav tab state and body theme class
     window.switchMajor = function(major) {
       document.querySelectorAll('.major-panel').forEach(p => {
         p.classList.remove('panel-active');
@@ -371,7 +379,6 @@
       const tab = document.querySelector('.major-tab[data-major="' + major + '"]');
       if (tab) tab.classList.add('active');
 
-      // Swap body theme class so per-major CSS variables take effect
       document.body.className = document.body.className.replace(/\btheme-\S+/g, '').trim();
       if (major !== 'home' && major !== 'season') document.body.classList.add('theme-' + major);
 
@@ -379,7 +386,6 @@
     };
 
     // ── Inner (day) tab navigation ────────────────────────────────────────────
-    // Shows the selected inner panel within a major section
     window.switchInnerTab = function(major, inner) {
       const majorPanel = document.getElementById('panel-' + major);
       if (!majorPanel) return;
@@ -413,7 +419,6 @@
       document.documentElement.setAttribute('data-theme', savedTheme);
       document.getElementById('themeToggle').textContent = savedTheme === 'dark' ? '🌙' : '☀️';
 
-      // Restore last active major tab from this session
       const savedMajor = sessionStorage.getItem('activeMajor');
       if (savedMajor && savedMajor !== 'home') window.switchMajor(savedMajor);
     })();

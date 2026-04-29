@@ -26,6 +26,7 @@
   --green:       #22a35a;
   --green-light: #2dcb6e;
   --green-muted: #1a3d2a;
+  --red:         #e05555;
   --gray-light:  #121212;
   --gray-mid:    #2a2a2a;
   --white:       #1e1e1e;
@@ -35,9 +36,7 @@
   --shadow:      0 2px 8px rgba(0,0,0,.4);
 }
 
-/* ── Per-major theme overrides (applied via body class) ───────────────────── */
-/* Swaps the --green token so all existing buttons, table headers, and accents
-   automatically adopt the active major's color with no extra markup needed.   */
+/* ── Per-major theme overrides ────────────────────────────────────────────── */
 body.theme-masters { --green: #1a6b3c; --green-light: #2d9a4e; --green-muted: #d4f0dc; }
 body.theme-pga     { --green: #003087; --green-light: #004bb5; --green-muted: #d4dff5; }
 body.theme-usopen  { --green: #3c638e; --green-light: #4a7cb0; --green-muted: #d4e3f0; }
@@ -57,7 +56,6 @@ a:hover { text-decoration: underline; }
 
 
 /* ===== HEADER ===== */
-/* Dark navy from the Basic Bros logo palette; stays consistent across all major tabs */
 .site-header {
   background: #1a2035;
   color: #f5f0e8;
@@ -76,7 +74,6 @@ a:hover { text-decoration: underline; }
   gap: 1rem;
 }
 
-/* Logo mark — placeholder until real logo image is provided */
 .logo-mark {
   width: 42px;
   height: 42px;
@@ -116,13 +113,24 @@ a:hover { text-decoration: underline; }
 }
 .theme-toggle:hover { background: rgba(255,255,255,.12); }
 
+/* Submit Picks — bright green with white border so it pops on the dark header */
 .btn-picks-header {
-  background: #2d6a4f;
+  background: #2d9a4e;
+  color: #ffffff !important;
+  border: 1.5px solid #4dc874;
+  font-size: .82rem;
+  font-weight: 600;
+}
+.btn-picks-header:hover { background: #34b85c; border-color: #5de080; }
+
+/* Standings link in admin header */
+.btn-nav-header {
+  background: rgba(255,255,255,.1);
   color: #f5f0e8 !important;
-  border-color: #2d6a4f;
+  border: 1px solid rgba(255,255,255,.25);
   font-size: .82rem;
 }
-.btn-picks-header:hover { background: #3a8a65; border-color: #3a8a65; }
+.btn-nav-header:hover { background: rgba(255,255,255,.18); }
 
 .nav-admin-link {
   color: rgba(245,240,232,.55);
@@ -132,6 +140,7 @@ a:hover { text-decoration: underline; }
   transition: color .15s;
 }
 .nav-admin-link:hover { color: #f5f0e8; text-decoration: none; }
+.nav-admin-link.nav-admin-active { color: #f5f0e8; font-weight: 600; }
 
 
 /* ===== MAJOR NAVIGATION BAR ===== */
@@ -140,7 +149,7 @@ a:hover { text-decoration: underline; }
   border-bottom: 1px solid rgba(255,255,255,.07);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none;
 }
 .major-nav::-webkit-scrollbar { display: none; }
 
@@ -170,7 +179,6 @@ a:hover { text-decoration: underline; }
 .major-tab:hover { color: #f5f0e8; }
 .major-tab.active { color: #f5f0e8; }
 
-/* Each major uses its own accent color on the active underline */
 .major-tab.tab-home.active    { border-bottom-color: #c9a227; }
 .major-tab.tab-masters.active { border-bottom-color: #2d9a4e; }
 .major-tab.tab-pga.active     { border-bottom-color: #c9a227; }
@@ -184,7 +192,6 @@ a:hover { text-decoration: underline; }
 .major-panel { display: none; min-height: 400px; }
 .major-panel.panel-active { display: block; }
 
-/* ── Major banner (colored header strip inside each panel) ── */
 .major-banner {
   display: flex;
   align-items: center;
@@ -198,7 +205,6 @@ a:hover { text-decoration: underline; }
   width: auto;
   object-fit: contain;
   flex-shrink: 0;
-  /* No background needed — banners are light so white-bg logos sit naturally */
 }
 .major-banner-info {
   display: flex;
@@ -206,20 +212,49 @@ a:hover { text-decoration: underline; }
   gap: .2rem;
 }
 
-/* Light tinted backgrounds per major — all logos have white backgrounds so
-   they sit naturally on a light surface. Per-major identity comes from the
-   colored left accent stripe.                                               */
 .masters-banner  { background: #f0faf3; border-left: 5px solid #1a6b3c; }
 .pga-banner      { background: #eef1fa; border-left: 5px solid #003087; }
 .usopen-banner   { background: #eef3fa; border-left: 5px solid #3c638e; }
 .theopen-banner  { background: #eeeffe; border-left: 5px solid #1a2456; }
 .season-banner   { background: #faf5e0; border-left: 5px solid #c9a227; }
 
-/* Text always dark on light banners */
 .major-title  { font-size: 1.35rem; font-weight: 800; letter-spacing: .02em; line-height: 1.2; color: #1a1a2e; }
 .major-detail { font-size: .82rem; font-weight: 400; color: #5a6070; }
-/* Keep legacy .major-year working if referenced elsewhere */
 .major-year   { font-size: .95rem; font-weight: 500; color: #5a6070; }
+
+
+/* ===== YEAR TAB BAR (sits above inner day tabs) ===== */
+.year-tab-bar {
+  display: flex;
+  gap: .4rem;
+  padding: .75rem 0 .5rem;
+  align-items: center;
+}
+
+.year-tab {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: .3rem .85rem;
+  font-size: .82rem;
+  font-family: var(--font);
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all .15s;
+  letter-spacing: .03em;
+}
+.year-tab:hover:not(:disabled) { border-color: var(--green); color: var(--green); }
+.year-tab.active {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
+.year-tab:disabled,
+.year-tab.year-tab-empty {
+  opacity: .4;
+  cursor: not-allowed;
+}
 
 
 /* ===== INNER TAB BAR (Day tabs within each major) ===== */
@@ -229,10 +264,11 @@ a:hover { text-decoration: underline; }
   flex-wrap: wrap;
   border-bottom: 2px solid var(--border);
   margin-bottom: 1.25rem;
-  padding-top: .5rem;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+.inner-tab-bar::-webkit-scrollbar { display: none; }
 
 .inner-tab {
   background: none;
@@ -251,11 +287,9 @@ a:hover { text-decoration: underline; }
 .inner-tab:hover { color: var(--green); }
 .inner-tab.active { color: var(--green); border-bottom-color: var(--green); font-weight: 600; }
 
-/* Inner panels: hidden by default, shown by JS */
 .inner-panel { display: none; }
 .inner-panel.inner-panel-active { display: block; }
 
-/* Coming soon placeholder for unbuilt tabs */
 .coming-soon {
   padding: 3rem 1.5rem;
   text-align: center;
@@ -298,6 +332,7 @@ a:hover { text-decoration: underline; }
 .btn-danger  { background: var(--red);   color: #fff; border-color: var(--red); }
 .btn-sm  { font-size: .8rem;  padding: .3rem .7rem; }
 .btn-lg  { font-size: 1rem;   padding: .65rem 1.5rem; }
+.btn-disabled { opacity: .45; cursor: not-allowed; pointer-events: none; }
 
 
 /* ===== FORMS ===== */
@@ -451,24 +486,6 @@ a:hover { text-decoration: underline; }
 .season-rule { font-size: .875rem; color: var(--text-muted); flex: 1; line-height: 1.5; }
 
 
-/* ===== TOURNAMENT BAR ===== */
-.tournament-bar {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-}
-.tournament-select {
-  padding: .45rem .75rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-size: .95rem;
-  background: var(--white);
-  color: var(--text);
-  min-width: 220px;
-}
-
 /* ===== LOCK COUNTDOWN ===== */
 .lock-countdown {
   background: #fff8e1;
@@ -477,6 +494,7 @@ a:hover { text-decoration: underline; }
   padding: .4rem .85rem;
   font-size: .875rem;
   color: #795548;
+  margin-bottom: 1rem;
 }
 [data-theme="dark"] .lock-countdown { background: #2a2000; border-color: #665500; color: #ddb860; }
 
@@ -516,6 +534,28 @@ a:hover { text-decoration: underline; }
 [data-theme="dark"] .status-final  { background: #2a2a2a; color: #aaaaaa; }
 
 
+/* ===== SEARCH BAR ===== */
+.search-bar {
+  margin-bottom: .75rem;
+}
+.standings-search {
+  width: 100%;
+  max-width: 380px;
+  padding: .4rem .85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: .9rem;
+  font-family: var(--font);
+  background: var(--white);
+  color: var(--text);
+}
+.standings-search:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(24,105,58,.1);
+}
+
+
 /* ===== STANDINGS TABLE ===== */
 .table-wrapper {
   background: var(--white);
@@ -550,15 +590,40 @@ a:hover { text-decoration: underline; }
 }
 .standings-table tr:last-child td { border-bottom: none; }
 .standings-table tr:hover td { background: var(--gray-light); }
-.col-rank  { width: 50px; text-align: center; }
-.col-total { width: 70px; text-align: center; font-weight: 700; }
-.col-tier  { width: 90px; font-size: .82rem; }
 
-/* Score color classes */
-.score-under { color: var(--green); font-weight: 600; }
-.score-over  { color: var(--red);   font-weight: 600; }
-.score-even  { color: var(--text-muted); }
-.score-mc    { color: var(--text-muted); font-style: italic; }
+/* Column widths — stretch tier columns, constrain rank/total */
+.col-rank  { width: 52px;  text-align: center; }
+.col-name  { min-width: 130px; }
+.col-total { width: 68px;  text-align: center; font-weight: 700; }
+.col-tier  { min-width: 110px; font-size: .82rem; }
+
+/* Player name inside tier cell — always uses body text color (readable in both modes) */
+.player-name-cell {
+  color: var(--text);
+  font-weight: 500;
+  display: block;
+  line-height: 1.3;
+}
+
+/* Score value inside tier and total cells */
+.score-val { display: inline-block; }
+
+/* Score color classes — only apply to the score value, not the cell */
+.score-under { color: var(--green); font-weight: 700; }
+.score-over  { color: var(--red);   font-weight: 700; }
+.score-even  { color: var(--text);  font-weight: 700; }   /* E = black, not gray */
+.score-mc    { color: var(--text-muted); font-style: italic; font-weight: 400; }
+
+/* Dark mode score adjustments */
+[data-theme="dark"] .score-even { color: var(--text); }
+
+/* Top-4 scoring players per entry — soft yellow highlight */
+td.top-4-pick {
+  background: #fffbea !important;
+}
+[data-theme="dark"] td.top-4-pick {
+  background: #2a2400 !important;
+}
 
 /* Top-3 rank badges */
 .rank-1 { color: var(--gold);  font-weight: 800; font-size: 1.05rem; }
@@ -808,8 +873,8 @@ a:hover { text-decoration: underline; }
   .home-grid       { grid-template-columns: 1fr; }
   .inner-tab       { padding: .45rem .75rem; font-size: .82rem; }
   .season-header-bar { flex-direction: column; align-items: flex-start; gap: .75rem; }
-  /* Hide header picks link on mobile — Home page card has the button */
   .btn-picks-header { display: none; }
+  .btn-nav-header   { display: none; }
 }
 
 @media (max-width: 600px) {
@@ -823,4 +888,5 @@ a:hover { text-decoration: underline; }
   .tier-label      { min-width: auto; }
   .modal-box       { padding: 1.25rem; }
   .container       { padding: 1rem .75rem; }
+  .standings-search { max-width: 100%; }
 }

@@ -303,8 +303,11 @@ function renderPrizes(tournament) {
 
 function renderStatusLabel(tournament) {
   const el = document.getElementById('statusLabel');
-  const labels = { open: 'Picks Open', locked: 'In Progress', final: 'Final' };
-  const cls = { open: 'status-open', locked: 'status-locked', final: 'status-final' };
+  if (!el) return;
+  // "Final" is communicated by the "Final Payouts" tab itself — hide the pill when final
+  if (tournament.status === 'final') { el.textContent = ''; el.className = 'status-label inner-tab-status'; return; }
+  const labels = { open: 'Picks Open', locked: 'In Progress' };
+  const cls    = { open: 'status-open', locked: 'status-locked' };
   el.textContent = labels[tournament.status] ?? tournament.status;
   el.className = `status-label ${cls[tournament.status] ?? ''}`;
 }
@@ -502,6 +505,13 @@ function fmtRound(n) {
   return n === 0 ? 'E' : (n > 0 ? `+${n}` : `${n}`);
 }
 
+function fmtRoundCell(n) {
+  if (n === null || n === undefined) return '<span style="color:var(--text-muted)">—</span>';
+  const s   = n === 0 ? 'E' : (n > 0 ? `+${n}` : `${n}`);
+  const cls = n < 0 ? 'score-under' : n > 0 ? 'score-over' : 'score-even';
+  return `<strong class="${cls}">${s}</strong>`;
+}
+
 export async function loadMastersScoreboard() {
   const loadingEl = document.getElementById('mastersSbLoading');
   const table     = document.getElementById('mastersSbTable');
@@ -522,8 +532,11 @@ export async function loadMastersScoreboard() {
           const rounds = [1,2,3,4].map(p => {
             const ls_r = ls.find(l => l.period === p);
             if (!ls_r) return null;
-            const raw = ls_r.value ?? ls_r.displayValue;
-            const v = parseFloat(raw);
+            // displayValue is to-par ("-7", "E", "+2"); value is raw strokes — use displayValue
+            const dv = ls_r.displayValue;
+            if (!dv || dv === '--' || dv === '-') return null;
+            if (dv === 'E') return 0;
+            const v = parseFloat(dv);
             return isNaN(v) ? null : v;
           });
           const status = c.status?.type?.name?.toLowerCase() ?? 'active';
@@ -539,7 +552,14 @@ export async function loadMastersScoreboard() {
             r1: rounds[0], r2: rounds[1], r3: rounds[2], r4: rounds[3],
             status: dispStatus,
           };
-        }).filter(p => p.name).sort((a, b) => a.total - b.total);
+        }).filter(p => p.name).sort((a, b) => {
+          // Active players first (by total), then CUT, then WD
+          const statusOrder = { 'Active': 0, 'CUT': 1, 'WD': 2 };
+          const sa = statusOrder[a.status] ?? 0;
+          const sb = statusOrder[b.status] ?? 0;
+          if (sa !== sb) return sa - sb;
+          return a.total - b.total;
+        });
       }
     }
   } catch { /* fall through to hardcoded */ }
@@ -552,19 +572,32 @@ export async function loadMastersScoreboard() {
     const statusCls = p.status === 'CUT' || p.status === 'WD' ? 'pgasb-cut' : '';
     return `
       <tr class="${statusCls}">
-        <td class="pgasb-col-pos">${p.pos ?? p.pos}</td>
+        <td class="pgasb-col-pos">${p.pos}</td>
         <td class="pgasb-col-player">${escapeHtml(p.name)}</td>
-        <td class="pgasb-col-total ${totalCls}">${fmtRound(p.total)}</td>
-        <td class="pgasb-col-round">${fmtRound(p.r1)}</td>
-        <td class="pgasb-col-round">${fmtRound(p.r2)}</td>
-        <td class="pgasb-col-round">${fmtRound(p.r3)}</td>
-        <td class="pgasb-col-round">${fmtRound(p.r4)}</td>
+        <td class="pgasb-col-total pgasb-col-total-border"><strong class="${totalCls}">${fmtRound(p.total)}</strong></td>
+        <td class="pgasb-col-round">${fmtRoundCell(p.r1)}</td>
+        <td class="pgasb-col-round">${fmtRoundCell(p.r2)}</td>
+        <td class="pgasb-col-round">${fmtRoundCell(p.r3)}</td>
+        <td class="pgasb-col-round">${fmtRoundCell(p.r4)}</td>
         <td class="pgasb-col-status">${p.status}</td>
       </tr>`;
   }).join('');
 
   if (loadingEl) loadingEl.classList.add('hidden');
   table.classList.remove('hidden');
+
+  // Wire up scoreboard search (guard against duplicate listeners on re-render)
+  const searchEl = document.getElementById('mastersSbSearch');
+  if (searchEl && !searchEl.dataset.wired) {
+    searchEl.dataset.wired = '1';
+    searchEl.addEventListener('input', () => {
+      const q = searchEl.value.toLowerCase().trim();
+      document.querySelectorAll('#mastersSbBody tr').forEach(row => {
+        const name = row.querySelector('.pgasb-col-player')?.textContent.toLowerCase() ?? '';
+        row.style.display = !q || name.includes(q) ? '' : 'none';
+      });
+    });
+  }
 }
 
 // ─── Masters 2026 Final Payouts ───────────────────────────────────────────────
@@ -609,17 +642,14 @@ export async function loadMastersPayouts() {
     const scoresSnap = await getDoc(doc(db, 'scores', 'masters-2026'));
     const scores = scoresSnap.exists() ? scoresSnap.data() : {};
 
-    for (const f of MASTERS_2026_FINISHERS) {
-      const chipId = `fp-chips-${f.name.replace(/\s+/g, '-').toLowerCase()}`;
-      const row = document.getElementById(chipId);
-      if (!row) continue;
-
-      const pick = picksByName[f.name.toLowerCase().trim()];
-      if (!pick) continue;
-
+    // Place finisher picks — show actual tournament scores from Firestore
+    function renderPicksWithScores(targetId, entrantName) {
+      const row = document.getElementById(targetId);
+      if (!row) return;
+      const pick = picksByName[entrantName.toLowerCase().trim()];
+      if (!pick) return;
       const golfers = ['t1','t2','t3','t4','t5','t6'].map(k => pick[k]).filter(Boolean);
-      if (!golfers.length) continue;
-
+      if (!golfers.length) return;
       row.innerHTML = `<div class="fp-picks-chips">${golfers.map(g => {
         const s = scores[g];
         let scoreStr = '—', cls = '';
@@ -633,6 +663,32 @@ export async function loadMastersPayouts() {
         return `<span class="fp-pick-chip"><span class="fp-pick-name">${lastName}</span><span class="fp-pick-score ${cls}">${scoreStr}</span></span>`;
       }).join('')}</div>`;
     }
+
+    // Daily winner picks — per-round scores not yet available, show TBD
+    function renderPicksAsTbd(targetId, entrantName) {
+      const row = document.getElementById(targetId);
+      if (!row) return;
+      const pick = picksByName[entrantName.toLowerCase().trim()];
+      if (!pick) return;
+      const golfers = ['t1','t2','t3','t4','t5','t6'].map(k => pick[k]).filter(Boolean);
+      if (!golfers.length) return;
+      row.innerHTML = `<div class="fp-picks-chips">${golfers.map(g => {
+        const lastName = g.split(' ').slice(1).join(' ') || g;
+        return `<span class="fp-pick-chip"><span class="fp-pick-name">${lastName}</span><span class="fp-pick-score score-mc">TBD</span></span>`;
+      }).join('')}</div>`;
+    }
+
+    // Populate place finisher picks with actual scores
+    for (const f of MASTERS_2026_FINISHERS) {
+      renderPicksWithScores(`fp-chips-${f.name.replace(/\s+/g, '-').toLowerCase()}`, f.name);
+    }
+
+    // Populate daily high score winner picks with TBD (no per-round breakdown yet)
+    renderPicksAsTbd('fp-daily-r1', 'Nick Bova');
+    renderPicksAsTbd('fp-daily-r2', 'Brandon Sullivan');
+    renderPicksAsTbd('fp-daily-r3', 'Sarah Crowell');
+    renderPicksAsTbd('fp-daily-r4', 'Ron Pannullo');
+
   } catch {
     // Firebase unavailable — base cards already visible, picks rows stay empty
   }
@@ -665,42 +721,13 @@ export async function loadSeasonLeaderboard() {
     const scoresSnap = await getDoc(doc(db, 'scores', 'masters-2026'));
     const scores = scoresSnap.exists() ? scoresSnap.data() : {};
 
-    // Build per-entry total scores to rank entries 6+
-    const entries = [];
-    picksSnap.forEach(d => {
-      const p = d.data();
-      const name = p.entrantName;
-      if (!name) return;
-      if (MASTERS_2026_FINAL_RANKS[name] !== undefined) {
-        entries.push({ name, rank: MASTERS_2026_FINAL_RANKS[name] });
-        return;
-      }
-      // Calculate total for unranked entries using scoring module
-      const tierPicks = ['t1','t2','t3','t4','t5','t6'].map(k => ({
-        golfer: p[k] || '',
-        score: scores[p[k]]?.score ?? 0,
-        status: scores[p[k]]?.status ?? 'active',
-      }));
-      const total = tierPicks.reduce((sum, t) => sum + t.score, 0);
-      entries.push({ name, total });
-    });
-
-    // Assign ranks 6+ by sorting remaining entries by total
-    const unranked = entries.filter(e => e.rank === undefined)
-      .sort((a, b) => (a.total ?? 999) - (b.total ?? 999));
-    let nextRank = 6;
-    unranked.forEach((e, i) => {
-      if (i > 0 && e.total === unranked[i-1].total) {
-        e.rank = unranked[i-1].rank;
-      } else {
-        e.rank = nextRank;
-      }
-      nextRank = e.rank + 1;
-    });
-
-    // Merge and sort all entries
-    const all = [...entries.filter(e => e.rank !== undefined)]
-      .sort((a, b) => a.rank - b.rank);
+    // Use calculateStandings (best 4 of 6) — same engine as the Total tab,
+    // so Season Leaderboard rank order always matches the Total standings.
+    const picks = [];
+    picksSnap.forEach(d => picks.push(d.data()));
+    const { _lastUpdated, ...scoresClean } = scores;
+    const results = calculateStandings(picks, scoresClean, 20);
+    const all = results.map(r => ({ name: r.pick.entrantName, rank: r.rank, total: r.total }));
 
     if (!all.length) {
       if (loadingEl) loadingEl.classList.add('hidden');
@@ -709,11 +736,17 @@ export async function loadSeasonLeaderboard() {
     }
 
     // Render rows — currently 1 major completed so avg = masters rank
+    const rankCounts = {};
+    all.forEach(e => { rankCounts[e.rank] = (rankCounts[e.rank] || 0) + 1; });
+
     tbody.innerHTML = all.map(e => {
       const rankClass = e.rank <= 3 ? `rank-${e.rank}` : '';
       const rankDisp  = e.rank <= 3 ? ['🥇','🥈','🥉'][e.rank - 1] : e.rank;
-      const mastersDisp = e.rank <= 5
-        ? `<strong>${['🥇','🥈','🥉 (T)','🥉 (T)','5th'][e.rank <= 3 ? e.rank - 1 : 4] || e.rank}</strong>`
+      const tied = rankCounts[e.rank] > 1;
+      const mastersDisp = e.rank === 1 ? '<strong>🥇</strong>'
+        : e.rank === 2 ? '<strong>🥈</strong>'
+        : e.rank === 3 ? `<strong>🥉${tied ? ' (T)' : ''}</strong>`
+        : tied ? `<strong>T-${e.rank}</strong>`
         : `${e.rank}`;
       return `
         <tr>

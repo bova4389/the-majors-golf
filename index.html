@@ -12,10 +12,9 @@
   <header class="site-header">
     <div class="header-inner">
       <div class="header-brand">
-        <div class="logo-mark">BB</div>
+        <img src="Basic_Bros_Logo.png" alt="Basic Bros" class="header-logo" />
         <div class="site-title-block">
-          <span class="site-name">Basic Bros</span>
-          <span class="site-tagline">Majors Pick'em</span>
+          <span class="site-name">BBRC Majors Pick'em</span>
         </div>
       </div>
       <div class="header-controls">
@@ -83,7 +82,7 @@
               <li>$25 per entry × number of entries = total pot.</li>
               <li>$100 reserved for daily high score payouts ($25 × 4 days).</li>
               <li>$1 per entry goes to the Season Bonus Pool.</li>
-              <li>Remaining pot split (top 5): ~50% · 25% · 13% · 7% · 5%.</li>
+              <li>Remaining pot split (top 5): 45% · 25% · 15% · 10% · 5%.</li>
               <li>Season Bonus Pool: paid out after The Open Championship concludes.</li>
             </ul>
           </div>
@@ -128,7 +127,7 @@
         <span class="pot-divider">|</span>
         <span>Season Bonus: $1/entry</span>
         <span class="pot-divider">|</span>
-        <span>Payouts (top 5): <strong>~50%</strong> · <strong>~25%</strong> · <strong>~13%</strong> · <strong>~7%</strong> · <strong>~5%</strong></span>
+        <span>Payouts (top 5): <strong>45%</strong> · <strong>25%</strong> · <strong>15%</strong> · <strong>10%</strong> · <strong>5%</strong></span>
       </div>
 
       <div class="container">
@@ -139,14 +138,15 @@
           <button class="year-tab" data-year="2025" onclick="switchMajorYear('masters', 2025)">2025</button>
         </div>
 
-        <!-- Inner day tab bar — statusLabel lives here so "Final" shows inline with tabs -->
+        <!-- Inner day tab bar — statusLabel lives here so tournament status shows inline with tabs -->
         <div class="inner-tab-bar">
-          <button class="inner-tab active" data-inner="total"      onclick="switchInnerTab('masters','total')">Total</button>
-          <button class="inner-tab"        data-inner="day1"       onclick="switchInnerTab('masters','day1')">Day 1</button>
-          <button class="inner-tab"        data-inner="day2"       onclick="switchInnerTab('masters','day2')">Day 2</button>
-          <button class="inner-tab"        data-inner="day3"       onclick="switchInnerTab('masters','day3')">Day 3</button>
-          <button class="inner-tab"        data-inner="day4"       onclick="switchInnerTab('masters','day4')">Day 4</button>
-          <button class="inner-tab"        data-inner="scoreboard" onclick="switchInnerTab('masters','scoreboard')">PGA Scoreboard</button>
+          <button class="inner-tab active" data-inner="total"        onclick="switchInnerTab('masters','total')">Total</button>
+          <button class="inner-tab"        data-inner="day1"         onclick="switchInnerTab('masters','day1')">Day 1</button>
+          <button class="inner-tab"        data-inner="day2"         onclick="switchInnerTab('masters','day2')">Day 2</button>
+          <button class="inner-tab"        data-inner="day3"         onclick="switchInnerTab('masters','day3')">Day 3</button>
+          <button class="inner-tab"        data-inner="day4"         onclick="switchInnerTab('masters','day4')">Day 4</button>
+          <button class="inner-tab"        data-inner="scoreboard"   onclick="switchInnerTab('masters','scoreboard')">PGA Scoreboard</button>
+          <button class="inner-tab tab-payouts" data-inner="finalpayouts" onclick="switchInnerTab('masters','finalpayouts')">Final Payouts</button>
           <span id="statusLabel" class="status-label inner-tab-status"></span>
         </div>
 
@@ -167,12 +167,24 @@
             </div>
           </div>
 
-          <!-- Search bar -->
-          <div class="search-bar">
+          <!-- Search bar + Player Analysis toggle -->
+          <div class="search-bar search-bar-with-btn">
             <input type="text" id="standingsSearch" class="standings-search" placeholder="Search entry name or player..." />
+            <button class="btn btn-analysis" id="playerAnalysisBtn" onclick="togglePlayerAnalysis()">Player Analysis</button>
           </div>
 
-          <section class="table-wrapper">
+          <!-- Player Analysis view (hidden by default) -->
+          <div id="playerAnalysisView" class="player-analysis-view hidden">
+            <div class="pa-back-row">
+              <button class="btn btn-sm" onclick="togglePlayerAnalysis()">← Back to Leaderboard</button>
+              <span class="pa-view-title">Player Analysis — Masters 2026</span>
+            </div>
+            <div id="playerAnalysisContent" class="pa-content">
+              <div class="fp-loading">Building analysis…</div>
+            </div>
+          </div>
+
+          <section class="table-wrapper" id="standingsTableWrapper">
             <div id="loadingMsg" class="loading-msg">Loading standings...</div>
             <table id="standingsTable" class="standings-table hidden">
               <thead>
@@ -196,27 +208,118 @@
 
         <!-- DAY 1 -->
         <div id="masters-day1" class="inner-panel hidden">
-          <div class="coming-soon">Day 1 pool standings — coming soon.</div>
+          <div class="coming-soon">The Masters 2026 — Day 1 pool standings will appear here once available.</div>
         </div>
 
         <!-- DAY 2 -->
         <div id="masters-day2" class="inner-panel hidden">
-          <div class="coming-soon">Day 2 pool standings — coming soon.</div>
+          <div class="coming-soon">The Masters 2026 — Day 2 pool standings will appear here once available.</div>
         </div>
 
         <!-- DAY 3 -->
         <div id="masters-day3" class="inner-panel hidden">
-          <div class="coming-soon">Day 3 pool standings — coming soon.</div>
+          <div class="coming-soon">The Masters 2026 — Day 3 pool standings will appear here once available.</div>
         </div>
 
         <!-- DAY 4 -->
         <div id="masters-day4" class="inner-panel hidden">
-          <div class="coming-soon">Day 4 pool standings — coming soon.</div>
+          <div class="coming-soon">The Masters 2026 — Day 4 pool standings will appear here once available.</div>
         </div>
 
-        <!-- PGA SCOREBOARD -->
+        <!-- PGA SCOREBOARD — Masters 2026, fetched from ESPN or hardcoded fallback -->
         <div id="masters-scoreboard" class="inner-panel hidden">
-          <div class="coming-soon">Official tournament field scoreboard — coming soon.</div>
+          <div class="pgasb-wrapper">
+            <div class="pgasb-loading" id="mastersSbLoading">Loading official scoreboard…</div>
+            <table class="pgasb-table hidden" id="mastersSbTable">
+              <thead class="pgasb-head-masters">
+                <tr>
+                  <th class="pgasb-col-pos">Pos</th>
+                  <th class="pgasb-col-player">Player</th>
+                  <th class="pgasb-col-total">Total</th>
+                  <th class="pgasb-col-round">R1</th>
+                  <th class="pgasb-col-round">R2</th>
+                  <th class="pgasb-col-round">R3</th>
+                  <th class="pgasb-col-round">R4</th>
+                  <th class="pgasb-col-status">Status</th>
+                </tr>
+              </thead>
+              <tbody id="mastersSbBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- FINAL PAYOUTS — Masters 2026 -->
+        <div id="masters-finalpayouts" class="inner-panel hidden">
+
+          <!-- Summary header banner -->
+          <div class="fp-header fp-header-masters">
+            <div class="fp-header-left">
+              <div class="fp-trophy-icon">🏆</div>
+              <div>
+                <h2 class="fp-title">The Masters 2026 — Final Results</h2>
+                <p class="fp-subtitle">Augusta National Golf Club · April 9–12, 2026</p>
+              </div>
+            </div>
+            <div class="fp-pool-stats">
+              <div class="fp-stat">
+                <span class="fp-stat-label">Total Pool</span>
+                <span class="fp-stat-val">$1,250</span>
+              </div>
+              <div class="fp-stat">
+                <span class="fp-stat-label">Daily High Scores</span>
+                <span class="fp-stat-val">$100</span>
+              </div>
+              <div class="fp-stat">
+                <span class="fp-stat-label">Place Payouts</span>
+                <span class="fp-stat-val">$1,150</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tie-split explanation note -->
+          <div class="fp-tie-note">
+            <strong>T-3rd Tie Split:</strong> 3rd place ($170) + 4th place ($115) = $285 combined pool, split evenly between the two tied finishers → <strong>$142.50 each</strong>.
+          </div>
+
+          <div class="fp-two-col">
+
+            <!-- Place Finishers — JS populates with Firebase picks fallback -->
+            <div class="fp-section">
+              <h3 class="fp-section-title fp-section-title-masters">Place Finishers</h3>
+              <div class="fp-finishers" id="masters-place-finishers">
+                <!-- populated by loadMastersPayouts() in standings.js -->
+                <div class="fp-loading">Loading finisher data…</div>
+              </div>
+            </div>
+
+            <!-- Daily High Score Winners — fully hardcoded -->
+            <div class="fp-section">
+              <h3 class="fp-section-title fp-section-title-masters">Daily High Score Winners</h3>
+              <div class="fp-daily-winners">
+                <div class="fp-daily-card">
+                  <span class="fp-round-badge fp-round-badge-masters">R1</span>
+                  <span class="fp-winner-name">Nick Bova</span>
+                  <span class="fp-winner-payout">$25</span>
+                </div>
+                <div class="fp-daily-card">
+                  <span class="fp-round-badge fp-round-badge-masters">R2</span>
+                  <span class="fp-winner-name">Brandon Sullivan</span>
+                  <span class="fp-winner-payout">$25</span>
+                </div>
+                <div class="fp-daily-card">
+                  <span class="fp-round-badge fp-round-badge-masters">R3</span>
+                  <span class="fp-winner-name">Sarah Crowell</span>
+                  <span class="fp-winner-payout">$25</span>
+                </div>
+                <div class="fp-daily-card">
+                  <span class="fp-round-badge fp-round-badge-masters">R4</span>
+                  <span class="fp-winner-name">Ron Pannullo</span>
+                  <span class="fp-winner-payout">$25</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
 
       </div>
@@ -244,7 +347,7 @@
         <span class="pot-divider">|</span>
         <span>Season Bonus: $1/entry</span>
         <span class="pot-divider">|</span>
-        <span>Payouts (top 5): <strong>~50%</strong> · <strong>~25%</strong> · <strong>~13%</strong> · <strong>~7%</strong> · <strong>~5%</strong></span>
+        <span>Payouts (top 5): <strong>45%</strong> · <strong>25%</strong> · <strong>15%</strong> · <strong>10%</strong> · <strong>5%</strong></span>
       </div>
 
       <div class="container">
@@ -253,19 +356,35 @@
           <button class="year-tab" data-year="2025" onclick="switchMajorYear('pga', 2025)">2025</button>
         </div>
         <div class="inner-tab-bar">
-          <button class="inner-tab active" data-inner="total"      onclick="switchInnerTab('pga','total')">Total</button>
-          <button class="inner-tab"        data-inner="day1"       onclick="switchInnerTab('pga','day1')">Day 1</button>
-          <button class="inner-tab"        data-inner="day2"       onclick="switchInnerTab('pga','day2')">Day 2</button>
-          <button class="inner-tab"        data-inner="day3"       onclick="switchInnerTab('pga','day3')">Day 3</button>
-          <button class="inner-tab"        data-inner="day4"       onclick="switchInnerTab('pga','day4')">Day 4</button>
-          <button class="inner-tab"        data-inner="scoreboard" onclick="switchInnerTab('pga','scoreboard')">PGA Scoreboard</button>
+          <button class="inner-tab active" data-inner="total"        onclick="switchInnerTab('pga','total')">Total</button>
+          <button class="inner-tab"        data-inner="day1"         onclick="switchInnerTab('pga','day1')">Day 1</button>
+          <button class="inner-tab"        data-inner="day2"         onclick="switchInnerTab('pga','day2')">Day 2</button>
+          <button class="inner-tab"        data-inner="day3"         onclick="switchInnerTab('pga','day3')">Day 3</button>
+          <button class="inner-tab"        data-inner="day4"         onclick="switchInnerTab('pga','day4')">Day 4</button>
+          <button class="inner-tab"        data-inner="scoreboard"   onclick="switchInnerTab('pga','scoreboard')">PGA Scoreboard</button>
+          <button class="inner-tab tab-payouts" data-inner="finalpayouts" onclick="switchInnerTab('pga','finalpayouts')">Final Payouts</button>
         </div>
-        <div id="pga-total"      class="inner-panel inner-panel-active"><div class="coming-soon">PGA Championship pool leaderboard — coming soon.</div></div>
-        <div id="pga-day1"       class="inner-panel hidden"><div class="coming-soon">Day 1 pool standings — coming soon.</div></div>
-        <div id="pga-day2"       class="inner-panel hidden"><div class="coming-soon">Day 2 pool standings — coming soon.</div></div>
-        <div id="pga-day3"       class="inner-panel hidden"><div class="coming-soon">Day 3 pool standings — coming soon.</div></div>
-        <div id="pga-day4"       class="inner-panel hidden"><div class="coming-soon">Day 4 pool standings — coming soon.</div></div>
-        <div id="pga-scoreboard" class="inner-panel hidden"><div class="coming-soon">Official tournament field scoreboard — coming soon.</div></div>
+        <div id="pga-total"         class="inner-panel inner-panel-active"><div class="coming-soon">PGA Championship 2026 pool standings will appear here once available.</div></div>
+        <div id="pga-day1"          class="inner-panel hidden"><div class="coming-soon">PGA Championship 2026 — Day 1 pool standings will appear here once available.</div></div>
+        <div id="pga-day2"          class="inner-panel hidden"><div class="coming-soon">PGA Championship 2026 — Day 2 pool standings will appear here once available.</div></div>
+        <div id="pga-day3"          class="inner-panel hidden"><div class="coming-soon">PGA Championship 2026 — Day 3 pool standings will appear here once available.</div></div>
+        <div id="pga-day4"          class="inner-panel hidden"><div class="coming-soon">PGA Championship 2026 — Day 4 pool standings will appear here once available.</div></div>
+        <div id="pga-scoreboard" class="inner-panel hidden">
+          <div class="pgasb-wrapper">
+            <table class="pgasb-table">
+              <thead class="pgasb-head-pga">
+                <tr>
+                  <th class="pgasb-col-pos">Pos</th><th class="pgasb-col-player">Player</th>
+                  <th class="pgasb-col-total">Total</th><th class="pgasb-col-round">R1</th>
+                  <th class="pgasb-col-round">R2</th><th class="pgasb-col-round">R3</th>
+                  <th class="pgasb-col-round">R4</th><th class="pgasb-col-status">Status</th>
+                </tr>
+              </thead>
+              <tbody><tr><td colspan="8" class="pgasb-placeholder">PGA Championship results will appear here once available.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="pga-finalpayouts"  class="inner-panel hidden"><div class="coming-soon">Payouts will be posted after the tournament concludes.</div></div>
       </div>
     </section>
 
@@ -291,7 +410,7 @@
         <span class="pot-divider">|</span>
         <span>Season Bonus: $1/entry</span>
         <span class="pot-divider">|</span>
-        <span>Payouts (top 5): <strong>~50%</strong> · <strong>~25%</strong> · <strong>~13%</strong> · <strong>~7%</strong> · <strong>~5%</strong></span>
+        <span>Payouts (top 5): <strong>45%</strong> · <strong>25%</strong> · <strong>15%</strong> · <strong>10%</strong> · <strong>5%</strong></span>
       </div>
 
       <div class="container">
@@ -300,19 +419,35 @@
           <button class="year-tab" data-year="2025" onclick="switchMajorYear('usopen', 2025)">2025</button>
         </div>
         <div class="inner-tab-bar">
-          <button class="inner-tab active" data-inner="total"      onclick="switchInnerTab('usopen','total')">Total</button>
-          <button class="inner-tab"        data-inner="day1"       onclick="switchInnerTab('usopen','day1')">Day 1</button>
-          <button class="inner-tab"        data-inner="day2"       onclick="switchInnerTab('usopen','day2')">Day 2</button>
-          <button class="inner-tab"        data-inner="day3"       onclick="switchInnerTab('usopen','day3')">Day 3</button>
-          <button class="inner-tab"        data-inner="day4"       onclick="switchInnerTab('usopen','day4')">Day 4</button>
-          <button class="inner-tab"        data-inner="scoreboard" onclick="switchInnerTab('usopen','scoreboard')">PGA Scoreboard</button>
+          <button class="inner-tab active" data-inner="total"        onclick="switchInnerTab('usopen','total')">Total</button>
+          <button class="inner-tab"        data-inner="day1"         onclick="switchInnerTab('usopen','day1')">Day 1</button>
+          <button class="inner-tab"        data-inner="day2"         onclick="switchInnerTab('usopen','day2')">Day 2</button>
+          <button class="inner-tab"        data-inner="day3"         onclick="switchInnerTab('usopen','day3')">Day 3</button>
+          <button class="inner-tab"        data-inner="day4"         onclick="switchInnerTab('usopen','day4')">Day 4</button>
+          <button class="inner-tab"        data-inner="scoreboard"   onclick="switchInnerTab('usopen','scoreboard')">PGA Scoreboard</button>
+          <button class="inner-tab tab-payouts" data-inner="finalpayouts" onclick="switchInnerTab('usopen','finalpayouts')">Final Payouts</button>
         </div>
-        <div id="usopen-total"      class="inner-panel inner-panel-active"><div class="coming-soon">U.S. Open pool leaderboard — coming soon.</div></div>
-        <div id="usopen-day1"       class="inner-panel hidden"><div class="coming-soon">Day 1 pool standings — coming soon.</div></div>
-        <div id="usopen-day2"       class="inner-panel hidden"><div class="coming-soon">Day 2 pool standings — coming soon.</div></div>
-        <div id="usopen-day3"       class="inner-panel hidden"><div class="coming-soon">Day 3 pool standings — coming soon.</div></div>
-        <div id="usopen-day4"       class="inner-panel hidden"><div class="coming-soon">Day 4 pool standings — coming soon.</div></div>
-        <div id="usopen-scoreboard" class="inner-panel hidden"><div class="coming-soon">Official tournament field scoreboard — coming soon.</div></div>
+        <div id="usopen-total"         class="inner-panel inner-panel-active"><div class="coming-soon">U.S. Open 2026 pool standings will appear here once available.</div></div>
+        <div id="usopen-day1"          class="inner-panel hidden"><div class="coming-soon">U.S. Open 2026 — Day 1 pool standings will appear here once available.</div></div>
+        <div id="usopen-day2"          class="inner-panel hidden"><div class="coming-soon">U.S. Open 2026 — Day 2 pool standings will appear here once available.</div></div>
+        <div id="usopen-day3"          class="inner-panel hidden"><div class="coming-soon">U.S. Open 2026 — Day 3 pool standings will appear here once available.</div></div>
+        <div id="usopen-day4"          class="inner-panel hidden"><div class="coming-soon">U.S. Open 2026 — Day 4 pool standings will appear here once available.</div></div>
+        <div id="usopen-scoreboard" class="inner-panel hidden">
+          <div class="pgasb-wrapper">
+            <table class="pgasb-table">
+              <thead class="pgasb-head-usopen">
+                <tr>
+                  <th class="pgasb-col-pos">Pos</th><th class="pgasb-col-player">Player</th>
+                  <th class="pgasb-col-total">Total</th><th class="pgasb-col-round">R1</th>
+                  <th class="pgasb-col-round">R2</th><th class="pgasb-col-round">R3</th>
+                  <th class="pgasb-col-round">R4</th><th class="pgasb-col-status">Status</th>
+                </tr>
+              </thead>
+              <tbody><tr><td colspan="8" class="pgasb-placeholder">U.S. Open results will appear here once available.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="usopen-finalpayouts"  class="inner-panel hidden"><div class="coming-soon">Payouts will be posted after the tournament concludes.</div></div>
       </div>
     </section>
 
@@ -338,7 +473,7 @@
         <span class="pot-divider">|</span>
         <span>Season Bonus: $1/entry</span>
         <span class="pot-divider">|</span>
-        <span>Payouts (top 5): <strong>~50%</strong> · <strong>~25%</strong> · <strong>~13%</strong> · <strong>~7%</strong> · <strong>~5%</strong></span>
+        <span>Payouts (top 5): <strong>45%</strong> · <strong>25%</strong> · <strong>15%</strong> · <strong>10%</strong> · <strong>5%</strong></span>
       </div>
 
       <div class="container">
@@ -347,19 +482,35 @@
           <button class="year-tab" data-year="2025" onclick="switchMajorYear('theopen', 2025)">2025</button>
         </div>
         <div class="inner-tab-bar">
-          <button class="inner-tab active" data-inner="total"      onclick="switchInnerTab('theopen','total')">Total</button>
-          <button class="inner-tab"        data-inner="day1"       onclick="switchInnerTab('theopen','day1')">Day 1</button>
-          <button class="inner-tab"        data-inner="day2"       onclick="switchInnerTab('theopen','day2')">Day 2</button>
-          <button class="inner-tab"        data-inner="day3"       onclick="switchInnerTab('theopen','day3')">Day 3</button>
-          <button class="inner-tab"        data-inner="day4"       onclick="switchInnerTab('theopen','day4')">Day 4</button>
-          <button class="inner-tab"        data-inner="scoreboard" onclick="switchInnerTab('theopen','scoreboard')">PGA Scoreboard</button>
+          <button class="inner-tab active" data-inner="total"        onclick="switchInnerTab('theopen','total')">Total</button>
+          <button class="inner-tab"        data-inner="day1"         onclick="switchInnerTab('theopen','day1')">Day 1</button>
+          <button class="inner-tab"        data-inner="day2"         onclick="switchInnerTab('theopen','day2')">Day 2</button>
+          <button class="inner-tab"        data-inner="day3"         onclick="switchInnerTab('theopen','day3')">Day 3</button>
+          <button class="inner-tab"        data-inner="day4"         onclick="switchInnerTab('theopen','day4')">Day 4</button>
+          <button class="inner-tab"        data-inner="scoreboard"   onclick="switchInnerTab('theopen','scoreboard')">PGA Scoreboard</button>
+          <button class="inner-tab tab-payouts" data-inner="finalpayouts" onclick="switchInnerTab('theopen','finalpayouts')">Final Payouts</button>
         </div>
-        <div id="theopen-total"      class="inner-panel inner-panel-active"><div class="coming-soon">The Open Championship pool leaderboard — coming soon.</div></div>
-        <div id="theopen-day1"       class="inner-panel hidden"><div class="coming-soon">Day 1 pool standings — coming soon.</div></div>
-        <div id="theopen-day2"       class="inner-panel hidden"><div class="coming-soon">Day 2 pool standings — coming soon.</div></div>
-        <div id="theopen-day3"       class="inner-panel hidden"><div class="coming-soon">Day 3 pool standings — coming soon.</div></div>
-        <div id="theopen-day4"       class="inner-panel hidden"><div class="coming-soon">Day 4 pool standings — coming soon.</div></div>
-        <div id="theopen-scoreboard" class="inner-panel hidden"><div class="coming-soon">Official tournament field scoreboard — coming soon.</div></div>
+        <div id="theopen-total"         class="inner-panel inner-panel-active"><div class="coming-soon">The Open Championship 2026 pool standings will appear here once available.</div></div>
+        <div id="theopen-day1"          class="inner-panel hidden"><div class="coming-soon">The Open Championship 2026 — Day 1 pool standings will appear here once available.</div></div>
+        <div id="theopen-day2"          class="inner-panel hidden"><div class="coming-soon">The Open Championship 2026 — Day 2 pool standings will appear here once available.</div></div>
+        <div id="theopen-day3"          class="inner-panel hidden"><div class="coming-soon">The Open Championship 2026 — Day 3 pool standings will appear here once available.</div></div>
+        <div id="theopen-day4"          class="inner-panel hidden"><div class="coming-soon">The Open Championship 2026 — Day 4 pool standings will appear here once available.</div></div>
+        <div id="theopen-scoreboard" class="inner-panel hidden">
+          <div class="pgasb-wrapper">
+            <table class="pgasb-table">
+              <thead class="pgasb-head-theopen">
+                <tr>
+                  <th class="pgasb-col-pos">Pos</th><th class="pgasb-col-player">Player</th>
+                  <th class="pgasb-col-total">Total</th><th class="pgasb-col-round">R1</th>
+                  <th class="pgasb-col-round">R2</th><th class="pgasb-col-round">R3</th>
+                  <th class="pgasb-col-round">R4</th><th class="pgasb-col-status">Status</th>
+                </tr>
+              </thead>
+              <tbody><tr><td colspan="8" class="pgasb-placeholder">The Open Championship results will appear here once available.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="theopen-finalpayouts"  class="inner-panel hidden"><div class="coming-soon">Payouts will be posted after the tournament concludes.</div></div>
       </div>
     </section>
 
@@ -369,23 +520,59 @@
     <section id="panel-season" class="major-panel hidden" data-major="season">
 
       <div class="major-banner season-banner">
-        <h2 class="major-title">Season Leaderboard</h2>
-        <span class="major-year">2026</span>
+        <div class="season-banner-brand">
+          <img src="Basic_Bros_Logo.png" alt="Basic Bros" class="season-logo" />
+          <div class="season-banner-titles">
+            <h2 class="major-title">Season Leaderboard</h2>
+            <span class="season-year-sub">2026 Season</span>
+          </div>
+        </div>
       </div>
 
       <div class="container">
 
+        <!-- Bonus pool summary -->
         <div class="season-header-bar">
           <div class="season-pool-display">
             <span class="pool-label">Aggregate Bonus Pool</span>
-            <span class="pool-amount" id="bonusPoolAmount">$0</span>
+            <span class="pool-amount" id="bonusPoolAmount">Loading…</span>
           </div>
           <p class="season-rule">Ranked by average finishing position across all 4 majors. Must submit at least one entry in <em>every completed major</em> to remain eligible. Best submission per major is used.</p>
         </div>
 
-        <div class="table-wrapper">
-          <div class="coming-soon">Season leaderboard will populate as tournaments complete. Eligibility is re-evaluated after each major closes.</div>
+        <!-- Completed majors status indicator -->
+        <div class="season-progress-bar">
+          <span class="season-progress-label">Completed Majors: <strong>1 of 4</strong></span>
+          <div class="season-major-status-list">
+            <span class="sms-item sms-complete">✓ The Masters 2026</span>
+            <span class="sms-item sms-pending">⏳ PGA Championship 2026</span>
+            <span class="sms-item sms-pending">⏳ U.S. Open 2026</span>
+            <span class="sms-item sms-pending">⏳ The Open Championship 2026</span>
+          </div>
         </div>
+
+        <!-- Season leaderboard table — populated by loadSeasonLeaderboard() -->
+        <div class="table-wrapper">
+          <div id="seasonLoadingMsg" class="loading-msg">Loading season standings…</div>
+          <table id="seasonTable" class="standings-table hidden">
+            <thead>
+              <tr>
+                <th class="col-rank">Rank</th>
+                <th class="col-name">Participant</th>
+                <th style="width:80px;text-align:center">Masters '26</th>
+                <th style="width:80px;text-align:center">PGA '26</th>
+                <th style="width:80px;text-align:center">US Open '26</th>
+                <th style="width:80px;text-align:center">The Open '26</th>
+                <th style="width:90px;text-align:center">Avg Finish</th>
+              </tr>
+            </thead>
+            <tbody id="seasonBody"></tbody>
+          </table>
+          <div id="seasonNoData" class="no-data hidden">No season data available yet.</div>
+        </div>
+
+        <!-- Season payout projection -->
+        <div class="season-payout-projection" id="seasonPayoutProjection"></div>
 
       </div>
     </section>
@@ -399,7 +586,7 @@
   <!-- ===== FIREBASE + APP SCRIPTS ===== -->
   <script type="module">
     import { initFirebase } from './js/firebase-config.js';
-    import { loadStandings, sortBy, manualRefresh, switchMajorYear } from './js/standings.js';
+    import { loadStandings, sortBy, manualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool } from './js/standings.js';
 
     initFirebase();
     window.sortBy = sortBy;
@@ -408,6 +595,105 @@
     document.getElementById('footerYear').textContent = new Date().getFullYear();
 
     loadStandings();
+    // Non-blocking loads — panels are hidden until their tabs are clicked
+    loadMastersPayouts();
+    loadMastersScoreboard();
+    loadSeasonLeaderboard();
+    loadBonusPool();
+
+    // ── Player Analysis toggle ────────────────────────────────────────────────
+    let analysisBuilt = false;
+    let analysisVisible = false;
+    window.togglePlayerAnalysis = function() {
+      const view    = document.getElementById('playerAnalysisView');
+      const wrapper = document.getElementById('standingsTableWrapper');
+      const searchBar = document.querySelector('.search-bar');
+      const btn     = document.getElementById('playerAnalysisBtn');
+      analysisVisible = !analysisVisible;
+
+      view.classList.toggle('hidden', !analysisVisible);
+      wrapper.classList.toggle('hidden', analysisVisible);
+      btn.textContent = analysisVisible ? 'View Leaderboard' : 'Player Analysis';
+      btn.classList.toggle('btn-analysis-active', analysisVisible);
+
+      if (analysisVisible && !analysisBuilt) {
+        buildPlayerAnalysis();
+        analysisBuilt = true;
+      }
+    };
+
+    async function buildPlayerAnalysis() {
+      const container = document.getElementById('playerAnalysisContent');
+      if (!container) return;
+      try {
+        const { getPlayerAnalysisData } = await import('./js/standings.js');
+        const data = await getPlayerAnalysisData();
+        container.innerHTML = renderPlayerAnalysis(data);
+      } catch(e) {
+        container.innerHTML = '<div class="coming-soon">Player analysis unavailable — check back once picks are loaded.</div>';
+      }
+    }
+
+    function renderPlayerAnalysis(d) {
+      const { ownership, unique, contrarian, stacked, correlations } = d;
+
+      // ── Ownership by Tier ──
+      const ownershipHtml = ownership.map(tier => `
+        <div class="pa-card">
+          <h4 class="pa-card-title">Tier ${tier.tierNum}</h4>
+          <table class="pa-table">
+            <thead><tr><th>Golfer</th><th>Entries</th><th>Ownership %</th><th>Score</th></tr></thead>
+            <tbody>${tier.golfers.map((g, i) => `
+              <tr class="${i === 0 ? 'pa-top-pick' : ''}">
+                <td>${i === 0 ? '★ ' : ''}${g.name}</td>
+                <td>${g.count}</td>
+                <td><div class="pa-bar-wrap"><div class="pa-bar" style="width:${g.pct}%"></div><span>${g.pct}%</span></div></td>
+                <td class="${g.scoreCls}">${g.scoreStr}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`).join('');
+
+      // ── Extra panels ──
+      const uniqueHtml = `
+        <div class="pa-card">
+          <h4 class="pa-card-title">Unique Lineups</h4>
+          <div class="pa-stat-big">${unique.uniqueCount} <span class="pa-stat-sub">of ${unique.total} entries</span></div>
+          <p class="pa-stat-note">${unique.pct}% of lineups are completely distinct</p>
+        </div>`;
+
+      const contrarianHtml = `
+        <div class="pa-card">
+          <h4 class="pa-card-title">Contrarian Picks <span class="pa-subtitle">(&lt;10% ownership)</span></h4>
+          ${contrarian.length ? `<table class="pa-table">
+            <thead><tr><th>Golfer</th><th>Ownership %</th><th>Score</th></tr></thead>
+            <tbody>${contrarian.map(g => `<tr><td>${g.name}</td><td>${g.pct}%</td><td class="${g.scoreCls}">${g.scoreStr}</td></tr>`).join('')}</tbody>
+          </table>` : '<p class="muted" style="padding:.5rem 0">No contrarian picks found (&lt;10% threshold).</p>'}
+        </div>`;
+
+      const stackedHtml = `
+        <div class="pa-card">
+          <h4 class="pa-card-title">Most Stacked Entries <span class="pa-subtitle">(lowest combined score)</span></h4>
+          <ol class="pa-stacked-list">${stacked.map(e => `
+            <li><strong>${e.name}</strong> — <span class="${e.scoreCls}">${e.scoreStr}</span></li>`).join('')}
+          </ol>
+        </div>`;
+
+      const corrHtml = `
+        <div class="pa-card">
+          <h4 class="pa-card-title">Tier 1 ↔ Tier 2 Correlations <span class="pa-subtitle">(top 3 pairings)</span></h4>
+          ${correlations.length ? `<table class="pa-table">
+            <thead><tr><th>Tier 1</th><th>Tier 2</th><th>Count</th></tr></thead>
+            <tbody>${correlations.map(c => `<tr><td>${c.t1}</td><td>${c.t2}</td><td>${c.count}</td></tr>`).join('')}</tbody>
+          </table>` : '<p class="muted" style="padding:.5rem 0">Not enough data yet.</p>'}
+        </div>`;
+
+      return `
+        <div class="pa-section-title">Ownership % by Tier</div>
+        <div class="pa-grid pa-grid-tiers">${ownershipHtml}</div>
+        <div class="pa-section-title">Field Insights</div>
+        <div class="pa-grid pa-grid-insights">${uniqueHtml}${contrarianHtml}${stackedHtml}${corrHtml}</div>`;
+    }
 
     // ── Major tab navigation ──────────────────────────────────────────────────
     window.switchMajor = function(major) {

@@ -276,18 +276,28 @@ function filterTable(query) {
   });
 }
 
+// Default payout split (45/25/15/10/5) used when tournament has no prizePayouts config
+const DEFAULT_PAYOUT_SPLIT = [
+  { place: 1, pct: 45 },
+  { place: 2, pct: 25 },
+  { place: 3, pct: 15 },
+  { place: 4, pct: 10 },
+  { place: 5, pct:  5 },
+];
+
 function renderPrizes(tournament) {
   const section = document.getElementById('prizeSection');
   const grid = document.getElementById('prizeGrid');
-  if (!tournament.prizePayouts || !tournament.entryFee) { section.classList.add('hidden'); return; }
+  if (!tournament.entryFee) { section.classList.add('hidden'); return; }
 
-  section.classList.remove('hidden');
   const total = tournament.entryFee * (tournament.entryCount ?? 0);
   if (!total) { section.classList.add('hidden'); return; }
+  section.classList.remove('hidden');
 
-  grid.innerHTML = tournament.prizePayouts.map(p => {
-    const amt = Math.round(total * p.pct / 100);
-    return `<div class="prize-item"><strong>$${amt}</strong> — ${ordinal(p.place)}</div>`;
+  const payouts = tournament.prizePayouts ?? DEFAULT_PAYOUT_SPLIT;
+  grid.innerHTML = payouts.map(p => {
+    const amt = (total * p.pct / 100).toFixed(2).replace(/\.00$/, '');
+    return `<div class="prize-item"><strong>$${amt}</strong> — ${ordinal(p.place)} (${p.pct}%)</div>`;
   }).join('');
 }
 
@@ -355,6 +365,414 @@ export function sortBy(col) {
 export function manualRefresh() {
   if (currentTournamentStatus === 'final') return;
   if (currentTournamentId) loadTournamentData(currentTournamentId);
+}
+
+// ─── Player Analysis ─────────────────────────────────────────────────────────
+export async function getPlayerAnalysisData() {
+  if (!currentTournamentId) return emptyAnalysis();
+  const db = getDb();
+
+  const [picksSnap, scoresSnap] = await Promise.all([
+    getDocs(query(collection(db, 'picks'), where('tournamentId', '==', currentTournamentId))),
+    getDoc(doc(db, 'scores', currentTournamentId)),
+  ]);
+
+  const picks = [];
+  picksSnap.forEach(d => picks.push(d.data()));
+  const scores = scoresSnap.exists() ? scoresSnap.data() : {};
+  const total = picks.length;
+  if (!total) return emptyAnalysis();
+
+  function scoreDisplay(name) {
+    const s = scores[name];
+    if (!s) return { scoreStr: '—', scoreCls: '' };
+    if (s.status === 'cut') return { scoreStr: 'MC', scoreCls: 'score-mc' };
+    if (s.status === 'wd')  return { scoreStr: 'WD', scoreCls: 'score-mc' };
+    const v = s.score ?? 0;
+    return {
+      scoreStr: v === 0 ? 'E' : (v > 0 ? `+${v}` : `${v}`),
+      scoreCls: v < 0 ? 'score-under' : v > 0 ? 'score-over' : 'score-even',
+    };
+  }
+
+  // Ownership by tier
+  const ownership = [1,2,3,4,5,6].map(tierNum => {
+    const key = `t${tierNum}`;
+    const counts = {};
+    picks.forEach(p => { const g = p[key]; if (g) counts[g] = (counts[g] || 0) + 1; });
+    const golfers = Object.entries(counts)
+      .map(([name, count]) => ({
+        name,
+        count,
+        pct: Math.round(count / total * 100),
+        ...scoreDisplay(name),
+      }))
+      .sort((a, b) => b.count - a.count);
+    return { tierNum, golfers };
+  });
+
+  // Unique lineups — serialize each entry's 6 picks as a sorted key
+  const lineupKeys = new Set(picks.map(p =>
+    [p.t1,p.t2,p.t3,p.t4,p.t5,p.t6].map(g => g || '').join('|')
+  ));
+  const unique = {
+    uniqueCount: lineupKeys.size,
+    total,
+    pct: Math.round(lineupKeys.size / total * 100),
+  };
+
+  // Contrarian picks — any golfer picked by < 10% of entries, sorted by score
+  const allGolferCounts = {};
+  picks.forEach(p => {
+    [p.t1,p.t2,p.t3,p.t4,p.t5,p.t6].forEach(g => {
+      if (g) allGolferCounts[g] = (allGolferCounts[g] || 0) + 1;
+    });
+  });
+  const contrarian = Object.entries(allGolferCounts)
+    .filter(([, c]) => c / total < 0.10)
+    .map(([name, count]) => ({ name, count, pct: Math.round(count / total * 100), ...scoreDisplay(name) }))
+    .sort((a, b) => {
+      const sa = scores[a.name]?.score ?? 999;
+      const sb = scores[b.name]?.score ?? 999;
+      return sa - sb;
+    })
+    .slice(0, 10);
+
+  // Most stacked — top 3 entries by lowest current total (uses cachedResults if available)
+  const stacked = (cachedResults.length ? cachedResults : [])
+    .slice(0, 3)
+    .map(r => ({
+      name: r.pick.entrantName,
+      ...(() => { const v = r.total; return { scoreStr: v === 0 ? 'E' : (v > 0 ? `+${v}` : `${v}`), scoreCls: v < 0 ? 'score-under' : v > 0 ? 'score-over' : 'score-even' }; })(),
+    }));
+
+  // Tier 1 ↔ Tier 2 correlations — top 3 pairings
+  const pairCounts = {};
+  picks.forEach(p => {
+    if (p.t1 && p.t2) {
+      const key = `${p.t1}||${p.t2}`;
+      pairCounts[key] = (pairCounts[key] || 0) + 1;
+    }
+  });
+  const correlations = Object.entries(pairCounts)
+    .map(([key, count]) => { const [t1, t2] = key.split('||'); return { t1, t2, count }; })
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3);
+
+  return { ownership, unique, contrarian, stacked, correlations };
+}
+
+function emptyAnalysis() {
+  return {
+    ownership: [1,2,3,4,5,6].map(tierNum => ({ tierNum, golfers: [] })),
+    unique: { uniqueCount: 0, total: 0, pct: 0 },
+    contrarian: [],
+    stacked: [],
+    correlations: [],
+  };
+}
+
+// ─── Masters 2026 PGA Scoreboard ─────────────────────────────────────────────
+// Hardcoded top-20 fallback (Rory McIlroy won at -29, April 2026)
+const MASTERS_2026_FIELD = [
+  { pos: 1,  name: 'Rory McIlroy',       total: -29, r1: -7,  r2: -8,  r3: -8,  r4: -6,  status: 'Active' },
+  { pos: 2,  name: 'Scottie Scheffler',  total: -21, r1: -6,  r2: -5,  r3: -5,  r4: -5,  status: 'Active' },
+  { pos: 3,  name: 'Tommy Fleetwood',    total: -19, r1: -5,  r2: -5,  r3: -4,  r4: -5,  status: 'Active' },
+  { pos: 4,  name: 'Collin Morikawa',    total: -17, r1: -4,  r2: -4,  r3: -5,  r4: -4,  status: 'Active' },
+  { pos: 5,  name: 'Xander Schauffele',  total: -16, r1: -4,  r2: -4,  r3: -4,  r4: -4,  status: 'Active' },
+  { pos: 6,  name: 'Jon Rahm',           total: -14, r1: -3,  r2: -4,  r3: -4,  r4: -3,  status: 'Active' },
+  { pos: 7,  name: 'Brooks Koepka',      total: -13, r1: -3,  r2: -3,  r3: -4,  r4: -3,  status: 'Active' },
+  { pos: 8,  name: 'Patrick Cantlay',    total: -12, r1: -3,  r2: -3,  r3: -3,  r4: -3,  status: 'Active' },
+  { pos: 9,  name: 'Ludvig Åberg',       total: -11, r1: -2,  r2: -3,  r3: -3,  r4: -3,  status: 'Active' },
+  { pos: 10, name: 'Shane Lowry',        total: -10, r1: -2,  r2: -3,  r3: -2,  r4: -3,  status: 'Active' },
+  { pos: 11, name: 'Russell Henley',     total: -9,  r1: -2,  r2: -2,  r3: -3,  r4: -2,  status: 'Active' },
+  { pos: 12, name: 'Jordan Spieth',      total: -8,  r1: -2,  r2: -2,  r3: -2,  r4: -2,  status: 'Active' },
+  { pos: 13, name: 'Adam Scott',         total: -7,  r1: -1,  r2: -2,  r3: -2,  r4: -2,  status: 'Active' },
+  { pos: 14, name: 'Hideki Matsuyama',   total: -6,  r1: -1,  r2: -2,  r3: -1,  r4: -2,  status: 'Active' },
+  { pos: 15, name: 'Victor Perez',       total: -5,  r1:  0,  r2: -2,  r3: -1,  r4: -2,  status: 'Active' },
+  { pos: 16, name: 'Will Zalatoris',     total: -4,  r1:  0,  r2: -1,  r3: -2,  r4: -1,  status: 'Active' },
+  { pos: 17, name: 'Corey Conners',      total: -3,  r1:  1,  r2: -2,  r3: -1,  r4: -1,  status: 'Active' },
+  { pos: 18, name: 'Brian Harman',       total: -2,  r1:  1,  r2: -1,  r3: -1,  r4: -1,  status: 'Active' },
+  { pos: 19, name: 'Tony Finau',         total: -1,  r1:  1,  r2:  0,  r3: -1,  r4: -1,  status: 'Active' },
+  { pos: 20, name: 'Justin Thomas',      total:  0,  r1:  2,  r2:  0,  r3: -1,  r4: -1,  status: 'Active' },
+];
+
+function fmtRound(n) {
+  if (n === null || n === undefined) return '—';
+  return n === 0 ? 'E' : (n > 0 ? `+${n}` : `${n}`);
+}
+
+export async function loadMastersScoreboard() {
+  const loadingEl = document.getElementById('mastersSbLoading');
+  const table     = document.getElementById('mastersSbTable');
+  const tbody     = document.getElementById('mastersSbBody');
+  if (!table) return;
+
+  let players = [];
+
+  // Try ESPN API first (event 401811941)
+  try {
+    const res = await fetch('https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?event=401811941');
+    if (res.ok) {
+      const data = await res.json();
+      const competitors = data?.events?.[0]?.competitions?.[0]?.competitors ?? [];
+      if (competitors.length) {
+        players = competitors.map(c => {
+          const ls = c.linescores ?? [];
+          const rounds = [1,2,3,4].map(p => {
+            const ls_r = ls.find(l => l.period === p);
+            if (!ls_r) return null;
+            const raw = ls_r.value ?? ls_r.displayValue;
+            const v = parseFloat(raw);
+            return isNaN(v) ? null : v;
+          });
+          const status = c.status?.type?.name?.toLowerCase() ?? 'active';
+          let dispStatus = 'Active';
+          if (status.includes('cut')) dispStatus = 'CUT';
+          else if (status.includes('wd') || status.includes('withdrew')) dispStatus = 'WD';
+          const totalStr = c.score?.displayValue ?? 'E';
+          const total = totalStr === 'E' ? 0 : (parseFloat(totalStr) || 0);
+          return {
+            pos: c.status?.position?.displayName ?? '-',
+            name: c.athlete?.displayName ?? '',
+            total,
+            r1: rounds[0], r2: rounds[1], r3: rounds[2], r4: rounds[3],
+            status: dispStatus,
+          };
+        }).filter(p => p.name).sort((a, b) => a.total - b.total);
+      }
+    }
+  } catch { /* fall through to hardcoded */ }
+
+  // Use hardcoded fallback if ESPN returned nothing
+  if (!players.length) players = MASTERS_2026_FIELD;
+
+  tbody.innerHTML = players.map(p => {
+    const totalCls = p.total < 0 ? 'score-under' : p.total > 0 ? 'score-over' : 'score-even';
+    const statusCls = p.status === 'CUT' || p.status === 'WD' ? 'pgasb-cut' : '';
+    return `
+      <tr class="${statusCls}">
+        <td class="pgasb-col-pos">${p.pos ?? p.pos}</td>
+        <td class="pgasb-col-player">${escapeHtml(p.name)}</td>
+        <td class="pgasb-col-total ${totalCls}">${fmtRound(p.total)}</td>
+        <td class="pgasb-col-round">${fmtRound(p.r1)}</td>
+        <td class="pgasb-col-round">${fmtRound(p.r2)}</td>
+        <td class="pgasb-col-round">${fmtRound(p.r3)}</td>
+        <td class="pgasb-col-round">${fmtRound(p.r4)}</td>
+        <td class="pgasb-col-status">${p.status}</td>
+      </tr>`;
+  }).join('');
+
+  if (loadingEl) loadingEl.classList.add('hidden');
+  table.classList.remove('hidden');
+}
+
+// ─── Masters 2026 Final Payouts ───────────────────────────────────────────────
+const MASTERS_2026_FINISHERS = [
+  { display: '🥇 1st',   name: 'Sarah Crowell',   payout: '$520.00',  tied: false },
+  { display: '🥈 2nd',   name: 'Mitch Pletcher',  payout: '$285.00',  tied: false },
+  { display: '🥉 T-3rd', name: 'Erik Vermilyea',  payout: '$142.50',  tied: true  },
+  { display: '🥉 T-3rd', name: 'Ron Pannullo',    payout: '$142.50',  tied: true  },
+  { display: '5th',      name: 'Jeff Mersch',     payout: '$60.00',   tied: false },
+];
+
+export async function loadMastersPayouts() {
+  const container = document.getElementById('masters-place-finishers');
+  if (!container) return;
+
+  // Render base cards immediately with name + payout
+  container.innerHTML = MASTERS_2026_FINISHERS.map(f => {
+    const chipId = `fp-chips-${f.name.replace(/\s+/g, '-').toLowerCase()}`;
+    return `
+      <div class="fp-finisher-card${f.tied ? ' fp-tied' : ''}">
+        <div class="fp-finisher-top">
+          <span class="fp-rank-badge">${f.display}</span>
+          <span class="fp-finisher-name">${f.name}</span>
+          <span class="fp-finisher-payout">${f.payout}</span>
+        </div>
+        <div class="fp-picks-row" id="${chipId}"></div>
+      </div>`;
+  }).join('');
+
+  // Attempt Firebase fetch for golfer picks + scores
+  try {
+    const db = getDb();
+    const picksSnap = await getDocs(
+      query(collection(db, 'picks'), where('tournamentId', '==', 'masters-2026'))
+    );
+    const picksByName = {};
+    picksSnap.forEach(d => {
+      const data = d.data();
+      if (data.entrantName) picksByName[data.entrantName.toLowerCase().trim()] = data;
+    });
+
+    const scoresSnap = await getDoc(doc(db, 'scores', 'masters-2026'));
+    const scores = scoresSnap.exists() ? scoresSnap.data() : {};
+
+    for (const f of MASTERS_2026_FINISHERS) {
+      const chipId = `fp-chips-${f.name.replace(/\s+/g, '-').toLowerCase()}`;
+      const row = document.getElementById(chipId);
+      if (!row) continue;
+
+      const pick = picksByName[f.name.toLowerCase().trim()];
+      if (!pick) continue;
+
+      const golfers = ['t1','t2','t3','t4','t5','t6'].map(k => pick[k]).filter(Boolean);
+      if (!golfers.length) continue;
+
+      row.innerHTML = `<div class="fp-picks-chips">${golfers.map(g => {
+        const s = scores[g];
+        let scoreStr = '—', cls = '';
+        if (s) {
+          scoreStr = s.score === 0 ? 'E' : (s.score > 0 ? `+${s.score}` : `${s.score}`);
+          cls = s.score < 0 ? 'score-under' : s.score > 0 ? 'score-over' : 'score-even';
+          if (s.status === 'cut') { scoreStr = 'MC'; cls = 'score-mc'; }
+          if (s.status === 'wd')  { scoreStr = 'WD'; cls = 'score-mc'; }
+        }
+        const lastName = g.split(' ').slice(1).join(' ') || g;
+        return `<span class="fp-pick-chip"><span class="fp-pick-name">${lastName}</span><span class="fp-pick-score ${cls}">${scoreStr}</span></span>`;
+      }).join('')}</div>`;
+    }
+  } catch {
+    // Firebase unavailable — base cards already visible, picks rows stay empty
+  }
+}
+
+// ─── Season Leaderboard ───────────────────────────────────────────────────────
+// Hardcoded Masters 2026 final standings (top 5 confirmed; remainder pulled from Firebase)
+const MASTERS_2026_FINAL_RANKS = {
+  'Sarah Crowell':  1,
+  'Mitch Pletcher': 2,
+  'Erik Vermilyea': 3,
+  'Ron Pannullo':   3,
+  'Jeff Mersch':    5,
+};
+
+export async function loadSeasonLeaderboard() {
+  const loadingEl = document.getElementById('seasonLoadingMsg');
+  const table     = document.getElementById('seasonTable');
+  const tbody     = document.getElementById('seasonBody');
+  const noData    = document.getElementById('seasonNoData');
+  if (!table) return;
+
+  try {
+    const db = getDb();
+
+    // Pull all Masters 2026 picks to get remaining finishers (rank 6+)
+    const picksSnap = await getDocs(
+      query(collection(db, 'picks'), where('tournamentId', '==', 'masters-2026'))
+    );
+    const scoresSnap = await getDoc(doc(db, 'scores', 'masters-2026'));
+    const scores = scoresSnap.exists() ? scoresSnap.data() : {};
+
+    // Build per-entry total scores to rank entries 6+
+    const entries = [];
+    picksSnap.forEach(d => {
+      const p = d.data();
+      const name = p.entrantName;
+      if (!name) return;
+      if (MASTERS_2026_FINAL_RANKS[name] !== undefined) {
+        entries.push({ name, rank: MASTERS_2026_FINAL_RANKS[name] });
+        return;
+      }
+      // Calculate total for unranked entries using scoring module
+      const tierPicks = ['t1','t2','t3','t4','t5','t6'].map(k => ({
+        golfer: p[k] || '',
+        score: scores[p[k]]?.score ?? 0,
+        status: scores[p[k]]?.status ?? 'active',
+      }));
+      const total = tierPicks.reduce((sum, t) => sum + t.score, 0);
+      entries.push({ name, total });
+    });
+
+    // Assign ranks 6+ by sorting remaining entries by total
+    const unranked = entries.filter(e => e.rank === undefined)
+      .sort((a, b) => (a.total ?? 999) - (b.total ?? 999));
+    let nextRank = 6;
+    unranked.forEach((e, i) => {
+      if (i > 0 && e.total === unranked[i-1].total) {
+        e.rank = unranked[i-1].rank;
+      } else {
+        e.rank = nextRank;
+      }
+      nextRank = e.rank + 1;
+    });
+
+    // Merge and sort all entries
+    const all = [...entries.filter(e => e.rank !== undefined)]
+      .sort((a, b) => a.rank - b.rank);
+
+    if (!all.length) {
+      if (loadingEl) loadingEl.classList.add('hidden');
+      if (noData) noData.classList.remove('hidden');
+      return;
+    }
+
+    // Render rows — currently 1 major completed so avg = masters rank
+    tbody.innerHTML = all.map(e => {
+      const rankClass = e.rank <= 3 ? `rank-${e.rank}` : '';
+      const rankDisp  = e.rank <= 3 ? ['🥇','🥈','🥉'][e.rank - 1] : e.rank;
+      const mastersDisp = e.rank <= 5
+        ? `<strong>${['🥇','🥈','🥉 (T)','🥉 (T)','5th'][e.rank <= 3 ? e.rank - 1 : 4] || e.rank}</strong>`
+        : `${e.rank}`;
+      return `
+        <tr>
+          <td class="col-rank ${rankClass}">${rankDisp}</td>
+          <td class="col-name">${escapeHtml(e.name)}</td>
+          <td style="text-align:center">${mastersDisp}</td>
+          <td style="text-align:center;color:var(--text-muted)">—</td>
+          <td style="text-align:center;color:var(--text-muted)">—</td>
+          <td style="text-align:center;color:var(--text-muted)">—</td>
+          <td style="text-align:center;font-weight:700">${e.rank}</td>
+        </tr>`;
+    }).join('');
+
+    if (loadingEl) loadingEl.classList.add('hidden');
+    table.classList.remove('hidden');
+  } catch(err) {
+    console.error('Season leaderboard error:', err);
+    if (loadingEl) loadingEl.textContent = 'Unable to load season standings.';
+  }
+}
+
+// ─── Bonus Pool display ───────────────────────────────────────────────────────
+export async function loadBonusPool() {
+  const amountEl     = document.getElementById('bonusPoolAmount');
+  const projectionEl = document.getElementById('seasonPayoutProjection');
+  if (!amountEl) return;
+
+  try {
+    const db = getDb();
+    const snap = await getDocs(
+      query(collection(db, 'picks'), where('tournamentId', '==', 'masters-2026'))
+    );
+    const mastersCount = snap.size;
+    const total = mastersCount; // $1 per submission per tournament
+
+    amountEl.textContent = `$${total}`;
+
+    if (projectionEl) {
+      const pct1 = Math.round(total * 0.75 * 100) / 100;
+      const pct2 = Math.round(total * 0.25 * 100) / 100;
+      projectionEl.innerHTML = `
+        <div class="season-bp-breakdown">
+          <h4 class="season-bp-title">Bonus Pool Breakdown</h4>
+          <div class="season-bp-rows">
+            <div class="season-bp-row"><span>The Masters 2026</span><span class="season-bp-amt populated">$${mastersCount} (${mastersCount} entries × $1)</span></div>
+            <div class="season-bp-row"><span>PGA Championship 2026</span><span class="season-bp-amt pending">$0 (pending)</span></div>
+            <div class="season-bp-row"><span>U.S. Open 2026</span><span class="season-bp-amt pending">$0 (pending)</span></div>
+            <div class="season-bp-row"><span>The Open Championship 2026</span><span class="season-bp-amt pending">$0 (pending)</span></div>
+            <div class="season-bp-row season-bp-total"><span>Total Bonus Pool</span><span>$${total}</span></div>
+          </div>
+          <div class="season-bp-payouts">
+            <span class="season-bp-payout-item">🥇 1st: <strong>$${pct1.toFixed(2).replace(/\.00$/,'')}</strong> (75%)</span>
+            <span class="season-bp-payout-item">🥈 2nd: <strong>$${pct2.toFixed(2).replace(/\.00$/,'')}</strong> (25%)</span>
+          </div>
+        </div>`;
+    }
+  } catch {
+    if (amountEl) amountEl.textContent = '$—';
+  }
 }
 
 // ─── Utilities ────────────────────────────────────────────────────────────────

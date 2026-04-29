@@ -74,26 +74,27 @@ a:hover { text-decoration: underline; }
   gap: 1rem;
 }
 
-.logo-mark {
-  width: 42px;
-  height: 42px;
-  background: #2d6a4f;
-  border: 2px solid #c9a227;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: .95rem;
-  color: #f5f0e8;
+/* Basic Bros logo image in header — black bg blends on dark navy; border-radius softens edges */
+.header-logo {
+  height: 64px;
+  max-height: 70px;
+  width: auto;
+  object-fit: contain;
   flex-shrink: 0;
-  letter-spacing: .05em;
+  border-radius: 8px;
 }
 
 .header-brand { display: flex; align-items: center; gap: .75rem; }
 .site-title-block { display: flex; flex-direction: column; line-height: 1.15; }
-.site-name    { font-size: 1.1rem; font-weight: 800; color: #f5f0e8; letter-spacing: .02em; }
-.site-tagline { font-size: .7rem;  font-weight: 500; color: #c9a227; text-transform: uppercase; letter-spacing: .08em; }
+/* Cream/serif display font to match logo aesthetic */
+.site-name {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #f5f0e8;
+  letter-spacing: .03em;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+.site-tagline { font-size: .7rem; font-weight: 500; color: #c9a227; text-transform: uppercase; letter-spacing: .08em; }
 
 .header-controls { display: flex; align-items: center; gap: .75rem; }
 
@@ -310,6 +311,27 @@ a:hover { text-decoration: underline; }
 .inner-panel { display: none; }
 .inner-panel.inner-panel-active { display: block; }
 
+/* Final Payouts tab — muted grey pill style, distinct from live-data tabs */
+.tab-payouts {
+  color: var(--text-muted);
+  background: var(--gray-light);
+  border-radius: 99px;
+  padding: .3rem .85rem;
+  margin: .35rem .25rem .35rem 0;
+  border: 1px solid var(--border);
+  font-size: .8rem;
+  align-self: center;
+}
+.tab-payouts:hover { color: var(--text); background: var(--gray-mid); }
+.tab-payouts.active {
+  background: #495057;
+  color: #fff;
+  border-color: #495057;
+  border-bottom-color: #495057;
+}
+[data-theme="dark"] .tab-payouts { background: #2a2a2a; border-color: #444; }
+[data-theme="dark"] .tab-payouts.active { background: #555; border-color: #555; }
+
 .coming-soon {
   padding: 3rem 1.5rem;
   text-align: center;
@@ -479,6 +501,101 @@ a:hover { text-decoration: underline; }
   justify-content: center;
   font-size: .95rem;
   padding: .65rem 1.25rem;
+}
+
+
+/* ===== SEASON PROGRESS / STATUS ===== */
+.season-progress-bar {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: .85rem 1.25rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+.season-progress-label {
+  font-size: .875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--text);
+  padding-top: .1rem;
+}
+.season-major-status-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem .85rem;
+}
+.sms-item {
+  font-size: .82rem;
+  padding: .2rem .65rem;
+  border-radius: 99px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.sms-complete { background: var(--green-muted); color: var(--green); border: 1px solid var(--green); }
+.sms-pending  { background: var(--gray-light);  color: var(--text-muted); border: 1px solid var(--border); }
+
+/* Bonus pool projection block */
+.season-payout-projection { margin-top: 1.25rem; }
+.season-bp-breakdown {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: var(--shadow);
+}
+.season-bp-title { font-size: .95rem; font-weight: 700; margin-bottom: .85rem; color: var(--text); }
+.season-bp-rows  { display: flex; flex-direction: column; gap: .4rem; margin-bottom: .85rem; }
+.season-bp-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: .875rem;
+  padding: .3rem 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+.season-bp-row:last-child { border-bottom: none; }
+.season-bp-total { font-weight: 700; font-size: .95rem; }
+.season-bp-amt.populated { color: var(--green); font-weight: 600; }
+.season-bp-amt.pending   { color: var(--text-muted); }
+.season-bp-payouts {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding-top: .75rem;
+  border-top: 2px solid var(--gold);
+}
+.season-bp-payout-item { font-size: .9rem; color: var(--text); }
+.season-bp-payout-item strong { color: var(--gold); font-size: 1rem; }
+
+
+/* Season banner logo — sits inside the gold-bordered season-banner */
+.season-banner-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.season-logo {
+  height: 100px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 8px;
+}
+.season-banner-titles { display: flex; flex-direction: column; gap: .2rem; }
+.season-year-sub {
+  font-size: .9rem;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: .05em;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+@media (max-width: 600px) {
+  .season-logo { height: 72px; }
 }
 
 
@@ -936,6 +1053,323 @@ td.top-4-pick {
 .tournament-pot-strip strong { color: var(--gold); }
 
 
+/* ===== SEARCH BAR WITH ANALYSIS BUTTON ===== */
+.search-bar-with-btn {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  flex-wrap: wrap;
+}
+.btn-analysis {
+  background: var(--white);
+  border: 1.5px solid var(--green);
+  color: var(--green);
+  font-weight: 600;
+  font-size: .82rem;
+  padding: .38rem .9rem;
+  white-space: nowrap;
+}
+.btn-analysis:hover { background: var(--green-muted); }
+.btn-analysis-active {
+  background: var(--green) !important;
+  color: #fff !important;
+  border-color: var(--green) !important;
+}
+
+
+/* ===== PLAYER ANALYSIS VIEW ===== */
+.player-analysis-view { margin-top: .5rem; }
+.pa-back-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+.pa-view-title { font-weight: 700; font-size: 1rem; color: var(--text); }
+.pa-section-title {
+  font-size: .78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--text-muted);
+  margin: 1.25rem 0 .65rem;
+}
+.pa-grid { display: grid; gap: 1rem; }
+.pa-grid-tiers    { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.pa-grid-insights { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+
+.pa-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  box-shadow: var(--shadow);
+}
+.pa-card-title {
+  font-size: .9rem;
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: .75rem;
+  padding-bottom: .4rem;
+  border-bottom: 2px solid var(--green-muted);
+}
+.pa-subtitle { font-size: .78rem; font-weight: 400; color: var(--text-muted); }
+
+.pa-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .82rem;
+}
+.pa-table th {
+  background: var(--gray-light);
+  padding: .35rem .6rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: .75rem;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+}
+.pa-table td { padding: .4rem .6rem; border-bottom: 1px solid var(--border); }
+.pa-table tr:last-child td { border-bottom: none; }
+.pa-table tr.pa-top-pick td { background: #fffbea; font-weight: 600; }
+[data-theme="dark"] .pa-table tr.pa-top-pick td { background: #3a3500; }
+
+/* Ownership bar */
+.pa-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+.pa-bar {
+  height: 8px;
+  background: var(--green);
+  border-radius: 99px;
+  min-width: 2px;
+  max-width: 120px;
+  flex-shrink: 0;
+}
+
+/* Unique / stacked stat display */
+.pa-stat-big {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: .25rem;
+  line-height: 1;
+}
+.pa-stat-sub  { font-size: .9rem; font-weight: 400; color: var(--text-muted); }
+.pa-stat-note { font-size: .82rem; color: var(--text-muted); margin-top: .4rem; }
+.pa-stacked-list {
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  font-size: .875rem;
+}
+
+@media (max-width: 600px) {
+  .pa-grid-tiers    { grid-template-columns: 1fr; }
+  .pa-grid-insights { grid-template-columns: 1fr; }
+}
+
+
+/* ===== PGA SCOREBOARD TABLE ===== */
+.pgasb-wrapper {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  box-shadow: var(--shadow);
+}
+.pgasb-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .875rem;
+}
+.pgasb-table th {
+  padding: .55rem .75rem;
+  text-align: left;
+  font-size: .75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: #fff;
+  white-space: nowrap;
+}
+/* Per-tournament header colors */
+.pgasb-head-masters th { background: #1a6b3c; }
+.pgasb-head-pga     th { background: #003087; }
+.pgasb-head-usopen  th { background: #3c638e; }
+.pgasb-head-theopen th { background: #1a2456; }
+
+.pgasb-table td {
+  padding: .5rem .75rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.pgasb-table tr:last-child td { border-bottom: none; }
+.pgasb-table tr:hover td { background: var(--gray-light); }
+.pgasb-table tr.pgasb-cut td { color: var(--text-muted); font-style: italic; }
+
+.pgasb-col-pos    { width: 48px;  text-align: center; font-weight: 700; }
+.pgasb-col-player { min-width: 150px; font-weight: 600; }
+.pgasb-col-total  { width: 64px;  text-align: center; font-weight: 800; }
+.pgasb-col-round  { width: 52px;  text-align: center; color: var(--text-muted); }
+.pgasb-col-status { width: 72px;  text-align: center; font-size: .78rem; }
+
+.pgasb-placeholder {
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: .9rem;
+}
+.pgasb-loading { padding: 2rem; text-align: center; color: var(--text-muted); font-size: .9rem; }
+
+
+/* ===== FINAL PAYOUTS PANEL ===== */
+.fp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+}
+.fp-header-masters {
+  background: linear-gradient(135deg, #1a6b3c 0%, #2d9a4e 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(26,107,60,.25);
+}
+.fp-header-left { display: flex; align-items: center; gap: 1rem; }
+.fp-trophy-icon { font-size: 2.5rem; line-height: 1; }
+.fp-title    { font-size: 1.2rem; font-weight: 800; color: #fff; margin-bottom: .2rem; }
+.fp-subtitle { font-size: .82rem; color: rgba(255,255,255,.75); }
+
+.fp-pool-stats { display: flex; gap: 1.25rem; flex-wrap: wrap; }
+.fp-stat { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.fp-stat-label { font-size: .68rem; text-transform: uppercase; letter-spacing: .07em; color: rgba(255,255,255,.7); margin-bottom: .15rem; }
+.fp-stat-val   { font-size: 1.3rem; font-weight: 800; color: #ffd700; line-height: 1; }
+
+/* Tie-split info note */
+.fp-tie-note {
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-left: 4px solid #c9a227;
+  border-radius: var(--radius);
+  padding: .65rem 1rem;
+  font-size: .875rem;
+  color: #5a4000;
+  margin-bottom: 1.25rem;
+}
+[data-theme="dark"] .fp-tie-note { background: #2a2000; border-color: #665500; color: #ddb860; }
+
+/* Two-column layout for place finishers + daily winners */
+.fp-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+@media (max-width: 768px) { .fp-two-col { grid-template-columns: 1fr; } }
+
+.fp-section {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: var(--shadow);
+}
+.fp-section-title {
+  font-size: .95rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  padding-bottom: .5rem;
+  border-bottom: 2px solid var(--border);
+}
+.fp-section-title-masters { border-bottom-color: #1a6b3c; color: #1a6b3c; }
+
+/* Place finisher cards */
+.fp-finisher-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: .75rem 1rem;
+  margin-bottom: .75rem;
+  background: var(--gray-light);
+  transition: background .15s;
+}
+.fp-finisher-card:last-child { margin-bottom: 0; }
+.fp-finisher-card.fp-tied { border-left: 3px solid #c9a227; }
+
+.fp-finisher-top {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+.fp-rank-badge {
+  font-size: .95rem;
+  font-weight: 700;
+  white-space: nowrap;
+  min-width: 72px;
+}
+.fp-finisher-name  { flex: 1; font-weight: 700; font-size: .95rem; color: var(--text); }
+.fp-finisher-payout {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #1a6b3c;
+  white-space: nowrap;
+}
+[data-theme="dark"] .fp-finisher-payout { color: #4ade80; }
+
+/* Golfer pick chips beneath each finisher */
+.fp-picks-row { margin-top: .5rem; }
+.fp-picks-chips { display: flex; flex-wrap: wrap; gap: .35rem; }
+.fp-pick-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: .15rem .55rem;
+  font-size: .75rem;
+}
+.fp-pick-name  { color: var(--text-muted); }
+.fp-pick-score { font-weight: 700; }
+.fp-loading    { color: var(--text-muted); font-size: .875rem; padding: 1rem 0; }
+
+/* Daily winner cards */
+.fp-daily-winners { display: flex; flex-direction: column; gap: .65rem; }
+.fp-daily-card {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  background: var(--gray-light);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: .65rem 1rem;
+}
+.fp-round-badge {
+  font-size: .8rem;
+  font-weight: 800;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+  letter-spacing: .03em;
+}
+.fp-round-badge-masters { background: #1a6b3c; color: #fff; }
+.fp-winner-name   { flex: 1; font-weight: 600; font-size: .9rem; }
+.fp-winner-payout { font-weight: 800; color: #1a6b3c; font-size: .95rem; }
+[data-theme="dark"] .fp-winner-payout { color: #4ade80; }
+
+
 /* ===== FOOTER ===== */
 .site-footer {
   text-align: center;
@@ -958,11 +1392,13 @@ td.top-4-pick {
   .season-header-bar { flex-direction: column; align-items: flex-start; gap: .75rem; }
   .btn-picks-header { display: none; }
   .btn-nav-header   { display: none; }
+  .header-logo     { height: 48px; }
+  .site-name       { font-size: 1rem; }
 }
 
 @media (max-width: 600px) {
-  .site-name       { font-size: 1rem; }
-  .site-tagline    { font-size: .65rem; }
+  .header-logo     { height: 38px; }
+  .site-name       { font-size: .88rem; }
   .major-tab       { padding: .6rem .65rem; font-size: .78rem; }
   .standings-table { font-size: .8rem; }
   .standings-table th, .standings-table td { padding: .45rem .5rem; }

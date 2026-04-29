@@ -223,6 +223,25 @@ a:hover { text-decoration: underline; }
 .major-detail { font-size: .82rem; font-weight: 400; color: #5a6070; }
 .major-year   { font-size: .95rem; font-weight: 500; color: #5a6070; }
 
+.major-official-link {
+  margin-left: auto;
+  align-self: flex-end;
+  font-size: .75rem;
+  font-weight: 500;
+  color: #5a6070;
+  text-decoration: none;
+  padding: .3rem .65rem;
+  border: 1px solid rgba(0,0,0,.15);
+  border-radius: var(--radius);
+  white-space: nowrap;
+  background: rgba(255,255,255,.55);
+  transition: background .15s, color .15s;
+  flex-shrink: 0;
+}
+.major-official-link:hover { background: rgba(255,255,255,.85); color: #1a1a2e; text-decoration: none; }
+[data-theme="dark"] .major-official-link { color: var(--text-muted); background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.12); }
+[data-theme="dark"] .major-official-link:hover { background: rgba(255,255,255,.14); color: var(--text); }
+
 
 /* ===== YEAR TAB BAR (sits above inner day tabs) ===== */
 .year-tab-bar {
@@ -530,9 +549,9 @@ a:hover { text-decoration: underline; }
 .status-label  { font-weight: 600; padding: .2rem .6rem; border-radius: 99px; font-size: .8rem; }
 .status-open   { background: var(--green-muted); color: var(--green); }
 .status-locked { background: #fff3cd; color: #856404; }
-.status-final  { background: #e2e3e5; color: #495057; }
+.status-final  { background: #e2e3e5; color: #495057; border-radius: 3px; }
 [data-theme="dark"] .status-locked { background: #2a2000; color: #ddb860; }
-[data-theme="dark"] .status-final  { background: #2a2a2a; color: #aaaaaa; }
+[data-theme="dark"] .status-final  { background: #2a2a2a; color: #aaaaaa; border-radius: 3px; }
 
 
 /* ===== SEARCH BAR ===== */
@@ -620,12 +639,14 @@ a:hover { text-decoration: underline; }
   min-width: 82px;
   background: var(--white);
 }
+/* Yellow halo: the card stays opaque so yellow only shows in the padding gap */
 td.top-4-pick .tier-cell-card {
   border-color: #c8a000;
-  background: transparent;
+  background: var(--white);
 }
 [data-theme="dark"] td.top-4-pick .tier-cell-card {
   border-color: #8a7200;
+  background: var(--white);
 }
 
 /* Score value inside tier and total cells */
@@ -637,8 +658,9 @@ td.top-4-pick .tier-cell-card {
 .score-even  { color: #1971c2;      font-weight: 700; }   /* blue = distinct from green/red */
 .score-mc    { color: var(--text-muted); font-style: italic; font-weight: 400; }
 
-/* Dark mode score adjustments */
-[data-theme="dark"] .score-even { color: #4dabf7; }
+/* Dark mode score adjustments — brighter green for contrast on dark background */
+[data-theme="dark"] .score-under { color: #4ade80; }
+[data-theme="dark"] .score-even  { color: #4dabf7; }
 
 /* Top-4 scoring players per entry — soft yellow highlight */
 td.top-4-pick {

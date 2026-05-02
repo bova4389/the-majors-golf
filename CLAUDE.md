@@ -26,9 +26,10 @@ A static website for a recurring golf pool covering all 4 major tournaments (Mas
 5. Final standings determine prize payouts
 
 ## Scoring Rules
-- Each entrant's score = sum of their 6 golfers' scores (strokes relative to par)
+- Each entrant's score = best 4 of their 6 golfers' scores (strokes relative to par)
 - Lower total = better (golf scoring)
 - WD / MC (missed cut) = **+20 stroke penalty** (configurable per tournament)
+- Tiebreaker: 5th-best golfer score, then 6th-best
 - Scores displayed as: `-12`, `E`, `+3`
 - Ties split prize money equally
 
@@ -77,6 +78,49 @@ Scores are cached in Firestore to avoid hammering the API; browser refreshes pul
 
 Per-round data is available via `competitors[n].linescores` array: each entry has `period` (1-4),
 `value` (raw score), `displayValue` (to-par string), `inScore`, `outScore`, `currentPosition`.
+
+## Past Tournament Data (Hardcoded in standings.js)
+
+Completed tournaments without Firebase data are hardcoded directly in `standings.js`. The pattern is:
+
+### Data constants
+Each tournament year has up to 6 constants:
+- `MASTERS_20XX_FIELD` — PGA official scoreboard (used by the Scoreboard tab)
+- `MASTERS_20XX_TOTAL` — Pool total standings (all entries, final ranks)
+- `MASTERS_20XX_R1/R2/R3/R4` — Round-by-round pool standings
+- `MASTERS_20XX_FINISHERS` — Top 5 finishers for the Payouts tab (2026 only; 2025 uses `loadMasters2025Payouts()`)
+
+### Data shape for pool standings (TOTAL and rounds)
+```javascript
+{
+  rank: number,
+  total: number,
+  pick: { entrantName: string },
+  tierScores: {
+    t1: { score: number, status: null, golfer: string, isTop4: boolean },
+    t2: ..., t3: ..., t4: ..., t5: ..., t6: ...
+  }
+}
+```
+`isTop4` is provided by the user from their spreadsheet — **do not recalculate it**. Score is a plain integer (negative = under par). `status` is `null` for all players (no MC/WD distinction needed in hardcoded data since the score already reflects any penalty).
+
+### Year tab switching flow
+`switchMajorYear('masters', year)` in `standings.js`:
+- Year with Firebase tournament → loads live data from Firestore
+- Year **2025** (no Firebase data) → calls `clearMastersPoolPanels()` then immediately calls `loadMasters2025TotalStandings()`, `loadMasters2025Round1Standings()`, `loadMasters2025Round2Standings()`, and `loadMasters2025Payouts()`, and activates the Total inner tab instead of jumping to Scoreboard
+- Other years with no Firebase data → jumps to Scoreboard tab, shows "coming soon" for pool panels
+
+### 2025 completion status (as of May 2026)
+- Total standings: ✅ done (`MASTERS_2025_TOTAL`, `loadMasters2025TotalStandings`)
+- Round 1: ✅ done (`MASTERS_2025_R1`, `loadMasters2025Round1Standings`)
+- Round 2: ✅ done (`MASTERS_2025_R2`, `loadMasters2025Round2Standings`)
+- Rounds 3–4: ⏳ pending — will show "coming soon" until data is provided
+- Final Payouts: ✅ structure done (`loadMasters2025Payouts`); round winner pick chips show "coming soon" until R3–4 data is complete
+
+### Adding a new round (R3/R4)
+1. Add `MASTERS_2025_R3` constant (same shape as `MASTERS_2025_R1`)
+2. Add `loadMasters2025Round3Standings()` — same render logic as Round 1, targeting `masters-day3`, using tbody id `r3StandingsBody` and search input id `r3Search`
+3. Add the call in `switchMajorYear`: `loadMasters2025Round3Standings()`
 
 ## Admin Workflow
 1. Log in at `admin.html` with Firebase email/password

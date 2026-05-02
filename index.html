@@ -136,6 +136,7 @@
         <div class="year-tab-bar" id="masters-year-tabs">
           <button class="year-tab active" data-year="2026" onclick="switchMajorYear('masters', 2026)">2026</button>
           <button class="year-tab" data-year="2025" onclick="switchMajorYear('masters', 2025)">2025</button>
+          <button id="refreshBtn" class="btn btn-sm" onclick="manualRefresh()">Refresh</button>
         </div>
 
         <!-- Inner day tab bar — statusLabel lives here so tournament status shows inline with tabs -->
@@ -160,13 +161,6 @@
             <div id="prizeGrid" class="prize-grid"></div>
           </section>
 
-          <div class="status-bar">
-            <div class="status-right">
-              <span id="lastUpdated" class="last-updated"></span>
-              <button id="refreshBtn" class="btn btn-sm" onclick="manualRefresh()">Refresh</button>
-            </div>
-          </div>
-
           <!-- Search bar + Player Analysis toggle -->
           <div class="search-bar search-bar-with-btn">
             <input type="text" id="standingsSearch" class="standings-search" placeholder="Search entry name or player..." />
@@ -175,10 +169,6 @@
 
           <!-- Player Analysis view (hidden by default) -->
           <div id="playerAnalysisView" class="player-analysis-view hidden">
-            <div class="pa-back-row">
-              <button class="btn btn-sm" onclick="togglePlayerAnalysis()">← Back to Leaderboard</button>
-              <span class="pa-view-title">Player Analysis — Masters 2026</span>
-            </div>
             <div id="playerAnalysisContent" class="pa-content">
               <div class="fp-loading">Building analysis…</div>
             </div>
@@ -208,22 +198,22 @@
 
         <!-- DAY 1 -->
         <div id="masters-day1" class="inner-panel hidden">
-          <div class="coming-soon">The Masters 2026 — Round 1 pool standings will appear here once available.</div>
+          <!-- populated by loadRound1Standings() in standings.js -->
         </div>
 
         <!-- DAY 2 -->
         <div id="masters-day2" class="inner-panel hidden">
-          <div class="coming-soon">The Masters 2026 — Round 2 pool standings will appear here once available.</div>
+          <!-- populated by loadRound2Standings() in standings.js -->
         </div>
 
         <!-- DAY 3 -->
         <div id="masters-day3" class="inner-panel hidden">
-          <div class="coming-soon">The Masters 2026 — Round 3 pool standings will appear here once available.</div>
+          <!-- populated by loadRound3Standings() in standings.js -->
         </div>
 
         <!-- DAY 4 -->
         <div id="masters-day4" class="inner-panel hidden">
-          <div class="coming-soon">The Masters 2026 — Round 4 pool standings will appear here once available.</div>
+          <!-- populated by loadRound4Standings() in standings.js -->
         </div>
 
         <!-- PGA SCOREBOARD — Masters 2026, fetched from ESPN or hardcoded fallback -->
@@ -302,7 +292,7 @@
                 <div class="fp-daily-card">
                   <div class="fp-daily-card-top">
                     <span class="fp-round-badge fp-round-badge-masters">R1</span>
-                    <span class="fp-winner-name">Nick Bova</span>
+                    <span class="fp-winner-name">Nick Bova 2</span>
                     <span class="fp-winner-payout">$25</span>
                   </div>
                   <div class="fp-picks-row" id="fp-daily-r1"></div>
@@ -598,7 +588,7 @@
   <!-- ===== FIREBASE + APP SCRIPTS ===== -->
   <script type="module">
     import { initFirebase } from './js/firebase-config.js';
-    import { loadStandings, sortBy, manualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool } from './js/standings.js';
+    import { loadStandings, sortBy, manualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings } from './js/standings.js';
 
     initFirebase();
     window.sortBy = sortBy;
@@ -612,6 +602,10 @@
     loadMastersScoreboard();
     loadSeasonLeaderboard();
     loadBonusPool();
+    loadRound1Standings();
+    loadRound2Standings();
+    loadRound3Standings();
+    loadRound4Standings();
 
     // ── Player Analysis toggle ────────────────────────────────────────────────
     let analysisBuilt = false;

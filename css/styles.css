@@ -306,8 +306,8 @@ a:hover { text-decoration: underline; }
   white-space: nowrap;
   transition: color .15s, border-color .15s;
 }
-.inner-tab:hover { color: var(--green); }
-.inner-tab.active { color: var(--green); border-bottom-color: var(--green); font-weight: 600; }
+.inner-tab:hover { color: var(--green); background: var(--green-muted); border-radius: 4px 4px 0 0; }
+.inner-tab.active { color: var(--green); border-bottom-color: var(--green); font-weight: 700; background: var(--green-muted); border-radius: 4px 4px 0 0; }
 
 .inner-panel { display: none; }
 .inner-panel.inner-panel-active { display: block; }

@@ -83,9 +83,35 @@ Per-round data is available via `competitors[n].linescores` array: each entry ha
 
 Completed tournaments without Firebase data are hardcoded directly in `standings.js`. The pattern is:
 
+### Scoreboard state reset pattern
+Every `loadXxxScoreboard()` function **resets DOM state at the top of each call** (hides table, clears tbody, restores loading text) before deciding what to render. This ensures that switching year tabs never leaves stale data visible. If no players are found (e.g. 2026 pre-tournament), the loading element shows "Scoreboard not yet available for this year." and the table stays hidden.
+
+### Year-tracking state variables
+```javascript
+let mastersActiveYear = 2026;
+let pgaActiveYear     = 2026;
+let usOpenActiveYear  = 2026;
+let theOpenActiveYear = 2026;
+```
+Each is set in `switchMajorYear()` before the corresponding `loadXxxScoreboard()` is called.
+
+### `markYearTabsAvailable` hardcoded years
+The 2025 year tab is enabled for all four majors even without a Firebase tournament, because all four have hardcoded 2025 scoreboard data. The relevant line:
+```javascript
+const hardcodedYears = major === 'masters' ? [2025] : (major === 'pga' || major === 'usopen' || major === 'theopen') ? [2025] : [];
+```
+
+### Scoreboard HTML element IDs per major
+| Major | Loading div | Table | Tbody | Search input |
+|-------|------------|-------|-------|--------------|
+| Masters | `mastersSbLoading` | `mastersSbTable` | `mastersSbBody` | `mastersSbSearch` |
+| PGA Championship | `pgaSbLoading` | `pgaSbTable` | `pgaSbBody` | `pgaSbSearch` |
+| U.S. Open | `usopenSbLoading` | `usopenSbTable` | `usopenSbBody` | `usopenSbSearch` |
+| The Open | `theopenSbLoading` | `theopenSbTable` | `theopenSbBody` | `theopenSbSearch` |
+
 ### Data constants
 Each tournament year has up to 6 constants:
-- `MASTERS_20XX_FIELD` — PGA official scoreboard (used by the Scoreboard tab)
+- `MASTERS_20XX_FIELD` / `PGA_20XX_FIELD` / `USOPEN_20XX_FIELD` / `THEOPEN_20XX_FIELD` — full field scoreboard
 - `MASTERS_20XX_TOTAL` — Pool total standings (all entries, final ranks)
 - `MASTERS_20XX_R1/R2/R3/R4` — Round-by-round pool standings
 - `MASTERS_20XX_FINISHERS` — Top 5 finishers for the Payouts tab (2026 only; 2025 uses `loadMasters2025Payouts()`)
@@ -111,12 +137,27 @@ Each tournament year has up to 6 constants:
 - Other years with no Firebase data → jumps to Scoreboard tab, shows "coming soon" for pool panels
 
 ### 2025 completion status (as of May 2026)
+
+**Masters 2025** (Rory McIlroy -11, Augusta)
 - Total standings: ✅ done (`MASTERS_2025_TOTAL`, `loadMasters2025TotalStandings`)
 - Round 1: ✅ done (`MASTERS_2025_R1`, `loadMasters2025Round1Standings`)
 - Round 2: ✅ done (`MASTERS_2025_R2`, `loadMasters2025Round2Standings`)
 - Round 3: ✅ done (`MASTERS_2025_R3`, `loadMasters2025Round3Standings`)
 - Round 4: ✅ done (`MASTERS_2025_R4`, `loadMasters2025Round4Standings`)
-- Final Payouts: ✅ fully done (`loadMasters2025Payouts`); daily winner chips pull tier scores from `roundDataMap` which references all four round constants
+- Final Payouts: ✅ fully done (`loadMasters2025Payouts`)
+- Scoreboard: ✅ done (`MASTERS_2025_FIELD`, `loadMastersScoreboard`)
+
+**PGA Championship 2025** (Scheffler -11, Quail Hollow)
+- Scoreboard: ✅ done (`PGA_2025_FIELD`, `loadPgaScoreboard`)
+- Pool standings: ❌ not yet hardcoded
+
+**U.S. Open 2025** (J.J. Spaun -1, Oakmont)
+- Scoreboard: ✅ done (`USOPEN_2025_FIELD`, `loadUsOpenScoreboard`)
+- Pool standings: ❌ not yet hardcoded
+
+**The Open Championship 2025** (Scheffler -17, Royal Portrush)
+- Scoreboard: ✅ done (`THEOPEN_2025_FIELD`, `loadTheOpenScoreboard`)
+- Pool standings: ❌ not yet hardcoded
 
 ### Adding a round for a future year (template)
 1. Add `MASTERS_20XX_RN` constant (same shape as existing round constants)

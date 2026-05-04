@@ -375,17 +375,25 @@
         <div id="pga-day3"          class="inner-panel hidden"><div class="coming-soon">PGA Championship 2026 — Round 3 pool standings will appear here once available.</div></div>
         <div id="pga-day4"          class="inner-panel hidden"><div class="coming-soon">PGA Championship 2026 — Round 4 pool standings will appear here once available.</div></div>
         <div id="pga-scoreboard" class="inner-panel hidden">
+          <div class="search-bar" style="margin-bottom:.75rem">
+            <input type="text" id="pgaSbSearch" class="standings-search" placeholder="Search player name…" />
+          </div>
           <div class="pgasb-wrapper">
-            <table class="pgasb-table">
+            <div class="pgasb-loading" id="pgaSbLoading">Loading official scoreboard…</div>
+            <table class="pgasb-table hidden" id="pgaSbTable">
               <thead class="pgasb-head-pga">
                 <tr>
-                  <th class="pgasb-col-pos">Pos</th><th class="pgasb-col-player">Player</th>
-                  <th class="pgasb-col-total">Total</th><th class="pgasb-col-round">R1</th>
-                  <th class="pgasb-col-round">R2</th><th class="pgasb-col-round">R3</th>
-                  <th class="pgasb-col-round">R4</th><th class="pgasb-col-status">Status</th>
+                  <th class="pgasb-col-pos">Pos</th>
+                  <th class="pgasb-col-player">Player</th>
+                  <th class="pgasb-col-total">Total</th>
+                  <th class="pgasb-col-round">R1</th>
+                  <th class="pgasb-col-round">R2</th>
+                  <th class="pgasb-col-round">R3</th>
+                  <th class="pgasb-col-round">R4</th>
+                  <th class="pgasb-col-status">Status</th>
                 </tr>
               </thead>
-              <tbody><tr><td colspan="8" class="pgasb-placeholder">PGA Championship results will appear here once available.</td></tr></tbody>
+              <tbody id="pgaSbBody"></tbody>
             </table>
           </div>
         </div>
@@ -438,17 +446,25 @@
         <div id="usopen-day3"          class="inner-panel hidden"><div class="coming-soon">U.S. Open 2026 — Round 3 pool standings will appear here once available.</div></div>
         <div id="usopen-day4"          class="inner-panel hidden"><div class="coming-soon">U.S. Open 2026 — Round 4 pool standings will appear here once available.</div></div>
         <div id="usopen-scoreboard" class="inner-panel hidden">
+          <div class="search-bar" style="margin-bottom:.75rem">
+            <input type="text" id="usopenSbSearch" class="standings-search" placeholder="Search player name…" />
+          </div>
           <div class="pgasb-wrapper">
-            <table class="pgasb-table">
+            <div class="pgasb-loading" id="usopenSbLoading">Loading official scoreboard…</div>
+            <table class="pgasb-table hidden" id="usopenSbTable">
               <thead class="pgasb-head-usopen">
                 <tr>
-                  <th class="pgasb-col-pos">Pos</th><th class="pgasb-col-player">Player</th>
-                  <th class="pgasb-col-total">Total</th><th class="pgasb-col-round">R1</th>
-                  <th class="pgasb-col-round">R2</th><th class="pgasb-col-round">R3</th>
-                  <th class="pgasb-col-round">R4</th><th class="pgasb-col-status">Status</th>
+                  <th class="pgasb-col-pos">Pos</th>
+                  <th class="pgasb-col-player">Player</th>
+                  <th class="pgasb-col-total">Total</th>
+                  <th class="pgasb-col-round">R1</th>
+                  <th class="pgasb-col-round">R2</th>
+                  <th class="pgasb-col-round">R3</th>
+                  <th class="pgasb-col-round">R4</th>
+                  <th class="pgasb-col-status">Status</th>
                 </tr>
               </thead>
-              <tbody><tr><td colspan="8" class="pgasb-placeholder">U.S. Open results will appear here once available.</td></tr></tbody>
+              <tbody id="usopenSbBody"></tbody>
             </table>
           </div>
         </div>
@@ -501,17 +517,25 @@
         <div id="theopen-day3"          class="inner-panel hidden"><div class="coming-soon">The Open Championship 2026 — Round 3 pool standings will appear here once available.</div></div>
         <div id="theopen-day4"          class="inner-panel hidden"><div class="coming-soon">The Open Championship 2026 — Round 4 pool standings will appear here once available.</div></div>
         <div id="theopen-scoreboard" class="inner-panel hidden">
+          <div class="search-bar" style="margin-bottom:.75rem">
+            <input type="text" id="theopenSbSearch" class="standings-search" placeholder="Search player name…" />
+          </div>
           <div class="pgasb-wrapper">
-            <table class="pgasb-table">
+            <div class="pgasb-loading" id="theopenSbLoading">Loading official scoreboard…</div>
+            <table class="pgasb-table hidden" id="theopenSbTable">
               <thead class="pgasb-head-theopen">
                 <tr>
-                  <th class="pgasb-col-pos">Pos</th><th class="pgasb-col-player">Player</th>
-                  <th class="pgasb-col-total">Total</th><th class="pgasb-col-round">R1</th>
-                  <th class="pgasb-col-round">R2</th><th class="pgasb-col-round">R3</th>
-                  <th class="pgasb-col-round">R4</th><th class="pgasb-col-status">Status</th>
+                  <th class="pgasb-col-pos">Pos</th>
+                  <th class="pgasb-col-player">Player</th>
+                  <th class="pgasb-col-total">Total</th>
+                  <th class="pgasb-col-round">R1</th>
+                  <th class="pgasb-col-round">R2</th>
+                  <th class="pgasb-col-round">R3</th>
+                  <th class="pgasb-col-round">R4</th>
+                  <th class="pgasb-col-status">Status</th>
                 </tr>
               </thead>
-              <tbody><tr><td colspan="8" class="pgasb-placeholder">The Open Championship results will appear here once available.</td></tr></tbody>
+              <tbody id="theopenSbBody"></tbody>
             </table>
           </div>
         </div>

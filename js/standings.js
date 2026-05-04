@@ -14,6 +14,9 @@ let cachedScoresMap = {};
 let refreshTimer = null;
 let tournamentsByMajor = {};
 let mastersActiveYear = 2026;
+let pgaActiveYear = 2026;
+let usOpenActiveYear = 2026;
+let theOpenActiveYear = 2026;
 let savedMastersFpHtml = null;
 
 // ─── Entry point ─────────────────────────────────────────────────────────────
@@ -82,8 +85,8 @@ function setYearTabActive(major, year) {
 function markYearTabsAvailable(major, years) {
   const bar = document.getElementById(major + '-year-tabs');
   if (!bar) return;
-  // Masters 2025 always enabled — hardcoded scoreboard data available
-  const hardcodedYears = major === 'masters' ? [2025] : [];
+  // 2025 hardcoded scoreboard data available for Masters, PGA, US Open, and The Open
+  const hardcodedYears = major === 'masters' ? [2025] : (major === 'pga' || major === 'usopen' || major === 'theopen') ? [2025] : [];
   bar.querySelectorAll('.year-tab').forEach(btn => {
     const y = parseInt(btn.dataset.year);
     const available = years.includes(y) || hardcodedYears.includes(y);
@@ -132,6 +135,18 @@ export function switchMajorYear(major, year) {
     mastersActiveYear = year;
     loadMastersScoreboard();
     if (year === 2025) { loadMasters2025TotalStandings(); loadMasters2025Round1Standings(); loadMasters2025Round2Standings(); loadMasters2025Round3Standings(); loadMasters2025Round4Standings(); loadMasters2025Payouts(); }
+  }
+  if (major === 'pga') {
+    pgaActiveYear = year;
+    loadPgaScoreboard();
+  }
+  if (major === 'usopen') {
+    usOpenActiveYear = year;
+    loadUsOpenScoreboard();
+  }
+  if (major === 'theopen') {
+    theOpenActiveYear = year;
+    loadTheOpenScoreboard();
   }
 }
 
@@ -2111,6 +2126,783 @@ export function loadRound4Standings() {
       row.style.display = (!q || entry.includes(q) || players.includes(q)) ? '' : 'none';
     });
   });
+}
+
+// ─── PGA Championship 2025 Scoreboard ────────────────────────────────────────
+// Scottie Scheffler won at -11, played at Quail Hollow Club, Charlotte NC
+const PGA_2025_FIELD = [
+  // ── Made Cut ────────────────────────────────────────────────────────────────
+  { pos: '1',   name: 'Scottie Scheffler',           total: -11, r1:  -2, r2:  -3, r3:  -6, r4:   0, status: 'Active' },
+  { pos: 'T2',  name: 'Harris English',              total:  -6, r1:  +1, r2:  -1, r3:   0, r4:  -6, status: 'Active' },
+  { pos: 'T2',  name: 'Bryson DeChambeau',           total:  -6, r1:   0, r2:  -3, r3:  -2, r4:  -1, status: 'Active' },
+  { pos: 'T2',  name: 'Davis Riley',                 total:  -6, r1:   0, r2:  -3, r3:  -4, r4:  +1, status: 'Active' },
+  { pos: 'T5',  name: 'Taylor Pendrith',             total:  -5, r1:  -2, r2:  -1, r3:  +1, r4:  -3, status: 'Active' },
+  { pos: 'T5',  name: 'Jhonattan Vegas',             total:  -5, r1:  -7, r2:  -1, r3:  +2, r4:  +1, status: 'Active' },
+  { pos: 'T5',  name: 'J.T. Poston',                total:  -5, r1:  -3, r2:  -1, r3:  -3, r4:  +2, status: 'Active' },
+  { pos: 'T8',  name: 'Joaquin Niemann',             total:  -4, r1:  +3, r2:  -4, r3:   0, r4:  -3, status: 'Active' },
+  { pos: 'T8',  name: 'Ben Griffin',                 total:  -4, r1:  -1, r2:  -2, r3:  +1, r4:  -2, status: 'Active' },
+  { pos: 'T8',  name: 'Denny McCarthy',              total:  -4, r1:  -1, r2:  -3, r3:  +1, r4:  -1, status: 'Active' },
+  { pos: 'T8',  name: 'Ryan Gerard',                 total:  -4, r1:  -5, r2:  +1, r3:  +1, r4:  -1, status: 'Active' },
+  { pos: 'T8',  name: 'Joe Highsmith',               total:  -4, r1:  +2, r2:  -4, r3:  -2, r4:   0, status: 'Active' },
+  { pos: 'T8',  name: 'Matt Fitzpatrick',            total:  -4, r1:  -3, r2:  -3, r3:  +1, r4:  +1, status: 'Active' },
+  { pos: 'T8',  name: 'Keegan Bradley',              total:  -4, r1:  -3, r2:  +1, r3:  -3, r4:  +1, status: 'Active' },
+  { pos: 'T8',  name: 'Jon Rahm',                   total:  -4, r1:  -1, r2:  -1, r3:  -4, r4:  +2, status: 'Active' },
+  { pos: 'T8',  name: 'Si Woo Kim',                 total:  -4, r1:  +1, r2:  -7, r3:   0, r4:  +2, status: 'Active' },
+  { pos: 'T17', name: 'Matt Wallace',                total:  -3, r1:   0, r2:  -1, r3:  -3, r4:  +1, status: 'Active' },
+  { pos: 'T17', name: 'Alex Noren',                  total:  -3, r1:  -3, r2:   0, r3:  -5, r4:  +5, status: 'Active' },
+  { pos: 'T19', name: 'Sam Burns',                   total:  -2, r1:  +2, r2:  -1, r3:  +1, r4:  -4, status: 'Active' },
+  { pos: 'T19', name: 'Corey Conners',               total:  -2, r1:  +2, r2:  -3, r3:  +3, r4:  -4, status: 'Active' },
+  { pos: 'T19', name: 'Beau Hossler',                total:  -2, r1:   0, r2:  -1, r3:  +2, r4:  -3, status: 'Active' },
+  { pos: 'T19', name: 'Aaron Rai',                   total:  -2, r1:  -4, r2:  +1, r3:  +3, r4:  -2, status: 'Active' },
+  { pos: 'T19', name: 'Harry Hall',                  total:  -2, r1:  -2, r2:  +1, r3:   0, r4:  -1, status: 'Active' },
+  { pos: 'T19', name: 'Taylor Moore',                total:  -2, r1:  +2, r2:  -2, r3:  -1, r4:  -1, status: 'Active' },
+  { pos: 'T19', name: 'Cam Davis',                   total:  -2, r1:  -5, r2:  +3, r3:  -1, r4:  +1, status: 'Active' },
+  { pos: 'T19', name: 'Adam Scott',                  total:  -2, r1:  -2, r2:   0, r3:  -2, r4:  +2, status: 'Active' },
+  { pos: 'T19', name: 'Tony Finau',                  total:  -2, r1:  -1, r2:  -2, r3:  -2, r4:  +3, status: 'Active' },
+  { pos: 'T28', name: 'Xander Schauffele',           total:  -1, r1:  +1, r2:   0, r3:  +1, r4:  -3, status: 'Active' },
+  { pos: 'T28', name: 'Marco Penge',                 total:  -1, r1:  -2, r2:   0, r3:  +3, r4:  -2, status: 'Active' },
+  { pos: 'T28', name: 'Viktor Hovland',              total:  -1, r1:  -2, r2:   0, r3:  +1, r4:   0, status: 'Active' },
+  { pos: 'T28', name: 'Alex Smalley',                total:  -1, r1:  -4, r2:   0, r3:  +2, r4:  +1, status: 'Active' },
+  { pos: 'T28', name: 'Ryan Fox',                    total:  -1, r1:  -4, r2:   0, r3:  +1, r4:  +2, status: 'Active' },
+  { pos: 'T33', name: 'Daniel Berger',               total:   0, r1:   0, r2:   0, r3:  +3, r4:  -3, status: 'Active' },
+  { pos: 'T33', name: 'Thorbjørn Olesen',            total:   0, r1:   0, r2:   0, r3:  +1, r4:  -1, status: 'Active' },
+  { pos: 'T33', name: 'Maverick McNealy',            total:   0, r1:  -1, r2:  +1, r3:  -2, r4:  +2, status: 'Active' },
+  { pos: 'T33', name: 'Max Greyserman',              total:   0, r1:   0, r2:  +1, r3:  -4, r4:  +3, status: 'Active' },
+  { pos: 'T37', name: 'Richard Bland',               total:  +1, r1:  -1, r2:  -2, r3:  +5, r4:  -1, status: 'Active' },
+  { pos: 'T37', name: 'J.J. Spaun',                 total:  +1, r1:   0, r2:  -3, r3:  +1, r4:  +3, status: 'Active' },
+  { pos: 'T37', name: 'Ryo Hisatsune',              total:  +1, r1:  -3, r2:   0, r3:  +1, r4:  +3, status: 'Active' },
+  { pos: 'T37', name: 'Lucas Glover',                total:  +1, r1:   0, r2:  -1, r3:  -2, r4:  +4, status: 'Active' },
+  { pos: 'T41', name: 'Nicolai Højgaard',            total:  +2, r1:  +1, r2:  -2, r3:  +6, r4:  -3, status: 'Active' },
+  { pos: 'T41', name: 'Tommy Fleetwood',             total:  +2, r1:  -1, r2:  -1, r3:  +5, r4:  -1, status: 'Active' },
+  { pos: 'T41', name: 'Eric Cole',                   total:  +2, r1:  -1, r2:  -1, r3:  +2, r4:  +2, status: 'Active' },
+  { pos: 'T41', name: 'Nico Echavarria',             total:  +2, r1:  -3, r2:  +3, r3:   0, r4:  +2, status: 'Active' },
+  { pos: 'T41', name: 'Michael Thorbjornsen',        total:  +2, r1:  -3, r2:  -1, r3:  +3, r4:  +3, status: 'Active' },
+  { pos: 'T41', name: 'Matthieu Pavon',              total:  +2, r1:   0, r2:  -6, r3:  +1, r4:  +7, status: 'Active' },
+  { pos: 'T47', name: 'Rory McIlroy',               total:  +3, r1:  +3, r2:  -2, r3:  +1, r4:  +1, status: 'Active' },
+  { pos: 'T47', name: 'Cameron Young',               total:  +3, r1:  +2, r2:  -2, r3:   0, r4:  +3, status: 'Active' },
+  { pos: 'T47', name: 'Robert MacIntyre',            total:  +3, r1:  -3, r2:  -1, r3:  +2, r4:  +5, status: 'Active' },
+  { pos: 'T50', name: 'Kevin Yu',                    total:  +4, r1:  +2, r2:  -1, r3:  +3, r4:   0, status: 'Active' },
+  { pos: 'T50', name: 'Collin Morikawa',             total:  +4, r1:  -1, r2:  +1, r3:  +3, r4:  +1, status: 'Active' },
+  { pos: 'T50', name: 'Christiaan Bezuidenhout',     total:  +4, r1:  -1, r2:  -3, r3:  +6, r4:  +2, status: 'Active' },
+  { pos: 'T50', name: 'Tom McKibbin',                total:  +4, r1:  -1, r2:   0, r3:  +3, r4:  +2, status: 'Active' },
+  { pos: 'T50', name: 'Wyndham Clark',               total:  +4, r1:  +1, r2:  -2, r3:  +2, r4:  +3, status: 'Active' },
+  { pos: 'T55', name: 'Chris Kirk',                  total:  +5, r1:  +2, r2:  -1, r3:  +7, r4:  -3, status: 'Active' },
+  { pos: 'T55', name: 'Brian Campbell',              total:  +5, r1:  +2, r2:  -2, r3:  +7, r4:  -2, status: 'Active' },
+  { pos: 'T55', name: 'Michael Kim',                 total:  +5, r1:   0, r2:  +1, r3:  +4, r4:   0, status: 'Active' },
+  { pos: 'T55', name: 'Rafael Campos',               total:  +5, r1:  -3, r2:  +2, r3:  +1, r4:  +5, status: 'Active' },
+  { pos: 'T55', name: 'Garrick Higgo',               total:  +5, r1:  -2, r2:  -2, r3:   0, r4:  +9, status: 'Active' },
+  { pos: 'T60', name: 'Brian Harman',                total:  +6, r1:   0, r2:  +1, r3:  +5, r4:   0, status: 'Active' },
+  { pos: 'T60', name: 'Justin Lower',                total:  +6, r1:  -2, r2:  +2, r3:  +4, r4:  +2, status: 'Active' },
+  { pos: 'T60', name: 'Sam Stevens',                 total:  +6, r1:  -1, r2:  -3, r3:  +6, r4:  +4, status: 'Active' },
+  { pos: 'T60', name: 'Luke Donald',                 total:  +6, r1:  -4, r2:  +3, r3:  +2, r4:  +5, status: 'Active' },
+  { pos: 'T60', name: 'Max Homa',                    total:  +6, r1:  +2, r2:  -7, r3:  +5, r4:  +6, status: 'Active' },
+  { pos: 'T60', name: 'Tyrrell Hatton',              total:  +6, r1:  -3, r2:  +2, r3:  +1, r4:  +6, status: 'Active' },
+  { pos: 'T60', name: 'David Puig',                  total:  +6, r1:   0, r2:  +1, r3:  -3, r4:  +8, status: 'Active' },
+  { pos: 'T67', name: 'Sergio Garcia',               total:  +7, r1:  +4, r2:  -3, r3:  +8, r4:  -2, status: 'Active' },
+  { pos: 'T67', name: 'Austin Eckroat',              total:  +7, r1:  +1, r2:  -1, r3:  +6, r4:  +1, status: 'Active' },
+  { pos: 'T67', name: 'Rasmus Højgaard',             total:  +7, r1:  -3, r2:  +3, r3:  +4, r4:  +3, status: 'Active' },
+  { pos: '70',  name: 'Stephan Jaeger',              total:  +8, r1:  -4, r2:  +4, r3:  +5, r4:  +3, status: 'Active' },
+  { pos: '71',  name: 'Tom Kim',                     total:  +9, r1:   0, r2:  +1, r3:  +4, r4:  +4, status: 'Active' },
+  { pos: 'T72', name: 'Bud Cauley',                  total: +10, r1:  +3, r2:  -2, r3:  +6, r4:  +3, status: 'Active' },
+  { pos: 'T72', name: 'Elvis Smylie',                total: +10, r1:  -1, r2:  +2, r3:  +6, r4:  +3, status: 'Active' },
+  { pos: '74',  name: 'Byeong Hun An',               total: +13, r1:  -2, r2:  +2, r3:  +8, r4:  +5, status: 'Active' },
+  // ── Missed Cut ──────────────────────────────────────────────────────────────
+  { pos: 'CUT', name: 'Jake Knapp',                  total:  +2, r1:  +2, r2:   0, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Jordan Spieth',               total:  +2, r1:  +5, r2:  -3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Tom Hoge',                    total:  +2, r1:  +4, r2:  -2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Rasmus Neergaard-Petersen',   total:  +2, r1:  +3, r2:  -1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Padraig Harrington',          total:  +2, r1:  +2, r2:   0, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Kurt Kitayama',               total:  +2, r1:  +2, r2:   0, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Sepp Straka',                 total:  +2, r1:  +2, r2:   0, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Shane Lowry',                 total:  +2, r1:  +2, r2:   0, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Akshay Bhatia',               total:  +2, r1:  -1, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Keith Mitchell',              total:  +3, r1:  +1, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Niklas Norgaard',             total:  +3, r1:  +4, r2:  -1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Justin Thomas',               total:  +3, r1:  +2, r2:  +1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Ludvig Åberg',                total:  +3, r1:  -1, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Hideki Matsuyama',            total:  +3, r1:  +1, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Takumi Kanaya',               total:  +3, r1:  +4, r2:  -1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Thriston Lawrence',           total:  +3, r1:  +2, r2:  +1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'John Catlin',                 total:  +3, r1:  +3, r2:   0, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Victor Perez',                total:  +3, r1:  +2, r2:  +1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Patrick Reed',                total:  +4, r1:  +1, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Matt McCarty',                total:  +4, r1:  +1, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Gary Woodland',               total:  +4, r1:  +3, r2:  +1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Jimmy Walker',                total:  +4, r1:  +1, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Patrick Fishburn',            total:  +4, r1:  +6, r2:  -2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Seamus Power',                total:  +4, r1:  +1, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Rickie Fowler',               total:  +4, r1:  +2, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Thomas Detry',                total:  +4, r1:  +3, r2:  +1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Min Woo Lee',                 total:  +4, r1:  +3, r2:  +1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Eugenio Chacarra',            total:  +4, r1:  +2, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Sungjae Im',                  total:  +5, r1:  +2, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Keita Nakajima',              total:  +5, r1:  +5, r2:   0, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Max McGreevy',                total:  +5, r1:  +2, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Daniel van Tonder',           total:  +5, r1:  +2, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Jacob Bridgeman',             total:  +6, r1:  +4, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Will Zalatoris',              total:  +6, r1:  +1, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Nick Taylor',                 total:  +6, r1:  +5, r2:  +1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Dean Burmester',              total:  +6, r1:  +3, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Davis Thompson',              total:  +6, r1:  +4, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Jason Day',                   total:  +6, r1:  +2, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Patrick Cantlay',             total:  +6, r1:  +3, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Lee Hodges',                  total:  +6, r1:  +4, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Erik van Rooyen',             total:  +7, r1:  -1, r2:  +8, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Cameron Smith',               total:  +7, r1:  +7, r2:   0, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'John Keefer',                 total:  +7, r1:  +5, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Shaun Micheel',               total:  +8, r1:  +3, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Martin Kaymer',               total:  +8, r1:  +7, r2:  +1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'John Parry',                  total:  +8, r1:  +5, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Laurie Canter',               total:  +8, r1:  +4, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Andrew Novak',                total:  +8, r1:  -1, r2:  +9, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Nick Dunlap',                 total:  +8, r1:  +7, r2:  +1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Sami Valimaki',               total:  +9, r1:  +3, r2:  +6, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Mackenzie Hughes',            total:  +9, r1:  +7, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Patrick Rodgers',             total:  +9, r1:  +9, r2:   0, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Tyler Collet',                total:  +9, r1:  +2, r2:  +7, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Justin Rose',                 total:  +9, r1:  +5, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'John Somers',                 total:  +9, r1:  +4, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Brooks Koepka',               total:  +9, r1:  +4, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Phil Mickelson',              total:  +9, r1:  +8, r2:  +1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Bob Sowards',                 total: +10, r1:  +7, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Michael Kartrude',            total: +10, r1:  +5, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Eric Steger',                 total: +10, r1:  +5, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Russell Henley',              total: +10, r1:  +6, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Tom Johnson',                 total: +10, r1:  +3, r2:  +7, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Adam Hadwin',                 total: +11, r1:  +2, r2:  +9, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Ryan Lenahan',                total: +11, r1:  +5, r2:  +6, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Karl Vilips',                 total: +11, r1:  +7, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Rico Hoey',                   total: +11, r1:  +4, r2:  +7, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Jesse Droemer',               total: +11, r1:  +8, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Dylan Newman',                total: +11, r1:  +4, r2:  +7, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Dustin Johnson',              total: +12, r1:  +7, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Brandon Bingaman',            total: +12, r1:  +7, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Jason Dufner',                total: +13, r1:  +7, r2:  +6, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Timothy Wiseman',             total: +13, r1:  +7, r2:  +6, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Justin Hicks',                total: +13, r1:  +5, r2:  +8, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Bobby Gates',                 total: +13, r1:  +9, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Brian Bergstol',              total: +14, r1:  +6, r2:  +8, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Michael Block',               total: +15, r1:  +4, r2: +11, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Nic Ishee',                   total: +16, r1: +11, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Larkin Gross',                total: +19, r1:  +8, r2: +11, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Andre Chi',                   total: +19, r1: +11, r2:  +8, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Rupe Taylor',                 total: +22, r1:  +9, r2: +13, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Greg Koch',                   total: +23, r1: +11, r2: +12, r3: null, r4: null, status: 'CUT' },
+];
+
+export async function loadPgaScoreboard() {
+  const loadingEl = document.getElementById('pgaSbLoading');
+  const table     = document.getElementById('pgaSbTable');
+  const tbody     = document.getElementById('pgaSbBody');
+  if (!table) return;
+
+  // Reset state on every call so stale data never persists across year switches
+  table.classList.add('hidden');
+  if (tbody) tbody.innerHTML = '';
+  if (loadingEl) { loadingEl.textContent = 'Loading official scoreboard…'; loadingEl.classList.remove('hidden'); }
+
+  let players = [];
+
+  if (pgaActiveYear === 2025) {
+    players = PGA_2025_FIELD;
+  } else {
+    // Try ESPN API (2026 event 401811947)
+    try {
+      const res = await fetch('https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?event=401811947');
+      if (res.ok) {
+        const data = await res.json();
+        const competitors = data?.events?.[0]?.competitions?.[0]?.competitors ?? [];
+        if (competitors.length) {
+          players = competitors.map(c => {
+            const ls = c.linescores ?? [];
+            const rounds = [1,2,3,4].map(p => {
+              const ls_r = ls.find(l => l.period === p);
+              if (!ls_r) return null;
+              const dv = ls_r.displayValue;
+              if (!dv || dv === '--' || dv === '-') return null;
+              if (dv === 'E') return 0;
+              const v = parseFloat(dv);
+              return isNaN(v) ? null : v;
+            });
+            const status = c.status?.type?.name?.toLowerCase() ?? 'active';
+            let dispStatus = 'Active';
+            if (status.includes('cut')) dispStatus = 'CUT';
+            else if (status.includes('wd') || status.includes('withdrew')) dispStatus = 'WD';
+            const totalStr = c.score?.displayValue ?? 'E';
+            const total = totalStr === 'E' ? 0 : (parseFloat(totalStr) || 0);
+            return {
+              pos: c.status?.position?.displayName ?? '-',
+              name: c.athlete?.displayName ?? '',
+              total,
+              r1: rounds[0], r2: rounds[1], r3: rounds[2], r4: rounds[3],
+              status: dispStatus,
+            };
+          }).filter(p => p.name).sort((a, b) => {
+            const statusOrder = { 'Active': 0, 'CUT': 1, 'WD': 2 };
+            const sa = statusOrder[a.status] ?? 0;
+            const sb = statusOrder[b.status] ?? 0;
+            if (sa !== sb) return sa - sb;
+            return a.total - b.total;
+          });
+        }
+      }
+    } catch { /* fall through — no hardcoded 2026 fallback yet */ }
+  }
+
+  if (!players.length) {
+    if (loadingEl) loadingEl.textContent = 'Scoreboard not yet available for this year.';
+    return;
+  }
+
+  tbody.innerHTML = players.map(p => {
+    const totalCls  = p.total < 0 ? 'score-under' : p.total > 0 ? 'score-over' : 'score-even';
+    const statusCls = p.status === 'CUT' || p.status === 'WD' ? 'pgasb-cut' : '';
+    return `
+      <tr class="${statusCls}">
+        <td class="pgasb-col-pos">${p.pos}</td>
+        <td class="pgasb-col-player">${escapeHtml(p.name)}</td>
+        <td class="pgasb-col-total pgasb-col-total-border"><strong class="${totalCls}">${fmtRound(p.total)}</strong></td>
+        <td class="pgasb-col-round">${fmtRoundCell(p.r1)}</td>
+        <td class="pgasb-col-round">${fmtRoundCell(p.r2)}</td>
+        <td class="pgasb-col-round">${fmtRoundCell(p.r3)}</td>
+        <td class="pgasb-col-round">${fmtRoundCell(p.r4)}</td>
+        <td class="pgasb-col-status">${p.status}</td>
+      </tr>`;
+  }).join('');
+
+  if (loadingEl) loadingEl.classList.add('hidden');
+  table.classList.remove('hidden');
+
+  const searchEl = document.getElementById('pgaSbSearch');
+  if (searchEl && !searchEl.dataset.wired) {
+    searchEl.dataset.wired = '1';
+    searchEl.addEventListener('input', () => {
+      const q = searchEl.value.toLowerCase().trim();
+      document.querySelectorAll('#pgaSbBody tr').forEach(row => {
+        const name = row.querySelector('.pgasb-col-player')?.textContent.toLowerCase() ?? '';
+        row.style.display = !q || name.includes(q) ? '' : 'none';
+      });
+    });
+  }
+}
+
+// ─── U.S. Open 2025 Scoreboard ───────────────────────────────────────────────
+// J.J. Spaun won at -1, played at Oakmont Country Club, Oakmont PA
+const USOPEN_2025_FIELD = [
+  // ── Made Cut ────────────────────────────────────────────────────────────────
+  { pos: '1',   name: 'J.J. Spaun',                     total:  -1, r1:  -4, r2:  +2, r3:  -1, r4:  +2, status: 'Active' },
+  { pos: '2',   name: 'Robert MacIntyre',                total:  +1, r1:   0, r2:  +4, r3:  -1, r4:  -2, status: 'Active' },
+  { pos: '3',   name: 'Viktor Hovland',                  total:  +2, r1:  +1, r2:  -2, r3:   0, r4:  +3, status: 'Active' },
+  { pos: 'T4',  name: 'Cameron Young',                   total:  +3, r1:   0, r2:  +4, r3:  -1, r4:   0, status: 'Active' },
+  { pos: 'T4',  name: 'Tyrrell Hatton',                  total:  +3, r1:  +3, r2:   0, r3:  -2, r4:  +2, status: 'Active' },
+  { pos: 'T4',  name: 'Carlos Ortiz',                    total:  +3, r1:  +1, r2:  +2, r3:  -3, r4:  +3, status: 'Active' },
+  { pos: 'T7',  name: 'Jon Rahm',                        total:  +4, r1:  -1, r2:  +5, r3:  +3, r4:  -3, status: 'Active' },
+  { pos: 'T7',  name: 'Scottie Scheffler',               total:  +4, r1:  +3, r2:  +1, r3:   0, r4:   0, status: 'Active' },
+  { pos: 'T7',  name: 'Sam Burns',                       total:  +4, r1:  +2, r2:  -5, r3:  -1, r4:  +8, status: 'Active' },
+  { pos: 'T10', name: 'Ben Griffin',                     total:  +5, r1:  -1, r2:  +1, r3:  +4, r4:  +1, status: 'Active' },
+  { pos: 'T10', name: 'Russell Henley',                  total:  +5, r1:   0, r2:  +2, r3:  +2, r4:  +1, status: 'Active' },
+  { pos: 'T12', name: 'Xander Schauffele',               total:  +6, r1:  +2, r2:  +4, r3:  +1, r4:  -1, status: 'Active' },
+  { pos: 'T12', name: 'Brooks Koepka',                   total:  +6, r1:  -2, r2:  +4, r3:  +3, r4:  +1, status: 'Active' },
+  { pos: 'T12', name: 'Chris Kirk',                      total:  +6, r1:  +3, r2:   0, r3:  +2, r4:  +1, status: 'Active' },
+  { pos: 'T12', name: 'Christiaan Bezuidenhout',         total:  +6, r1:  +2, r2:  +1, r3:  +1, r4:  +2, status: 'Active' },
+  { pos: 'T12', name: 'Rasmus Neergaard-Petersen',       total:  +6, r1:  -1, r2:  +4, r3:  -1, r4:  +4, status: 'Active' },
+  { pos: 'T12', name: 'Thriston Lawrence',               total:  +6, r1:  -3, r2:  +4, r3:   0, r4:  +5, status: 'Active' },
+  { pos: 'T12', name: 'Adam Scott',                      total:  +6, r1:   0, r2:   0, r3:  -3, r4:  +9, status: 'Active' },
+  { pos: 'T19', name: 'Rory McIlroy',                    total:  +7, r1:  +4, r2:  +2, r3:  +4, r4:  -3, status: 'Active' },
+  { pos: 'T19', name: 'Ryan Fox',                        total:  +7, r1:  +2, r2:  +3, r3:  +3, r4:  -1, status: 'Active' },
+  { pos: 'T19', name: 'Victor Perez',                    total:  +7, r1:  +1, r2:   0, r3:  +3, r4:  +3, status: 'Active' },
+  { pos: 'T19', name: 'Emiliano Grillo',                 total:  +7, r1:  +1, r2:  +2, r3:  +1, r4:  +3, status: 'Active' },
+  { pos: 'T23', name: 'Collin Morikawa',                 total:  +8, r1:   0, r2:  +4, r3:  +4, r4:   0, status: 'Active' },
+  { pos: 'T23', name: 'Patrick Reed',                    total:  +8, r1:  +3, r2:  +4, r3:  +1, r4:   0, status: 'Active' },
+  { pos: 'T23', name: 'Jordan Spieth',                   total:  +8, r1:   0, r2:  +5, r3:  +1, r4:  +2, status: 'Active' },
+  { pos: 'T23', name: 'Thomas Detry',                    total:  +8, r1:  -1, r2:  +3, r3:  +3, r4:  +3, status: 'Active' },
+  { pos: 'T23', name: 'Jason Day',                       total:  +8, r1:  +6, r2:  -3, r3:  +2, r4:  +3, status: 'Active' },
+  { pos: 'T23', name: 'Sam Stevens',                     total:  +8, r1:  +1, r2:  +2, r3:  +2, r4:  +3, status: 'Active' },
+  { pos: 'T23', name: 'Matt Wallace',                    total:  +8, r1:  +2, r2:  +4, r3:  -1, r4:  +3, status: 'Active' },
+  { pos: 'T23', name: 'Max Greyserman',                  total:  +8, r1:  +6, r2:  -3, r3:  +1, r4:  +4, status: 'Active' },
+  { pos: 'T23', name: 'Nick Taylor',                     total:  +8, r1:  +3, r2:  +1, r3:   0, r4:  +4, status: 'Active' },
+  { pos: 'T23', name: 'Chris Gotterup',                  total:  +8, r1:  +6, r2:  -1, r3:  -1, r4:  +4, status: 'Active' },
+  { pos: 'T33', name: 'Tom Kim',                         total:  +9, r1:  +2, r2:  +3, r3:  +2, r4:  +2, status: 'Active' },
+  { pos: 'T33', name: 'Aaron Rai',                       total:  +9, r1:  +2, r2:  +2, r3:  +2, r4:  +3, status: 'Active' },
+  { pos: 'T33', name: 'J.T. Poston',                     total:  +9, r1:  +4, r2:  +2, r3:   0, r4:  +3, status: 'Active' },
+  { pos: 'T33', name: 'Keegan Bradley',                  total:  +9, r1:  +3, r2:   0, r3:  +2, r4:  +4, status: 'Active' },
+  { pos: '37',  name: 'Maverick McNealy',                total: +10, r1:  +6, r2:  -1, r3:  +2, r4:  +3, status: 'Active' },
+  { pos: 'T38', name: 'Taylor Pendrith',                 total: +11, r1:  +2, r2:  +2, r3:  +8, r4:  -1, status: 'Active' },
+  { pos: 'T38', name: 'Tony Finau',                      total: +11, r1:  +6, r2:   0, r3:  +4, r4:  +1, status: 'Active' },
+  { pos: 'T38', name: 'Matt Fitzpatrick',                total: +11, r1:  +4, r2:  +3, r3:  +2, r4:  +2, status: 'Active' },
+  { pos: 'T38', name: 'Marc Leishman',                   total: +11, r1:  +1, r2:  +5, r3:  -2, r4:  +7, status: 'Active' },
+  { pos: 'T42', name: 'Hideki Matsuyama',                total: +12, r1:  +4, r2:  +3, r3:  +7, r4:  -2, status: 'Active' },
+  { pos: 'T42', name: 'Andrew Novak',                    total: +12, r1:  +6, r2:  +1, r3:  +3, r4:  +2, status: 'Active' },
+  { pos: 'T42', name: 'Si Woo Kim',                      total: +12, r1:  -2, r2:  +4, r3:  +4, r4:  +6, status: 'Active' },
+  { pos: 'T42', name: 'Trevor Cone',                     total: +12, r1:  +1, r2:  +3, r3:  +2, r4:  +6, status: 'Active' },
+  { pos: 'T46', name: 'Niklas Norgaard',                 total: +13, r1:  +6, r2:   0, r3:  +5, r4:  +2, status: 'Active' },
+  { pos: 'T46', name: 'Daniel Berger',                   total: +13, r1:  +2, r2:  +2, r3:  +6, r4:  +3, status: 'Active' },
+  { pos: 'T46', name: 'Rasmus Højgaard',                 total: +13, r1:  +1, r2:  +3, r3:  +4, r4:  +5, status: 'Active' },
+  { pos: 'T46', name: 'Jhonattan Vegas',                 total: +13, r1:  +4, r2:   0, r3:  +2, r4:  +7, status: 'Active' },
+  { pos: 'T50', name: 'Ryan McCormick',                  total: +14, r1:   0, r2:  +7, r3:  +6, r4:  +1, status: 'Active' },
+  { pos: 'T50', name: 'Michael Kim',                     total: +14, r1:  +5, r2:  +1, r3:  +6, r4:  +2, status: 'Active' },
+  { pos: 'T50', name: 'Adam Schenk',                     total: +14, r1:  +1, r2:  +2, r3:  +6, r4:  +5, status: 'Active' },
+  { pos: 'T50', name: 'Mackenzie Hughes',                total: +14, r1:  +3, r2:  +2, r3:  +4, r4:  +5, status: 'Active' },
+  { pos: 'T50', name: 'Ryan Gerard',                     total: +14, r1:  +2, r2:  +4, r3:  -1, r4:  +9, status: 'Active' },
+  { pos: 'T55', name: 'Justin Hastings (a)',             total: +15, r1:  +3, r2:  +3, r3:  +3, r4:  +6, status: 'Active' },
+  { pos: 'T55', name: 'Laurie Canter',                   total: +15, r1:  +2, r2:  +5, r3:  +1, r4:  +7, status: 'Active' },
+  { pos: 'T57', name: 'Sungjae Im',                      total: +16, r1:  -2, r2:  +7, r3:  +6, r4:  +5, status: 'Active' },
+  { pos: 'T57', name: 'Denny McCarthy',                  total: +16, r1:   0, r2:  +4, r3:  +6, r4:  +6, status: 'Active' },
+  { pos: 'T59', name: 'Harris English',                  total: +18, r1:  +3, r2:  +4, r3:  +7, r4:  +4, status: 'Active' },
+  { pos: 'T59', name: 'Brian Harman',                    total: +18, r1:  +1, r2:  +6, r3:  +5, r4:  +6, status: 'Active' },
+  { pos: 'T61', name: 'Jordan Smith',                    total: +19, r1:  +2, r2:  +4, r3:  +9, r4:  +4, status: 'Active' },
+  { pos: 'T61', name: 'Johnny Keefer',                   total: +19, r1:  +6, r2:  -1, r3:  +7, r4:  +7, status: 'Active' },
+  { pos: 'T61', name: 'James Nicholas',                  total: +19, r1:  -1, r2:  +8, r3:  +5, r4:  +7, status: 'Active' },
+  { pos: 'T64', name: 'Cam Davis',                       total: +22, r1:  +4, r2:  +3, r3: +12, r4:  +3, status: 'Active' },
+  { pos: 'T64', name: 'Matthieu Pavon',                  total: +22, r1:  +1, r2:  +4, r3: +11, r4:  +6, status: 'Active' },
+  { pos: '66',  name: 'Philip Barbaree, Jr.',            total: +24, r1:  +6, r2:  +1, r3:  +5, r4: +12, status: 'Active' },
+  // ── Missed Cut ──────────────────────────────────────────────────────────────
+  { pos: 'CUT', name: 'Tom Hoge',                        total:  +8, r1:  +5, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Benjamin James (a)',              total:  +8, r1:  +5, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Ludvig Åberg',                    total:  +8, r1:  +2, r2:  +6, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Wyndham Clark',                   total:  +8, r1:  +4, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Patrick Cantlay',                 total:  +8, r1:  +6, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Lucas Glover',                    total:  +8, r1:  +4, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Cameron Smith',                   total:  +8, r1:  +5, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Phil Mickelson',                  total:  +8, r1:  +4, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Davis Thompson',                  total:  +8, r1:  +5, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Jackson Koivun (a)',              total:  +8, r1:  +2, r2:  +6, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Edoardo Molinari',                total:  +8, r1:  +4, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Thorbjørn Olesen',                total:  +8, r1:  +6, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Byeong Hun An',                   total:  +9, r1:  +4, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Erik van Rooyen',                 total:  +9, r1:  +5, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Min Woo Lee',                     total:  +9, r1:  +7, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Bud Cauley',                      total:  +9, r1:   0, r2:  +9, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Stephan Jaeger',                  total:  +9, r1:  +3, r2:  +6, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Tyler Weaver (a)',                total:  +9, r1:  +5, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Scott Vincent',                   total:  +9, r1:  +5, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Tommy Fleetwood',                 total:  +9, r1:  +4, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Lanto Griffin',                   total:  +9, r1:  +1, r2:  +8, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Mark Hubbard',                    total:  +9, r1:  +6, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Jinichiro Kozuma',                total:  +9, r1:  +5, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Takumi Kanaya',                   total: +10, r1:  +5, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Jacob Bridgeman',                 total: +10, r1:  +2, r2:  +8, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Dustin Johnson',                  total: +10, r1:  +5, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Joaquin Niemann',                 total: +10, r1:  +5, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Frankie Harris (a)',              total: +10, r1:  +9, r2:  +1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Kevin Velo',                      total: +10, r1:  +1, r2:  +9, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Trent Phillips',                  total: +10, r1:  +5, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Jacques Kruyswijk',               total: +10, r1:  +3, r2:  +7, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Bryson DeChambeau',               total: +10, r1:  +3, r2:  +7, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Gary Woodland',                   total: +10, r1:  +3, r2:  +7, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Akshay Bhatia',                   total: +10, r1:  +6, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Michael La Sasso (a)',            total: +10, r1:  +5, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Jackson Buchanan',                total: +10, r1:  +4, r2:  +6, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Sepp Straka',                     total: +11, r1:  +8, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Nick Dunlap',                     total: +11, r1:  +7, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Zac Blair',                       total: +11, r1:  +4, r2:  +7, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Evan Beck (a)',                   total: +11, r1:  +9, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Riley Lewis',                     total: +11, r1:  +6, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Justin Thomas',                   total: +12, r1:  +6, r2:  +6, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Riki Kawamoto',                   total: +12, r1:  +8, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Emilio Gonzalez R.',              total: +12, r1:  +5, r2:  +7, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Eric Cole',                       total: +12, r1:  +6, r2:  +6, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Chandler Blanchet',               total: +12, r1:  +5, r2:  +7, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Maxwell Moldovan',                total: +12, r1:  +6, r2:  +6, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Jose Luis Ballester',             total: +12, r1:  +6, r2:  +6, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Lance Simpson (a)',               total: +12, r1:  +4, r2:  +8, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Frederic LaCroix',                total: +13, r1:  +6, r2:  +7, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Sam Bairstow',                    total: +13, r1: +11, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Nico Echavarria',                 total: +13, r1:  +8, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Austen Truslow',                  total: +13, r1:  +6, r2:  +7, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Joey Herrera',                    total: +13, r1:  +7, r2:  +6, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'James Hahn',                      total: +13, r1:  +8, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Mason Howell (a)',                total: +13, r1:  +7, r2:  +6, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Joe Highsmith',                   total: +14, r1:  +9, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Matthew Jordan',                  total: +14, r1:  +4, r2: +10, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Harrison Ott',                    total: +14, r1:  +5, r2:  +9, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Justin Rose',                     total: +14, r1:  +7, r2:  +7, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Cameron Tankersley (a)',          total: +14, r1: +10, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Davis Riley',                     total: +15, r1:  +8, r2:  +7, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Noah Kent (a)',                   total: +15, r1: +10, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Bryan Lee (a)',                   total: +16, r1:  +8, r2:  +8, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Zach Pollo (a)',                  total: +16, r1:  +4, r2: +12, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Alvaro Ortiz',                    total: +17, r1:  +5, r2: +12, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Doug Ghim',                       total: +17, r1:  +9, r2:  +8, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Shane Lowry',                     total: +17, r1:  +9, r2:  +8, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Brian Campbell',                  total: +17, r1:  +9, r2:  +8, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Guido Migliozzi',                 total: +18, r1:  +5, r2: +13, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Preston Summerhays',              total: +18, r1:  +8, r2: +10, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Roberto Díaz',                    total: +18, r1: +15, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Grant Haefner',                   total: +18, r1: +11, r2:  +7, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Alistair Docherty',               total: +18, r1: +10, r2:  +8, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Richard Bland',                   total: +18, r1:  +6, r2: +12, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Chase Johnson',                   total: +18, r1:  +9, r2:  +9, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Andrea Pavan',                    total: +19, r1: +12, r2:  +7, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Yuta Sugiura',                    total: +20, r1:  +9, r2: +11, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'George Kneiser',                  total: +20, r1: +11, r2:  +9, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Matt McCarty',                    total: +20, r1: +12, r2:  +8, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Trevor Gutschewski (a)',          total: +20, r1: +10, r2: +10, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Joakim Lagergren',                total: +20, r1: +10, r2: +10, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Will Chandler',                   total: +22, r1:  +8, r2: +14, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Matt Vogt (a)',                   total: +23, r1: +12, r2: +11, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Justin Hicks',                    total: +27, r1: +14, r2: +13, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Justin Lower',                    total: +27, r1: +13, r2: +14, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Brady Calkins',                   total: +27, r1: +12, r2: +15, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'George Duangmanee',               total: +35, r1: +16, r2: +19, r3: null, r4: null, status: 'CUT' },
+  // ── Withdrew ────────────────────────────────────────────────────────────────
+  { pos: 'WD',  name: 'Zach Bauchou',                    total:  +8, r1:  +8, r2: null, r3: null, r4: null, status: 'WD'  },
+  { pos: 'WD',  name: 'Corey Conners',                   total:  +8, r1:  +2, r2:  +4, r3:  +2, r4: null, status: 'WD'  },
+];
+
+export async function loadUsOpenScoreboard() {
+  const loadingEl = document.getElementById('usopenSbLoading');
+  const table     = document.getElementById('usopenSbTable');
+  const tbody     = document.getElementById('usopenSbBody');
+  if (!table) return;
+
+  // Reset state on every call so stale data never persists across year switches
+  table.classList.add('hidden');
+  if (tbody) tbody.innerHTML = '';
+  if (loadingEl) { loadingEl.textContent = 'Loading official scoreboard…'; loadingEl.classList.remove('hidden'); }
+
+  let players = [];
+
+  if (usOpenActiveYear === 2025) {
+    players = USOPEN_2025_FIELD;
+  } else {
+    // Try ESPN API (2026 event 401811952)
+    try {
+      const res = await fetch('https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?event=401811952');
+      if (res.ok) {
+        const data = await res.json();
+        const competitors = data?.events?.[0]?.competitions?.[0]?.competitors ?? [];
+        if (competitors.length) {
+          players = competitors.map(c => {
+            const ls = c.linescores ?? [];
+            const rounds = [1,2,3,4].map(p => {
+              const ls_r = ls.find(l => l.period === p);
+              if (!ls_r) return null;
+              const dv = ls_r.displayValue;
+              if (!dv || dv === '--' || dv === '-') return null;
+              if (dv === 'E') return 0;
+              const v = parseFloat(dv);
+              return isNaN(v) ? null : v;
+            });
+            const status = c.status?.type?.name?.toLowerCase() ?? 'active';
+            let dispStatus = 'Active';
+            if (status.includes('cut')) dispStatus = 'CUT';
+            else if (status.includes('wd') || status.includes('withdrew')) dispStatus = 'WD';
+            const totalStr = c.score?.displayValue ?? 'E';
+            const total = totalStr === 'E' ? 0 : (parseFloat(totalStr) || 0);
+            return {
+              pos: c.status?.position?.displayName ?? '-',
+              name: c.athlete?.displayName ?? '',
+              total,
+              r1: rounds[0], r2: rounds[1], r3: rounds[2], r4: rounds[3],
+              status: dispStatus,
+            };
+          }).filter(p => p.name).sort((a, b) => {
+            const statusOrder = { 'Active': 0, 'CUT': 1, 'WD': 2 };
+            const sa = statusOrder[a.status] ?? 0;
+            const sb = statusOrder[b.status] ?? 0;
+            if (sa !== sb) return sa - sb;
+            return a.total - b.total;
+          });
+        }
+      }
+    } catch { /* fall through — no hardcoded 2026 fallback yet */ }
+  }
+
+  if (!players.length) {
+    if (loadingEl) loadingEl.textContent = 'Scoreboard not yet available for this year.';
+    return;
+  }
+
+  tbody.innerHTML = players.map(p => {
+    const totalCls  = p.total < 0 ? 'score-under' : p.total > 0 ? 'score-over' : 'score-even';
+    const statusCls = p.status === 'CUT' || p.status === 'WD' ? 'pgasb-cut' : '';
+    return `
+      <tr class="${statusCls}">
+        <td class="pgasb-col-pos">${p.pos}</td>
+        <td class="pgasb-col-player">${escapeHtml(p.name)}</td>
+        <td class="pgasb-col-total pgasb-col-total-border"><strong class="${totalCls}">${fmtRound(p.total)}</strong></td>
+        <td class="pgasb-col-round">${fmtRoundCell(p.r1)}</td>
+        <td class="pgasb-col-round">${fmtRoundCell(p.r2)}</td>
+        <td class="pgasb-col-round">${fmtRoundCell(p.r3)}</td>
+        <td class="pgasb-col-round">${fmtRoundCell(p.r4)}</td>
+        <td class="pgasb-col-status">${p.status}</td>
+      </tr>`;
+  }).join('');
+
+  if (loadingEl) loadingEl.classList.add('hidden');
+  table.classList.remove('hidden');
+
+  const searchEl = document.getElementById('usopenSbSearch');
+  if (searchEl && !searchEl.dataset.wired) {
+    searchEl.dataset.wired = '1';
+    searchEl.addEventListener('input', () => {
+      const q = searchEl.value.toLowerCase().trim();
+      document.querySelectorAll('#usopenSbBody tr').forEach(row => {
+        const name = row.querySelector('.pgasb-col-player')?.textContent.toLowerCase() ?? '';
+        row.style.display = !q || name.includes(q) ? '' : 'none';
+      });
+    });
+  }
+}
+
+// ─── The Open Championship 2025 Scoreboard ───────────────────────────────────
+// Scottie Scheffler won at -17, played at Royal Portrush, Northern Ireland
+const THEOPEN_2025_FIELD = [
+  // ── Made Cut ────────────────────────────────────────────────────────────────
+  { pos: '1',   name: 'S. Scheffler',          total: -17, r1:  -3, r2:  -7, r3:  -4, r4:  -3, status: 'Active' },
+  { pos: '2',   name: 'H. English',             total: -13, r1:  -4, r2:  -1, r3:  -3, r4:  -5, status: 'Active' },
+  { pos: '3',   name: 'C. Gotterup',            total: -12, r1:  +1, r2:  -6, r3:  -3, r4:  -4, status: 'Active' },
+  { pos: 'T4',  name: 'H. Li',                  total: -11, r1:  -4, r2:  -4, r3:  -2, r4:  -1, status: 'Active' },
+  { pos: 'T4',  name: 'M. Fitzpatrick',         total: -11, r1:  -4, r2:  -5, r3:   0, r4:  -2, status: 'Active' },
+  { pos: 'T4',  name: 'W. Clark',               total: -11, r1:  +5, r2:  -5, r3:  -5, r4:  -6, status: 'Active' },
+  { pos: 'T7',  name: 'X. Schauffele',          total: -10, r1:   0, r2:  -2, r3:  -5, r4:  -3, status: 'Active' },
+  { pos: 'T7',  name: 'R. McIlroy',             total: -10, r1:  -1, r2:  -2, r3:  -5, r4:  -2, status: 'Active' },
+  { pos: 'T7',  name: 'R. MacIntyre',           total: -10, r1:   0, r2:  -5, r3:  -1, r4:  -4, status: 'Active' },
+  { pos: 'T10', name: 'R. Henley',              total:  -9, r1:  +1, r2:  -1, r3:  -6, r4:  -3, status: 'Active' },
+  { pos: 'T10', name: 'B. Harman',              total:  -9, r1:  -2, r2:  -6, r3:  +2, r4:  -3, status: 'Active' },
+  { pos: 'T10', name: 'C. Conners',             total:  -9, r1:  +3, r2:  -2, r3:  -5, r4:  -5, status: 'Active' },
+  { pos: 'T10', name: 'B. DeChambeau',          total:  -9, r1:  +7, r2:  -6, r3:  -3, r4:  -7, status: 'Active' },
+  { pos: 'T14', name: 'R. Fowler',              total:  -8, r1:  -2, r2:  +1, r3:  -1, r4:  -6, status: 'Active' },
+  { pos: 'T14', name: 'N. Hojgaard',            total:  -8, r1:  -2, r2:  -2, r3:  -2, r4:  -2, status: 'Active' },
+  { pos: 'T16', name: 'J. Rose',                total:  -7, r1:  -2, r2:   0, r3:  -3, r4:  -2, status: 'Active' },
+  { pos: 'T16', name: 'R. Hojgaard',            total:  -7, r1:  -2, r2:  -3, r3:  -1, r4:  -1, status: 'Active' },
+  { pos: 'T16', name: 'T. Hatton',              total:  -7, r1:  -3, r2:  -2, r3:  -3, r4:  +1, status: 'Active' },
+  { pos: 'T16', name: 'T. Fleetwood',           total:  -7, r1:  +2, r2:  -3, r3:  -2, r4:  -4, status: 'Active' },
+  { pos: 'T16', name: 'J. Svensson',            total:  -7, r1:   0, r2:  +1, r3:  -3, r4:  -5, status: 'Active' },
+  { pos: 'T16', name: 'H. Matsuyama',           total:  -7, r1:  +3, r2:  -2, r3:  -3, r4:  -5, status: 'Active' },
+  { pos: 'T16', name: 'J. Parry',               total:  -7, r1:  +1, r2:   0, r3:  -4, r4:  -4, status: 'Active' },
+  { pos: 'T23', name: 'M. McNealy',             total:  -6, r1:  -2, r2:  +3, r3:  -2, r4:  -5, status: 'Active' },
+  { pos: 'T23', name: 'J.J. Spaun',             total:  -6, r1:  +2, r2:  -2, r3:  -3, r4:  -3, status: 'Active' },
+  { pos: 'T23', name: 'L. Glover',              total:  -6, r1:  -2, r2:  +1, r3:  -3, r4:  -2, status: 'Active' },
+  { pos: 'T23', name: 'D. Johnson',             total:  -6, r1:  +2, r2:  -2, r3:  -4, r4:  -2, status: 'Active' },
+  { pos: 'T23', name: 'L. Aberg',               total:  -6, r1:  +2, r2:  -4, r3:  -3, r4:  -1, status: 'Active' },
+  { pos: 'T28', name: 'H. Hall',                total:  -5, r1:  +2, r2:  -4, r3:  -3, r4:   0, status: 'Active' },
+  { pos: 'T28', name: 'O. Lindell',             total:  -5, r1:  +1, r2:  -3, r3:  -3, r4:   0, status: 'Active' },
+  { pos: 'T30', name: 'D. Berger',              total:  -4, r1:  +1, r2:  -1, r3:  -1, r4:  -3, status: 'Active' },
+  { pos: 'T30', name: 'A. Bhatia',              total:  -4, r1:  +2, r2:  -3, r3:  -1, r4:  -2, status: 'Active' },
+  { pos: 'T30', name: 'K. Reitan',              total:  -4, r1:  +1, r2:  -3, r3:  -3, r4:  +1, status: 'Active' },
+  { pos: 'T30', name: 'K. Bradley',             total:  -4, r1:  +1, r2:  -4, r3:  -1, r4:   0, status: 'Active' },
+  { pos: 'T34', name: 'L. Westwood',            total:  -3, r1:  -2, r2:  -1, r3:  -2, r4:  +2, status: 'Active' },
+  { pos: 'T34', name: 'C. Bezuidenhout',        total:  -3, r1:  -4, r2:  +2, r3:  -2, r4:  +1, status: 'Active' },
+  { pos: 'T34', name: 'J. Thomas',              total:  -3, r1:  +1, r2:  -2, r3:  -2, r4:   0, status: 'Active' },
+  { pos: 'T34', name: 'A. Rai',                 total:  -3, r1:  -2, r2:  +1, r3:   0, r4:  -2, status: 'Active' },
+  { pos: 'T34', name: 'J. Rahm',                total:  -3, r1:  -1, r2:  +1, r3:  -2, r4:  -1, status: 'Active' },
+  { pos: 'T34', name: 'S. Garcia',              total:  -3, r1:  -1, r2:  +2, r3:  -1, r4:  -3, status: 'Active' },
+  { pos: 'T40', name: 'S. Lowry',               total:  -2, r1:  -1, r2:  +1, r3:  +3, r4:  -5, status: 'Active' },
+  { pos: 'T40', name: 'T. Kanaya',              total:  -2, r1:   0, r2:  +1, r3:  -2, r4:  -1, status: 'Active' },
+  { pos: 'T40', name: 'J. Kokrak',              total:  -2, r1:   0, r2:  -1, r3:   0, r4:  -1, status: 'Active' },
+  { pos: 'T40', name: 'N. Kimsey',              total:  -2, r1:   0, r2:  +1, r3:  -3, r4:   0, status: 'Active' },
+  { pos: 'T40', name: 'J. Spieth',              total:  -2, r1:  +2, r2:  -2, r3:  +1, r4:  -3, status: 'Active' },
+  { pos: 'T45', name: 'M. Jordan',              total:  -1, r1:  -3, r2:  +1, r3:  +2, r4:  -1, status: 'Active' },
+  { pos: 'T45', name: 'T. Lawrence',            total:  -1, r1:  +2, r2:  -1, r3:  -3, r4:  +1, status: 'Active' },
+  { pos: 'T45', name: 'S. Burns',               total:  -1, r1:  -1, r2:  -2, r3:  +1, r4:  +1, status: 'Active' },
+  { pos: 'T45', name: 'T. Detry',               total:  -1, r1:  +1, r2:   0, r3:  -1, r4:  -1, status: 'Active' },
+  { pos: 'T45', name: 'J. Smith',               total:  -1, r1:   0, r2:  -3, r3:  +1, r4:  +1, status: 'Active' },
+  { pos: 'T45', name: 'H. Stenson',             total:  -1, r1:  +4, r2:  -3, r3:  -2, r4:   0, status: 'Active' },
+  { pos: 'T45', name: 'M. Wallace',             total:  -1, r1:  +2, r2:  -2, r3:  -5, r4:  +4, status: 'Active' },
+  { pos: 'T52', name: 'M. Leishman',            total:   0, r1:  +2, r2:  -3, r3:  -3, r4:  +4, status: 'Active' },
+  { pos: 'T52', name: 'A. Saddier',             total:   0, r1:  +1, r2:   0, r3:  +1, r4:  -2, status: 'Active' },
+  { pos: 'T52', name: 'S. Straka',              total:   0, r1:  +1, r2:   0, r3:  -1, r4:   0, status: 'Active' },
+  { pos: 'T52', name: 'S. Im',                  total:   0, r1:   0, r2:   0, r3:  -4, r4:  +4, status: 'Active' },
+  { pos: 'T56', name: 'J. Vegas',               total:  +1, r1:  +1, r2:  -1, r3:  -1, r4:  +2, status: 'Active' },
+  { pos: 'T56', name: 'P. Mickelson',           total:  +1, r1:  -1, r2:  +1, r3:  +5, r4:  -4, status: 'Active' },
+  { pos: 'T56', name: 'T. Finau',               total:  +1, r1:  -1, r2:  -3, r3:  +1, r4:  +4, status: 'Active' },
+  { pos: 'T59', name: 'J. Leonard',             total:  +2, r1:  -1, r2:  +2, r3:  -1, r4:  +2, status: 'Active' },
+  { pos: 'T59', name: 'A. Rozner',              total:  +2, r1:  +1, r2:  -1, r3:  +2, r4:   0, status: 'Active' },
+  { pos: 'T61', name: 'D. Burmester',           total:  +3, r1:   0, r2:   0, r3:  +5, r4:  -2, status: 'Active' },
+  { pos: 'T61', name: 'R. Langasque',           total:  +3, r1:   0, r2:   0, r3:  +1, r4:  +2, status: 'Active' },
+  { pos: 'T63', name: 'V. Hovland',             total:  +4, r1:  +2, r2:  -2, r3:  +2, r4:  +2, status: 'Active' },
+  { pos: 'T63', name: 'F. Molinari',            total:  +4, r1:  +1, r2:   0, r3:   0, r4:  +3, status: 'Active' },
+  { pos: 'T63', name: 'A. Novak',               total:  +4, r1:   0, r2:  +1, r3:  +3, r4:   0, status: 'Active' },
+  { pos: 'T63', name: 'R. Kawamoto',            total:  +4, r1:  +1, r2:  -1, r3:  +7, r4:  -3, status: 'Active' },
+  { pos: 'T63', name: 'R. Johnston',            total:  +4, r1:  +3, r2:  -5, r3:  +3, r4:  +3, status: 'Active' },
+  { pos: '68',  name: 'J. Olesen',              total:  +6, r1:  -4, r2:  +5, r3:  +2, r4:  +3, status: 'Active' },
+  { pos: '69',  name: 'M. Schmid',              total:  +8, r1:  +2, r2:  -1, r3:  +8, r4:  -1, status: 'Active' },
+  { pos: '70',  name: 'S. Soderberg',           total: +11, r1:  +2, r2:  -1, r3:  +4, r4:  +6, status: 'Active' },
+  // ── Missed Cut ──────────────────────────────────────────────────────────────
+  { pos: 'CUT', name: 'M. Manassero',           total:  +2, r1:  +2, r2:   0, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'R. Fox',                 total:  +2, r1:  +4, r2:  -2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'J. Suh',                 total:  +2, r1:  +2, r2:   0, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'J. Niemann',             total:  +2, r1:  -1, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'R. Hoshino',             total:  +2, r1:  +3, r2:  -1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'J. Day',                 total:  +2, r1:  +2, r2:   0, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'D. Hillier',             total:  +2, r1:   0, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'B. Griffin',             total:  +2, r1:  +3, r2:  -1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'J. Axelsen',             total:  +3, r1:  -1, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'A. Hidalgo Portillo',    total:  +3, r1:  -1, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'K. Yu',                  total:  +3, r1:  +8, r2:  -5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'D. McCarthy',            total:  +3, r1:  +3, r2:   0, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'E. Smylie',              total:  +3, r1:  +4, r2:  -1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'T. Pendrith',            total:  +3, r1:  +4, r2:  -1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'E. Fang',                total:  +3, r1:  +4, r2:  -1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'G. Bloor',               total:  +3, r1:  +2, r2:  +1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'T. McKibbin',            total:  +3, r1:  +1, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'J. Guerrier',            total:  +3, r1:  +2, r2:  +1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'M. McCarty',             total:  +3, r1:   0, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'N. Taylor',              total:  +3, r1:  +6, r2:  -3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'S. Kim',                 total:  +3, r1:  +3, r2:   0, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'C. Adam',                total:  +3, r1:  +2, r2:  +1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'T. Kim',                 total:  +3, r1:  -2, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'C. Ortiz',               total:  +3, r1:  +4, r2:  -1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'B. Campbell',            total:  +3, r1:  +2, r2:  +1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Z. Johnson',             total:  +3, r1:  -1, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'M. Greyserman',          total:  +3, r1:  +7, r2:  -4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'P. Cantlay',             total:  +3, r1:  +2, r2:  +1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'T. Olesen',              total:  +4, r1:  +1, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'L. Herbert',             total:  +4, r1:  +3, r2:  +1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'M. Penge',               total:  +4, r1:  +3, r2:  +1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'O. Farrell',             total:  +4, r1:  +3, r2:  +1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'N. Norgaard',            total:  +4, r1:  +6, r2:  -2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'C. Young',               total:  +4, r1:  +3, r2:  +1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'J. Sandborg',            total:  +4, r1:  +1, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'S. Cink',                total:  +4, r1:  +4, r2:   0, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'D. Young',               total:  +4, r1:  +4, r2:   0, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'Y. Song',                total:  +4, r1:  +2, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'N. Echavarria',          total:  +4, r1:  +1, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'D. Naidoo',              total:  +4, r1:  +3, r2:  +1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'M. Kim',                 total:  +4, r1:  +3, r2:  +1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'J. Catlin',              total:  +4, r1:  +7, r2:  -3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'M. Lee',                 total:  +5, r1:  +3, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'B. Cauley',              total:  +5, r1:  +1, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'C. Kirk',                total:  +5, r1:  +2, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'B. An',                  total:  +5, r1:  +5, r2:   0, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'S. Kaewkanjana',         total:  +5, r1:  -3, r2:  +8, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'P. Reed',                total:  +5, r1:  +6, r2:  -1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'M. Pavon',               total:  +5, r1:  +5, r2:   0, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'S. Norris',              total:  +5, r1:  +1, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'A. Potgieter',           total:  +5, r1:  +6, r2:  -1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'L. Oosthuizen',          total:  +6, r1:  +6, r2:   0, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'D. Clarke',              total:  +6, r1:  +4, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'S. Jaeger',              total:  +6, r1:  +1, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'L. Canter',              total:  +6, r1:  +3, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'D. Thompson',            total:  +6, r1:  +2, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'F. Jakubcik',            total:  +6, r1:  +4, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'C. Knipes',              total:  +6, r1:  +2, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'J. Hastings',            total:  +6, r1:  +3, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'J.T. Poston',            total:  +7, r1:  +1, r2:  +6, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'D. Brown',               total:  +7, r1:  +5, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'S. Theegala',            total:  +7, r1:  +4, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'D. Fichardt',            total:  +7, r1:  +7, r2:   0, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'C. Morikawa',            total:  +7, r1:  +4, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'M. Hughes',              total:  +7, r1:  +8, r2:  -1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'B. Koepka',              total:  +7, r1:  +4, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'J. Walters',             total:  +8, r1:  +2, r2:  +6, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'R. Peake',               total:  +8, r1:  +6, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'S. Zheng',               total:  +8, r1:  +6, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'R. Teder',               total:  +8, r1:  +3, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'C. Smith',               total:  +8, r1:  +1, r2:  +7, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'F. Jones',               total:  +8, r1:  +6, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'C. Luck',                total:  +8, r1:  +9, r2:  -1, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'A. Scott',               total:  +9, r1:  +1, r2:  +8, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'S. Imahira',             total:  +9, r1:  +5, r2:  +4, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'D. Riley',               total:  +9, r1:  +6, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'M. Akutsu',              total:  +9, r1:  +7, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'P. Harrington',          total:  +9, r1:  +4, r2:  +5, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'M. Couvra',              total:  +9, r1:  +7, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'C. Graham',              total: +10, r1:  +2, r2:  +8, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'S. Cave',                total: +11, r1:  +5, r2:  +6, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'T. Hoge',                total: +12, r1: +10, r2:  +2, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'G. Migliozzi',           total: +12, r1:  +6, r2:  +6, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'K.J. Choi',              total: +13, r1: +10, r2:  +3, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'D. Van Tonder',          total: +14, r1:  +8, r2:  +6, r3: null, r4: null, status: 'CUT' },
+  { pos: 'CUT', name: 'B. Newman',              total: +15, r1: +11, r2:  +4, r3: null, r4: null, status: 'CUT' },
+];
+
+export async function loadTheOpenScoreboard() {
+  const loadingEl = document.getElementById('theopenSbLoading');
+  const table     = document.getElementById('theopenSbTable');
+  const tbody     = document.getElementById('theopenSbBody');
+  if (!table) return;
+
+  // Reset state on every call so stale data never persists across year switches
+  table.classList.add('hidden');
+  if (tbody) tbody.innerHTML = '';
+  if (loadingEl) { loadingEl.textContent = 'Loading official scoreboard…'; loadingEl.classList.remove('hidden'); }
+
+  let players = [];
+
+  if (theOpenActiveYear === 2025) {
+    players = THEOPEN_2025_FIELD;
+  } else {
+    // Try ESPN API (2026 event 401811957)
+    try {
+      const res = await fetch('https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?event=401811957');
+      if (res.ok) {
+        const data = await res.json();
+        const competitors = data?.events?.[0]?.competitions?.[0]?.competitors ?? [];
+        if (competitors.length) {
+          players = competitors.map(c => {
+            const ls = c.linescores ?? [];
+            const rounds = [1,2,3,4].map(p => {
+              const ls_r = ls.find(l => l.period === p);
+              if (!ls_r) return null;
+              const dv = ls_r.displayValue;
+              if (!dv || dv === '--' || dv === '-') return null;
+              if (dv === 'E') return 0;
+              const v = parseFloat(dv);
+              return isNaN(v) ? null : v;
+            });
+            const status = c.status?.type?.name?.toLowerCase() ?? 'active';
+            let dispStatus = 'Active';
+            if (status.includes('cut')) dispStatus = 'CUT';
+            else if (status.includes('wd') || status.includes('withdrew')) dispStatus = 'WD';
+            const totalStr = c.score?.displayValue ?? 'E';
+            const total = totalStr === 'E' ? 0 : (parseFloat(totalStr) || 0);
+            return {
+              pos: c.status?.position?.displayName ?? '-',
+              name: c.athlete?.displayName ?? '',
+              total,
+              r1: rounds[0], r2: rounds[1], r3: rounds[2], r4: rounds[3],
+              status: dispStatus,
+            };
+          }).filter(p => p.name).sort((a, b) => {
+            const statusOrder = { 'Active': 0, 'CUT': 1, 'WD': 2 };
+            const sa = statusOrder[a.status] ?? 0;
+            const sb = statusOrder[b.status] ?? 0;
+            if (sa !== sb) return sa - sb;
+            return a.total - b.total;
+          });
+        }
+      }
+    } catch { /* fall through — no hardcoded 2026 fallback yet */ }
+  }
+
+  if (!players.length) {
+    if (loadingEl) loadingEl.textContent = 'Scoreboard not yet available for this year.';
+    return;
+  }
+
+  tbody.innerHTML = players.map(p => {
+    const totalCls  = p.total < 0 ? 'score-under' : p.total > 0 ? 'score-over' : 'score-even';
+    const statusCls = p.status === 'CUT' || p.status === 'WD' ? 'pgasb-cut' : '';
+    return `
+      <tr class="${statusCls}">
+        <td class="pgasb-col-pos">${p.pos}</td>
+        <td class="pgasb-col-player">${escapeHtml(p.name)}</td>
+        <td class="pgasb-col-total pgasb-col-total-border"><strong class="${totalCls}">${fmtRound(p.total)}</strong></td>
+        <td class="pgasb-col-round">${fmtRoundCell(p.r1)}</td>
+        <td class="pgasb-col-round">${fmtRoundCell(p.r2)}</td>
+        <td class="pgasb-col-round">${fmtRoundCell(p.r3)}</td>
+        <td class="pgasb-col-round">${fmtRoundCell(p.r4)}</td>
+        <td class="pgasb-col-status">${p.status}</td>
+      </tr>`;
+  }).join('');
+
+  if (loadingEl) loadingEl.classList.add('hidden');
+  table.classList.remove('hidden');
+
+  const searchEl = document.getElementById('theopenSbSearch');
+  if (searchEl && !searchEl.dataset.wired) {
+    searchEl.dataset.wired = '1';
+    searchEl.addEventListener('input', () => {
+      const q = searchEl.value.toLowerCase().trim();
+      document.querySelectorAll('#theopenSbBody tr').forEach(row => {
+        const name = row.querySelector('.pgasb-col-player')?.textContent.toLowerCase() ?? '';
+        row.style.display = !q || name.includes(q) ? '' : 'none';
+      });
+    });
+  }
 }
 
 // ─── Utilities ────────────────────────────────────────────────────────────────

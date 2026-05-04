@@ -114,13 +114,15 @@ Each tournament year has up to 6 constants:
 - Total standings: ✅ done (`MASTERS_2025_TOTAL`, `loadMasters2025TotalStandings`)
 - Round 1: ✅ done (`MASTERS_2025_R1`, `loadMasters2025Round1Standings`)
 - Round 2: ✅ done (`MASTERS_2025_R2`, `loadMasters2025Round2Standings`)
-- Rounds 3–4: ⏳ pending — will show "coming soon" until data is provided
-- Final Payouts: ✅ structure done (`loadMasters2025Payouts`); round winner pick chips show "coming soon" until R3–4 data is complete
+- Round 3: ✅ done (`MASTERS_2025_R3`, `loadMasters2025Round3Standings`)
+- Round 4: ✅ done (`MASTERS_2025_R4`, `loadMasters2025Round4Standings`)
+- Final Payouts: ✅ fully done (`loadMasters2025Payouts`); daily winner chips pull tier scores from `roundDataMap` which references all four round constants
 
-### Adding a new round (R3/R4)
-1. Add `MASTERS_2025_R3` constant (same shape as `MASTERS_2025_R1`)
-2. Add `loadMasters2025Round3Standings()` — same render logic as Round 1, targeting `masters-day3`, using tbody id `r3StandingsBody` and search input id `r3Search`
-3. Add the call in `switchMajorYear`: `loadMasters2025Round3Standings()`
+### Adding a round for a future year (template)
+1. Add `MASTERS_20XX_RN` constant (same shape as existing round constants)
+2. Add `loadMasters20XXRoundNStandings()` — targets `masters-dayN`, tbody id `rNStandingsBody`, search input id `rNSearch`
+3. Add the call in `switchMajorYear` for that year
+4. Update `loadMasters20XXPayouts()` to include a `roundDataMap` referencing all round constants
 
 ## Admin Workflow
 1. Log in at `admin.html` with Firebase email/password

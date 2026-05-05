@@ -1243,6 +1243,11 @@ td.top-4-pick {
   color: #fff;
   box-shadow: 0 4px 16px rgba(26,107,60,.25);
 }
+.fp-header-pga {
+  background: linear-gradient(135deg, #003087 0%, #1a56b0 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(0,48,135,.25);
+}
 .fp-header-left { display: flex; align-items: center; gap: 1rem; }
 .fp-trophy-icon { font-size: 2.5rem; line-height: 1; }
 .fp-title    { font-size: 1.2rem; font-weight: 800; color: #fff; margin-bottom: .2rem; }
@@ -1289,6 +1294,7 @@ td.top-4-pick {
   border-bottom: 2px solid var(--border);
 }
 .fp-section-title-masters { border-bottom-color: #1a6b3c; color: #1a6b3c; }
+.fp-section-title-pga     { border-bottom-color: #003087; color: #003087; }
 
 /* Place finisher cards */
 .fp-finisher-card {
@@ -1368,6 +1374,7 @@ td.top-4-pick {
   letter-spacing: .03em;
 }
 .fp-round-badge-masters { background: #1a6b3c; color: #fff; }
+.fp-round-badge-pga     { background: #003087; color: #fff; }
 .fp-winner-name   { flex: 1; font-weight: 600; font-size: .9rem; }
 .fp-winner-payout { font-weight: 800; color: #1a6b3c; font-size: .95rem; }
 [data-theme="dark"] .fp-winner-payout { color: #4ade80; }

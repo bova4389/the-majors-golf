@@ -149,7 +149,12 @@ Each tournament year has up to 6 constants:
 
 **PGA Championship 2025** (Scheffler -11, Quail Hollow)
 - Scoreboard: ✅ done (`PGA_2025_FIELD`, `loadPgaScoreboard`)
-- Pool standings: ❌ not yet hardcoded
+- Total standings: ✅ done (`PGA_2025_TOTAL`, `loadPga2025TotalStandings`)
+- Round 1: ✅ done (`PGA_2025_R1`, `loadPga2025Round1Standings`)
+- Round 2: ✅ done (`PGA_2025_R2`, `loadPga2025Round2Standings`)
+- Round 3: ✅ done (`PGA_2025_R3`, `loadPga2025Round3Standings`)
+- Round 4: ✅ done (`PGA_2025_R4`, `loadPga2025Round4Standings`)
+- Final Payouts: ✅ done (`loadPga2025Payouts`) — Bobby Cross 1st $405, Chris Schumann/Ron Pannullo T-2nd $180 ea, Jeff Bagnasco 4th $90, Jake Bogardus 5th $45; daily winners: Erik Vermilyea R1, Nick Bova R2, Bobby Cross R3, Luke S R4 ($25 ea)
 
 **U.S. Open 2025** (J.J. Spaun -1, Oakmont)
 - Scoreboard: ✅ done (`USOPEN_2025_FIELD`, `loadUsOpenScoreboard`)

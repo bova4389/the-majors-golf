@@ -33,6 +33,18 @@ A static website for a recurring golf pool covering all 4 major tournaments (Mas
 - Scores displayed as: `-12`, `E`, `+3`
 - Ties split prize money equally
 
+## Season Bonus Pool Rules
+- **The Masters**: $25 flat fee taken from the Masters pool (not per-entry)
+- **PGA Championship, U.S. Open, The Open**: $1 per entry per tournament
+- **Payout**: 100% to the single winner (best average finish across all 4 majors)
+- **Eligibility**: must submit at least one entry in every completed major
+- In `loadBonusPool()`: Masters contribution is hardcoded as `25`; PGA/US Open/The Open counts are fetched from Firestore at tournament IDs `pga-2026`, `usopen-2026`, `theopen-2026`
+
+## Key Contacts (site content)
+- **Ryne** — Co-commissioner
+- **Cody** — Co-commissioner
+- **Matt** — Website Vibes Guy
+
 ## File Map
 | File | Purpose |
 |---|---|
@@ -109,6 +121,16 @@ const hardcodedYears = major === 'masters' ? [2025] : (major === 'pga' || major 
 | U.S. Open | `usopenSbLoading` | `usopenSbTable` | `usopenSbBody` | `usopenSbSearch` |
 | The Open | `theopenSbLoading` | `theopenSbTable` | `theopenSbBody` | `theopenSbSearch` |
 
+### Pool panel IDs per major (hardcoded standings inject into these)
+| Major | Total | Round 1–4 | Payouts |
+|-------|-------|-----------|---------|
+| Masters | shared `standingsTable` / `standingsBody` | `masters-day1` … `masters-day4` | `masters-finalpayouts` |
+| PGA | `pga-total` | `pga-day1` … `pga-day4` | `pga-finalpayouts` |
+| U.S. Open | `usopen-total` | `usopen-day1` … `usopen-day4` | `usopen-finalpayouts` |
+| The Open | `theopen-total` | `theopen-day1` … `theopen-day4` | `theopen-finalpayouts` |
+
+PGA/US Open/The Open use `innerHTML` injection (not the shared `standingsTable` element used by Masters live data).
+
 ### Data constants
 Each tournament year has up to 6 constants:
 - `MASTERS_20XX_FIELD` / `PGA_20XX_FIELD` / `USOPEN_20XX_FIELD` / `THEOPEN_20XX_FIELD` — full field scoreboard
@@ -131,10 +153,13 @@ Each tournament year has up to 6 constants:
 `isTop4` is provided by the user from their spreadsheet — **do not recalculate it**. Score is a plain integer (negative = under par). `status` is `null` for all players (no MC/WD distinction needed in hardcoded data since the score already reflects any penalty).
 
 ### Year tab switching flow
-`switchMajorYear('masters', year)` in `standings.js`:
+`switchMajorYear(major, year)` in `standings.js`:
 - Year with Firebase tournament → loads live data from Firestore
-- Year **2025** (no Firebase data) → calls `clearMastersPoolPanels()` then immediately calls `loadMasters2025TotalStandings()`, `loadMasters2025Round1Standings()`, `loadMasters2025Round2Standings()`, and `loadMasters2025Payouts()`, and activates the Total inner tab instead of jumping to Scoreboard
-- Other years with no Firebase data → jumps to Scoreboard tab, shows "coming soon" for pool panels
+- Masters **2025** → calls `clearMastersPoolPanels()`, then loads all hardcoded standings, activates Total inner tab
+- PGA **2025** → calls all `loadPga2025Xxx()` functions; switching *away* from 2025 calls `clearPgaPoolPanels()` to wipe injected content
+- Other years with no data → jumps to Scoreboard tab, shows "coming soon" for pool panels
+
+**Pattern for adding future majors with hardcoded pool data:** always implement a `clearXxxPoolPanels()` function (sets placeholder text in all pool panel divs) and call it in the `else` branch of the year-2025 guard in `switchMajorYear`. Without this, navigating back to 2026 shows stale 2025 content.
 
 ### 2025 completion status (as of May 2026)
 
@@ -169,6 +194,21 @@ Each tournament year has up to 6 constants:
 2. Add `loadMasters20XXRoundNStandings()` — targets `masters-dayN`, tbody id `rNStandingsBody`, search input id `rNSearch`
 3. Add the call in `switchMajorYear` for that year
 4. Update `loadMasters20XXPayouts()` to include a `roundDataMap` referencing all round constants
+
+## CSS Gotchas
+
+### Dark mode + per-major theme color conflict
+Per-major themes override `--green-muted` to a **light** color (e.g. `body.theme-pga { --green-muted: #d4dff5; }`). Any element using `background: var(--green-muted)` will have a light background even in dark mode. The `.pot-strip-label` and inner tab hover/active states are affected. The fix is explicit dark-mode overrides:
+```css
+[data-theme="dark"] .pot-strip-label { color: #0a1535; } /* keep text dark against light badge bg */
+```
+Always check per-major theme interactions when adding new elements that use `--green-muted` or `--green`.
+
+### Mobile horizontal overflow
+Wide banner logos (PGA Championship, U.S. Open, The Open have landscape-format logos) can push `.major-banner` past the viewport width on mobile. The fix is `overflow-x: hidden` on `.major-panel` (600px breakpoint) combined with `flex-shrink: 1` on `.major-logo`. Do not add `overflow-x: hidden` to `body` — it breaks the `.major-nav` horizontal scroll.
+
+### Admin page mobile navigation
+`.btn-nav-header { display: none }` hides navigation buttons at 768px. On `admin.html`, the "← Leaderboard" back link uses class `btn-back-home` which has an `!important` override to remain visible on mobile. Any new admin-page nav links that must appear on mobile should use this class.
 
 ## Admin Workflow
 1. Log in at `admin.html` with Firebase email/password

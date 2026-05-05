@@ -1418,4 +1418,19 @@ td.top-4-pick {
   .modal-box       { padding: 1.25rem; }
   .container       { padding: 1rem .75rem; }
   .standings-search { max-width: 100%; }
+  /* Prevent wide banners/tables from causing horizontal page overflow on mobile */
+  .major-panel     { overflow-x: hidden; }
+  .major-logo      { flex-shrink: 1; }
+  .major-official-link { display: none; }
+}
+
+/* ── Dark mode: home tab background matches logo black ── */
+[data-theme="dark"] #panel-home { background: #000; }
+
+/* ── Dark mode: Pool Payouts label — keep text dark for readability against light major-theme badge ── */
+[data-theme="dark"] .pot-strip-label { color: #0a1535; }
+
+/* ── Admin page: always show the back-to-leaderboard button on mobile ── */
+@media (max-width: 768px) {
+  .btn-back-home { display: inline-flex !important; }
 }

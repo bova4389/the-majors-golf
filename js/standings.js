@@ -1553,30 +1553,42 @@ export async function loadBonusPool() {
 
   try {
     const db = getDb();
-    const snap = await getDocs(
-      query(collection(db, 'picks'), where('tournamentId', '==', 'masters-2026'))
-    );
-    const mastersCount = snap.size;
-    const total = mastersCount; // $1 per submission per tournament
+    const mastersBonusAmt = 25; // flat fee taken from Masters pool
 
+    // PGA/US Open/The Open: $1 per entry — fetch counts when picks exist
+    let pgaCount = 0, usOpenCount = 0, theOpenCount = 0;
+    try {
+      const pgaSnap = await getDocs(query(collection(db, 'picks'), where('tournamentId', '==', 'pga-2026')));
+      pgaCount = pgaSnap.size;
+    } catch { /* tournament not created yet */ }
+    try {
+      const usSnap = await getDocs(query(collection(db, 'picks'), where('tournamentId', '==', 'usopen-2026')));
+      usOpenCount = usSnap.size;
+    } catch { /* tournament not created yet */ }
+    try {
+      const openSnap = await getDocs(query(collection(db, 'picks'), where('tournamentId', '==', 'theopen-2026')));
+      theOpenCount = openSnap.size;
+    } catch { /* tournament not created yet */ }
+
+    const total = mastersBonusAmt + pgaCount + usOpenCount + theOpenCount;
     amountEl.textContent = `$${total}`;
 
     if (projectionEl) {
-      const pct1 = Math.round(total * 0.75 * 100) / 100;
-      const pct2 = Math.round(total * 0.25 * 100) / 100;
+      const pgaAmt     = pgaCount     > 0 ? `$${pgaCount} (${pgaCount} entries × $1)`     : '$0 (pending)';
+      const usOpenAmt  = usOpenCount  > 0 ? `$${usOpenCount} (${usOpenCount} entries × $1)` : '$0 (pending)';
+      const theOpenAmt = theOpenCount > 0 ? `$${theOpenCount} (${theOpenCount} entries × $1)` : '$0 (pending)';
       projectionEl.innerHTML = `
         <div class="season-bp-breakdown">
           <h4 class="season-bp-title">Bonus Pool Breakdown</h4>
           <div class="season-bp-rows">
-            <div class="season-bp-row"><span>The Masters 2026</span><span class="season-bp-amt populated">$${mastersCount} (${mastersCount} entries × $1)</span></div>
-            <div class="season-bp-row"><span>PGA Championship 2026</span><span class="season-bp-amt pending">$0 (pending)</span></div>
-            <div class="season-bp-row"><span>U.S. Open 2026</span><span class="season-bp-amt pending">$0 (pending)</span></div>
-            <div class="season-bp-row"><span>The Open Championship 2026</span><span class="season-bp-amt pending">$0 (pending)</span></div>
+            <div class="season-bp-row"><span>The Masters 2026</span><span class="season-bp-amt populated">$25 (flat fee)</span></div>
+            <div class="season-bp-row"><span>PGA Championship 2026</span><span class="season-bp-amt ${pgaCount > 0 ? 'populated' : 'pending'}">${pgaAmt}</span></div>
+            <div class="season-bp-row"><span>U.S. Open 2026</span><span class="season-bp-amt ${usOpenCount > 0 ? 'populated' : 'pending'}">${usOpenAmt}</span></div>
+            <div class="season-bp-row"><span>The Open Championship 2026</span><span class="season-bp-amt ${theOpenCount > 0 ? 'populated' : 'pending'}">${theOpenAmt}</span></div>
             <div class="season-bp-row season-bp-total"><span>Total Bonus Pool</span><span>$${total}</span></div>
           </div>
           <div class="season-bp-payouts">
-            <span class="season-bp-payout-item">🥇 1st: <strong>$${pct1.toFixed(2).replace(/\.00$/,'')}</strong> (75%)</span>
-            <span class="season-bp-payout-item">🥈 2nd: <strong>$${pct2.toFixed(2).replace(/\.00$/,'')}</strong> (25%)</span>
+            <span class="season-bp-payout-item">🥇 Winner: <strong>$${total}</strong> (100%)</span>
           </div>
         </div>`;
     }

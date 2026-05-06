@@ -1699,7 +1699,10 @@ export async function loadSeasonLeaderboard() {
     picksSnap.forEach(d => picks.push(d.data()));
     const { _lastUpdated, ...scoresClean } = scores;
     const results = calculateStandings(picks, scoresClean, 20);
-    const all = results.map(r => ({ name: r.pick.realName || r.pick.entrantName, rank: r.rank, total: r.total }));
+    const all = results.map(r => {
+      const rawName = r.pick.realName || r.pick.entrantName;
+      return { name: rawName.replace(/ \d+$/, ''), rank: r.rank, total: r.total };
+    });
 
     if (!all.length) {
       if (loadingEl) loadingEl.classList.add('hidden');

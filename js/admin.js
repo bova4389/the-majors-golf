@@ -318,15 +318,20 @@ export async function loadPicksForAdmin() {
   }
 
   container.innerHTML = `
+    <div style="margin-bottom:.75rem">
+      <button class="btn btn-sm" onclick="exportPicksCsv()">Export CSV</button>
+    </div>
     <table class="admin-table">
       <thead><tr>
-        <th>Real Name</th><th>Picks Name</th><th>T1</th><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th><th>Submitted</th><th></th>
+        <th>Real Name</th><th>Picks Name</th><th>Email</th><th>Phone</th><th>T1</th><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th><th>Submitted</th><th></th>
       </tr></thead>
       <tbody>
         ${picks.map(p => `
           <tr>
             <td>${escapeHtml(p.realName ?? p.entrantName ?? '—')}</td>
             <td>${escapeHtml(p.entrantName ?? '—')}</td>
+            <td>${escapeHtml(p.email ?? '—')}</td>
+            <td>${escapeHtml(p.phone ?? '—')}</td>
             <td>${escapeHtml(p.t1 ?? '—')}</td>
             <td>${escapeHtml(p.t2 ?? '—')}</td>
             <td>${escapeHtml(p.t3 ?? '—')}</td>
@@ -343,6 +348,35 @@ export async function loadPicksForAdmin() {
       </tbody>
     </table>
   `;
+
+  // Store picks on container for CSV export
+  container._picksData = picks;
+}
+
+export function exportPicksCsv() {
+  const container = document.getElementById('picksAdminTable');
+  const picks = container._picksData;
+  if (!picks || !picks.length) { alert('No picks to export.'); return; }
+
+  const headers = ['Real Name','Picks Name','Email','Phone','T1','T2','T3','T4','T5','T6','Submitted'];
+  const csvEscape = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const rows = picks.map(p => [
+    p.realName ?? p.entrantName ?? '',
+    p.entrantName ?? '',
+    p.email ?? '',
+    p.phone ?? '',
+    p.t1 ?? '', p.t2 ?? '', p.t3 ?? '', p.t4 ?? '', p.t5 ?? '', p.t6 ?? '',
+    p.submittedAt?.toDate ? p.submittedAt.toDate().toLocaleDateString() : '',
+  ].map(csvEscape).join(','));
+
+  const csv = [headers.map(csvEscape).join(','), ...rows].join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = 'picks-export.csv';
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 export async function openAddPickModal(pickId = null) {

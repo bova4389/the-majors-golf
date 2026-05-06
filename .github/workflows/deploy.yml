@@ -13,16 +13,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Deploy via SFTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: sftp
           port: 22
-          server-dir: /home/mattbova/basic-bros-pga-pickems.com/
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/.github/**
-            **/CLAUDE.md
+          local_path: './*'
+          remote_path: /home/mattbova/basic-bros-pga-pickems.com/
+          sftp_only: true
+          delete_remote_files: false

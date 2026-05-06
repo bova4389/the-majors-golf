@@ -8,15 +8,20 @@
 </head>
 <body>
 
+  <!-- ===== STICKY TOP BAR: header + nav scroll-lock together ===== -->
+  <div class="sticky-top-bar">
+
   <!-- ===== PERSISTENT HEADER ===== -->
   <header class="site-header">
     <div class="header-inner">
-      <div class="header-brand">
-        <img src="Basic_Bros_Logo.png" alt="Basic Bros" class="header-logo" />
-        <div class="site-title-block">
-          <span class="site-name">BBRC Majors Pick'em</span>
+      <a href="index.html" onclick="event.preventDefault(); switchMajor('home')" class="header-brand-link" aria-label="Go to home page">
+        <div class="header-brand">
+          <img src="Basic_Bros_Logo.png" alt="Basic Bros" class="header-logo" />
+          <div class="site-title-block">
+            <span class="site-name">BBRC Majors Pick'em</span>
+          </div>
         </div>
-      </div>
+      </a>
       <div class="header-controls">
         <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark/light mode">☀️</button>
         <a href="picks.html" class="btn btn-sm btn-picks-header">Submit Picks</a>
@@ -36,6 +41,8 @@
       <button class="major-tab tab-season"       data-major="season"  onclick="switchMajor('season')">Season Leaderboard</button>
     </div>
   </nav>
+
+  </div><!-- /.sticky-top-bar -->
 
   <main class="main-content">
 

@@ -55,6 +55,19 @@ a { color: var(--green); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 
+/* ===== STICKY TOP BAR (index.html only — wraps header + major-nav so both scroll-lock together) ===== */
+.sticky-top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+/* When the header lives inside sticky-top-bar it doesn't need its own sticky positioning */
+.sticky-top-bar .site-header {
+  position: relative;
+  top: auto;
+  z-index: auto;
+}
+
 /* ===== HEADER ===== */
 .site-header {
   background: #1a2035;
@@ -84,6 +97,16 @@ a:hover { text-decoration: underline; }
   border-radius: 8px;
   mix-blend-mode: screen;
 }
+
+.header-brand-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 6px;
+  transition: opacity .15s;
+}
+.header-brand-link:hover { opacity: .8; text-decoration: none; }
 
 .header-brand { display: flex; align-items: center; gap: .75rem; }
 .site-title-block { display: flex; flex-direction: column; line-height: 1.15; }
@@ -1523,10 +1546,18 @@ td.top-4-pick {
   .home-grid       { grid-template-columns: 1fr; }
   .inner-tab       { padding: .45rem .75rem; font-size: .82rem; }
   .season-header-bar { flex-direction: column; align-items: flex-start; gap: .75rem; }
-  .btn-picks-header { display: none; }
   .btn-nav-header   { display: none; }
+  /* Admin link hidden in portrait — shown again in landscape via the block below */
+  .nav-admin-link   { display: none; }
+  /* Keep Submit Picks visible; shrink it so it fits alongside the theme toggle */
+  .btn-picks-header { font-size: .75rem; padding: .28rem .55rem; }
   .header-logo     { height: 48px; }
   .site-name       { font-size: 1rem; }
+}
+
+/* Show Admin link when phone is in landscape */
+@media (max-width: 900px) and (orientation: landscape) {
+  .nav-admin-link { display: inline-block; }
 }
 
 @media (max-width: 600px) {
@@ -1544,7 +1575,17 @@ td.top-4-pick {
   /* Prevent wide banners/tables from causing horizontal page overflow on mobile */
   .major-panel     { overflow-x: hidden; }
   .major-logo      { flex-shrink: 1; }
-  .major-official-link { display: none; }
+  /* Show official scoreboard link on mobile — wrap it to its own row below the logo+info */
+  .major-banner    { flex-wrap: wrap; }
+  .major-official-link {
+    display: block;
+    margin-left: 0;
+    align-self: auto;
+    width: 100%;
+    text-align: center;
+    margin-top: .35rem;
+    font-size: .72rem;
+  }
 }
 
 /* ── Dark mode: home tab background matches logo black ── */

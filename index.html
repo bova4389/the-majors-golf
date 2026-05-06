@@ -188,7 +188,8 @@
               <thead>
                 <tr>
                   <th class="col-rank sortable" data-col="rank"  onclick="sortBy('rank')">Rank <span class="sort-icon">▼</span></th>
-                  <th class="col-name sortable" data-col="name"  onclick="sortBy('name')">Entry <span class="sort-icon"></span></th>
+                  <th class="col-name sortable" data-col="name"  onclick="sortBy('name')">Name <span class="sort-icon"></span></th>
+                  <th class="col-name col-picks-name">Picks Name</th>
                   <th class="col-total sortable" data-col="total" onclick="sortBy('total')">Total <span class="sort-icon"></span></th>
                   <th class="col-tier">Tier 1</th>
                   <th class="col-tier">Tier 2</th>
@@ -367,6 +368,8 @@
         <div class="year-tab-bar" id="pga-year-tabs">
           <button class="year-tab active" data-year="2026" onclick="switchMajorYear('pga', 2026)">2026</button>
           <button class="year-tab" data-year="2025" onclick="switchMajorYear('pga', 2025)">2025</button>
+          <button id="pgaRefreshBtn" class="btn btn-sm" onclick="pgaManualRefresh()">Refresh</button>
+          <span id="pgaLastUpdated" class="last-updated" style="font-size:.8rem;color:var(--text-muted);margin-left:.5rem;"></span>
         </div>
         <div class="inner-tab-bar">
           <button class="inner-tab active" data-inner="total"        onclick="switchInnerTab('pga','total')">Total</button>
@@ -377,7 +380,32 @@
           <button class="inner-tab"        data-inner="scoreboard"   onclick="switchInnerTab('pga','scoreboard')">PGA Scoreboard</button>
           <button class="inner-tab tab-payouts" data-inner="finalpayouts" onclick="switchInnerTab('pga','finalpayouts')">Final Payouts</button>
         </div>
-        <div id="pga-total"         class="inner-panel inner-panel-active"><div class="coming-soon">PGA Championship 2026 pool standings will appear here once available.</div></div>
+        <div id="pga-total" class="inner-panel inner-panel-active">
+          <div class="search-bar">
+            <input type="text" id="pgaStandingsSearch" class="standings-search" placeholder="Search entry name or player..." />
+          </div>
+          <section class="table-wrapper">
+            <div id="pgaLoadingMsg" class="loading-msg">Loading standings...</div>
+            <table id="pgaStandingsTable" class="standings-table hidden">
+              <thead>
+                <tr>
+                  <th class="col-rank">Rank</th>
+                  <th class="col-name">Name</th>
+                  <th class="col-name col-picks-name">Picks Name</th>
+                  <th class="col-total">Total</th>
+                  <th class="col-tier">Tier 1</th>
+                  <th class="col-tier">Tier 2</th>
+                  <th class="col-tier">Tier 3</th>
+                  <th class="col-tier">Tier 4</th>
+                  <th class="col-tier">Tier 5</th>
+                  <th class="col-tier">Tier 6</th>
+                </tr>
+              </thead>
+              <tbody id="pgaStandingsBody"></tbody>
+            </table>
+            <div id="pgaNoDataMsg" class="no-data hidden">No picks found for this tournament.</div>
+          </section>
+        </div>
         <div id="pga-day1"          class="inner-panel hidden"><div class="coming-soon">PGA Championship 2026 — Round 1 pool standings will appear here once available.</div></div>
         <div id="pga-day2"          class="inner-panel hidden"><div class="coming-soon">PGA Championship 2026 — Round 2 pool standings will appear here once available.</div></div>
         <div id="pga-day3"          class="inner-panel hidden"><div class="coming-soon">PGA Championship 2026 — Round 3 pool standings will appear here once available.</div></div>
@@ -620,15 +648,27 @@
   <!-- ===== FIREBASE + APP SCRIPTS ===== -->
   <script type="module">
     import { initFirebase } from './js/firebase-config.js';
-    import { loadStandings, sortBy, manualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings } from './js/standings.js';
+    import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings } from './js/standings.js';
 
     initFirebase();
     window.sortBy = sortBy;
-    window.manualRefresh = manualRefresh;
+    window.manualRefresh    = manualRefresh;
+    window.pgaManualRefresh = pgaManualRefresh;
     window.switchMajorYear = switchMajorYear;
     document.getElementById('footerYear').textContent = new Date().getFullYear();
 
     loadStandings();
+
+    // PGA standings search filter
+    document.getElementById('pgaStandingsSearch').addEventListener('input', e => {
+      const q = e.target.value.toLowerCase().trim();
+      document.querySelectorAll('#pgaStandingsBody tr').forEach(row => {
+        const entry   = row.dataset.entry   || '';
+        const players = row.dataset.players || '';
+        row.style.display = (!q || entry.includes(q) || players.includes(q)) ? '' : 'none';
+      });
+    });
+
     // Non-blocking loads — panels are hidden until their tabs are clicked
     loadMastersPayouts();
     loadMastersScoreboard();

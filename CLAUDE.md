@@ -87,7 +87,15 @@ All 4 info fields are required; no entry password:
 3. **Email** — required
 4. **Cell Phone** — required
 
-Uniqueness is enforced on `entrantName` (Picks Name) via Firestore query before write. After successful submit, user sees a success screen with **Submit Another Entry** (returns to tournament selector) or **View Standings**.
+Uniqueness is enforced on `entrantName` (Picks Name) via Firestore query before write.
+
+After successful submit, `showSuccessSummary()` in picks.js:
+- Renders a table of all 6 tier selections in `#successPicksSummary`
+- Builds a `mailto:` link pre-addressed to the entrant's email with their picks in the body, shown as **📧 Email Yourself a Copy** (`#successMailtoBtn`)
+- Displays an amber warning box telling users to email/screenshot their picks because standings are hidden until the tournament begins
+- Shows **Submit Another Entry** (returns to tournament selector) and **View Standings** buttons
+
+`backToTournamentSelect()` hides `#successMailtoBtn` and resets the form. The submit button state is reset in both `openPicksForm()` and the success path to prevent it getting stuck as "Submitting..." on subsequent entries.
 
 ## Tournament Selection Grid (picks.html)
 `loadPickForm()` in picks.js fetches all tournaments, then `renderTournamentSelect()` renders 4 major cards. A card is clickable (`major-card--open`) only if a matching tournament has `status === 'open'` and `pickDeadline` hasn't passed. Clicking calls `openPicksForm(tournament)` which fetches the tiers doc and shows the form.
@@ -100,6 +108,16 @@ Uniqueness is enforced on `entrantName` (Picks Name) via Firestore query before 
 5. Picks auto-lock at `pickDeadline`; admin can manually flip to `locked`
 6. During tournament: scores auto-refresh from ESPN; admin can override individual scores
 7. After final round: flip status to `final` → Prize Calculator tab shows payouts
+
+## Standings Blind
+
+`loadTournamentData()` in standings.js hides the picks table while picks are still being collected. When `status === 'open'` and `Date.now() < pickDeadline`, the function returns early after showing:
+
+> *"Standings are hidden while picks are open. Check back after [deadline]."*
+
+This prevents entrants from seeing each other's picks before the deadline and copying them. The blind lifts automatically once the deadline passes — even if the admin hasn't manually flipped status to `locked` yet. If no `pickDeadline` is set on the tournament, the blind stays up indefinitely while status is `open`.
+
+The auto-refresh interval (`setInterval`) only starts when `status === 'locked'`, so ESPN score fetching is entirely separate from this visibility check.
 
 ## ESPN API
 Primary endpoint (no key required):

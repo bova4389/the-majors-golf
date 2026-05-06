@@ -1553,6 +1553,17 @@ td.top-4-pick {
   .btn-picks-header { font-size: .75rem; padding: .28rem .55rem; }
   .header-logo     { height: 48px; }
   .site-name       { font-size: 1rem; }
+  /* Official scoreboard link: wrap to its own row on all phone sizes in portrait */
+  .major-banner         { flex-wrap: wrap; }
+  .major-official-link  {
+    display: block !important;
+    margin-left: 0;
+    align-self: auto;
+    width: 100%;
+    text-align: center;
+    margin-top: .35rem;
+    font-size: .72rem;
+  }
 }
 
 /* Show Admin link when phone is in landscape */
@@ -1575,17 +1586,6 @@ td.top-4-pick {
   /* Prevent wide banners/tables from causing horizontal page overflow on mobile */
   .major-panel     { overflow-x: hidden; }
   .major-logo      { flex-shrink: 1; }
-  /* Show official scoreboard link on mobile — wrap it to its own row below the logo+info */
-  .major-banner    { flex-wrap: wrap; }
-  .major-official-link {
-    display: block;
-    margin-left: 0;
-    align-self: auto;
-    width: 100%;
-    text-align: center;
-    margin-top: .35rem;
-    font-size: .72rem;
-  }
 }
 
 /* ── Dark mode: home tab background matches logo black ── */

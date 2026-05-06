@@ -10,15 +10,14 @@
   <header class="site-header">
     <div class="header-inner">
       <div class="header-brand">
-        <div class="logo-mark">BB</div>
+        <img src="Basic_Bros_Logo.png" alt="Basic Bros" class="header-logo" />
         <div class="site-title-block">
-          <span class="site-name">Basic Bros</span>
-          <span class="site-tagline">Majors Pick'em</span>
+          <span class="site-name">BBRC Majors Pick'em</span>
         </div>
       </div>
       <div class="header-controls">
         <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark/light mode">☀️</button>
-        <a href="index.html" class="btn btn-sm btn-nav-header">Standings</a>
+        <a href="index.html" class="btn btn-sm btn-nav-header">← Leaderboard</a>
         <a href="admin.html" class="nav-admin-link">Admin</a>
       </div>
     </div>
@@ -27,6 +26,15 @@
   <main class="container">
     <!-- Loading state -->
     <div id="loadingMsg" class="loading-msg">Loading tournament info...</div>
+
+    <!-- Tournament selection -->
+    <section id="tournamentSelect" class="hidden">
+      <div class="form-header">
+        <h2 class="form-title">Submit Your Picks</h2>
+        <p class="form-deadline">Select a tournament below to enter your lineup</p>
+      </div>
+      <div id="majorCards" class="major-select-grid"></div>
+    </section>
 
     <!-- Picks locked state -->
     <section id="lockedMsg" class="locked-banner hidden">
@@ -38,11 +46,13 @@
     <!-- No active tournament -->
     <section id="noTournament" class="no-data hidden">
       <p>No active tournament found. Check back soon or visit the <a href="index.html">standings page</a>.</p>
+      <button class="btn btn-sm pick-form-back" style="margin-top:1rem" onclick="backToTournamentSelect()">← Back to Tournaments</button>
     </section>
 
     <!-- Pick submission form -->
     <section id="pickForm" class="hidden">
       <div class="form-header">
+        <button class="btn btn-sm pick-form-back" onclick="backToTournamentSelect()">← Change Tournament</button>
         <h2 id="formTournamentName" class="form-title"></h2>
         <p id="formDeadline" class="form-deadline"></p>
       </div>
@@ -53,16 +63,22 @@
         <div class="form-section">
           <h3 class="form-section-title">Your Info</h3>
           <div class="form-row">
-            <label for="entrantName">Your Name <span class="required">*</span></label>
+            <label for="entrantRealName">Your Name <span class="required">*</span></label>
+            <input type="text" id="entrantRealName" placeholder="First Last" required maxlength="60" />
+            <small class="field-hint">Your real name — used to track you across all tournaments.</small>
+          </div>
+          <div class="form-row">
+            <label for="entrantName">Picks Name <span class="required">*</span></label>
             <input type="text" id="entrantName" placeholder="First Last" required maxlength="60" />
+            <small class="field-hint">Must be unique across all entries.</small>
           </div>
           <div class="form-row">
-            <label for="entrantEmail">Email (optional — for confirmation)</label>
-            <input type="email" id="entrantEmail" placeholder="you@email.com" />
+            <label for="entrantEmail">Email <span class="required">*</span></label>
+            <input type="email" id="entrantEmail" placeholder="you@email.com" required />
           </div>
           <div class="form-row">
-            <label for="entryPassword">Pool Entry Code <span class="required">*</span></label>
-            <input type="password" id="entryPassword" placeholder="Enter the code shared by the pool admin" required />
+            <label for="entrantPhone">Cell Phone <span class="required">*</span></label>
+            <input type="tel" id="entrantPhone" placeholder="555-555-5555" required maxlength="20" />
           </div>
         </div>
 
@@ -89,7 +105,17 @@
       <div class="success-icon">✅</div>
       <h2>Picks Submitted!</h2>
       <p id="successDetail"></p>
-      <a href="index.html" class="btn btn-primary">View Standings</a>
+      <table class="success-picks-table">
+        <tbody id="successPicksSummary"></tbody>
+      </table>
+      <div class="success-warning">
+        ⚠️ <strong>Save your picks now</strong> — standings are hidden until the tournament begins. Email yourself a copy or take a screenshot. You will not be able to view your selections again until picks lock.
+      </div>
+      <div class="success-actions">
+        <a id="successMailtoBtn" class="btn btn-primary hidden">📧 Email Yourself a Copy</a>
+        <button class="btn" onclick="backToTournamentSelect()">Submit Another Entry</button>
+        <a href="index.html" class="btn">View Standings</a>
+      </div>
     </section>
   </main>
 
@@ -99,9 +125,10 @@
 
   <script type="module">
     import { initFirebase } from './js/firebase-config.js';
-    import { loadPickForm, submitPicks } from './js/picks.js';
+    import { loadPickForm, submitPicks, backToTournamentSelect } from './js/picks.js';
     initFirebase();
     window.submitPicks = submitPicks;
+    window.backToTournamentSelect = backToTournamentSelect;
     document.getElementById('footerYear').textContent = new Date().getFullYear();
     loadPickForm();
 

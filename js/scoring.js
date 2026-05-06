@@ -22,12 +22,16 @@ export function scoreClass(score, status) {
 }
 
 /**
- * Get the effective score for a golfer (MC/WD = mcPenalty).
+ * Get the effective score for a golfer.
+ * MC/WD: their actual R1+R2 score + mcPenalty (+20 = +10 R3, +10 R4).
+ * Unknown golfer (not yet in scores): apply full mcPenalty.
  */
 export function effectiveScore(golferName, scoresMap, mcPenalty) {
   const g = scoresMap[golferName];
   if (!g) return mcPenalty;
-  if (g.status === 'cut' || g.status === 'wd') return mcPenalty;
+  if (g.status === 'cut' || g.status === 'wd') {
+    return (typeof g.score === 'number' ? g.score : 0) + mcPenalty;
+  }
   return typeof g.score === 'number' ? g.score : mcPenalty;
 }
 

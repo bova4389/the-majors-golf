@@ -465,15 +465,27 @@ a:hover { text-decoration: underline; }
   line-height: 1.45;
 }
 
+.contacts-pay-note {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--green);
+  background: var(--green-muted);
+  border-radius: var(--radius);
+  padding: .5rem .75rem;
+  margin-bottom: .85rem;
+}
 .contacts-list {
   list-style: none;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: .5rem;
+  gap: .85rem;
   font-size: .9rem;
   margin-bottom: 1.25rem;
 }
+.contacts-list li { line-height: 1.5; }
+.contact-detail { font-size: .82rem; color: var(--text-muted); }
+.contact-detail a { color: var(--green); }
 
 .submission-count-display {
   background: var(--gray-light);
@@ -788,6 +800,104 @@ td.top-4-pick {
 .rank-3 { color: #a05a2c;      font-weight: 700; }
 
 
+/* ===== TOURNAMENT SELECTION GRID ===== */
+.major-select-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  max-width: 680px;
+  margin: 1.5rem auto 0;
+}
+
+.major-card {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem 1.25rem;
+  text-align: center;
+  transition: transform .15s, box-shadow .15s, border-color .15s;
+  user-select: none;
+}
+
+.major-card--open {
+  cursor: pointer;
+  border-color: var(--mc-color);
+}
+.major-card--open:hover,
+.major-card--open:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.13);
+  outline: none;
+}
+
+.major-card--locked { opacity: .52; cursor: default; }
+
+/* Per-major accent colours */
+.major-card--masters  { --mc-color: #1a6b3c; }
+.major-card--pga      { --mc-color: #003087; }
+.major-card--usopen   { --mc-color: #3c638e; }
+.major-card--theopen  { --mc-color: #1a2456; }
+
+.major-card-badge {
+  display: inline-block;
+  background: var(--mc-color);
+  color: #fff;
+  font-size: .65rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: .2rem .65rem;
+  border-radius: 4px;
+  margin-bottom: .85rem;
+}
+
+.major-card-name {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: .2rem;
+  line-height: 1.3;
+}
+
+.major-card-year {
+  font-size: .8rem;
+  color: var(--text-muted);
+  margin-bottom: .85rem;
+}
+
+.major-card-open-label {
+  display: inline-block;
+  background: var(--mc-color);
+  color: #fff;
+  font-size: .875rem;
+  font-weight: 700;
+  padding: .45rem 1.1rem;
+  border-radius: 6px;
+}
+
+.major-card-locked-label {
+  font-size: .875rem;
+  color: var(--text-muted);
+}
+
+.major-card-deadline {
+  font-size: .73rem;
+  color: var(--text-muted);
+  margin-top: .55rem;
+}
+
+.pick-form-back {
+  margin-bottom: 1rem;
+  display: inline-block;
+  color: var(--text-muted);
+  border-color: var(--border);
+  font-size: .8rem;
+}
+
+@media (max-width: 500px) {
+  .major-select-grid { grid-template-columns: 1fr; }
+}
+
+
 /* ===== PICK FORM ===== */
 .form-header    { margin-bottom: 1.5rem; }
 .form-title     { font-size: 1.4rem; font-weight: 700; }
@@ -937,6 +1047,10 @@ td.top-4-pick {
 .golfer-tag .remove-golfer:hover { opacity: 1; }
 .add-golfer-row { display: flex; gap: .5rem; }
 .add-golfer-row input { flex: 1; }
+.tier-count { font-size: .8rem; font-weight: 400; color: var(--text-muted); margin-left: .4rem; }
+.bulk-add-panel { margin-top: .75rem; }
+.bulk-add-panel textarea { width: 100%; padding: .5rem; border: 1px solid var(--border); border-radius: var(--radius); font-family: var(--font); font-size: .875rem; resize: vertical; background: var(--white); color: var(--text); }
+.bulk-add-actions { display: flex; gap: .5rem; margin-top: .5rem; }
 
 
 /* ===== ADMIN PICKS TABLE ===== */
@@ -1000,6 +1114,15 @@ td.top-4-pick {
 .prize-calc table { width: 100%; border-collapse: collapse; font-size: .9rem; margin-top: 1rem; }
 .prize-calc th, .prize-calc td { padding: .5rem .75rem; border-bottom: 1px solid var(--border); text-align: left; }
 .prize-calc th { font-weight: 700; background: var(--gray-light); }
+.prize-breakdown { background: var(--gray-light); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem; }
+.prize-breakdown p { margin-bottom: .35rem; font-size: .9rem; }
+.prize-breakdown p:last-child { margin-bottom: 0; }
+.success-picks-table { margin: 1rem auto; border-collapse: collapse; min-width: 240px; }
+.success-picks-table td { padding: .35rem .75rem; font-size: .9rem; border-bottom: 1px solid var(--border); text-align: left; }
+.success-tier-label { font-weight: 700; color: var(--green); width: 60px; }
+.success-warning { background: #fff8e1; border: 1px solid #f0c040; border-radius: var(--radius); padding: .75rem 1rem; font-size: .875rem; color: #7a5c00; max-width: 480px; margin: 1rem auto 0; text-align: left; }
+[data-theme="dark"] .success-warning { background: #2a2000; border-color: #7a5c00; color: #f0c040; }
+.success-actions { display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
 
 
 /* ===== UTILITY ===== */

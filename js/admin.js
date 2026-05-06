@@ -123,7 +123,6 @@ export async function openTournamentModal(tournamentId = null) {
       document.getElementById('tFormMcPenalty').value = t.mcPenalty ?? 20;
       document.getElementById('tFormDeadline').value = t.pickDeadline
         ? t.pickDeadline.slice(0, 16) : '';
-      document.getElementById('tFormPassword').value = t.entryPassword ?? '';
       document.getElementById('tFormEspnId').value = t.espnEventId ?? '';
       document.getElementById('tFormStatus').value = t.status ?? 'open';
       document.getElementById('tFormPrizes').value = t.prizePayouts
@@ -162,7 +161,6 @@ export async function saveTournament(event) {
     entryFee: Number(document.getElementById('tFormEntryFee').value) || 0,
     mcPenalty: Number(document.getElementById('tFormMcPenalty').value) || 20,
     pickDeadline: document.getElementById('tFormDeadline').value || null,
-    entryPassword: document.getElementById('tFormPassword').value.trim(),
     espnEventId: document.getElementById('tFormEspnId').value.trim(),
     status: document.getElementById('tFormStatus').value,
     prizePayouts,
@@ -203,7 +201,7 @@ export async function loadTiersForAdmin() {
     return `
       <div class="tier-editor-block">
         <div class="tier-editor-header">
-          <h3>Tier ${i}</h3>
+          <h3>Tier ${i} <span class="tier-count">(${golfers.length} golfers)</span></h3>
         </div>
         <div class="golfer-list" id="golferList${i}">
           ${golfers.map(g => golferTag(i, g.name)).join('')}
@@ -211,6 +209,14 @@ export async function loadTiersForAdmin() {
         <div class="add-golfer-row">
           <input type="text" id="newGolfer${i}" placeholder="Golfer name..." />
           <button class="btn btn-sm btn-primary" onclick="addGolfer(${i}, '${tournamentId}')">Add</button>
+          <button class="btn btn-sm" onclick="toggleBulkAdd(${i})">Bulk Add</button>
+        </div>
+        <div id="bulkAdd${i}" class="bulk-add-panel hidden">
+          <textarea id="bulkText${i}" placeholder="Paste one golfer name per line..." rows="6"></textarea>
+          <div class="bulk-add-actions">
+            <button class="btn btn-sm btn-primary" onclick="saveBulkGolfers(${i}, '${tournamentId}')">Save All</button>
+            <button class="btn btn-sm" onclick="toggleBulkAdd(${i})">Cancel</button>
+          </div>
         </div>
       </div>
     `;
@@ -255,6 +261,46 @@ window.removeGolfer = async function(tier, name) {
   await loadTiersForAdmin();
 };
 
+window.toggleBulkAdd = function(tier) {
+  const panel = document.getElementById(`bulkAdd${tier}`);
+  panel.classList.toggle('hidden');
+  if (!panel.classList.contains('hidden')) {
+    document.getElementById(`bulkText${tier}`).focus();
+  }
+};
+
+window.saveBulkGolfers = async function(tier, tournamentId) {
+  const textarea = document.getElementById(`bulkText${tier}`);
+  const names = textarea.value
+    .split('\n')
+    .map(n => n.trim())
+    .filter(n => n.length > 0);
+
+  if (!names.length) return;
+
+  const db = getDb();
+  const ref = doc(db, 'tiers', tournamentId);
+  const snap = await getDoc(ref);
+  const data = snap.exists() ? snap.data() : {};
+  const key = `tier${tier}`;
+  const existing = data[key] ?? [];
+  const existingNames = new Set(existing.map(g => g.name));
+
+  const added = [];
+  for (const name of names) {
+    if (!existingNames.has(name)) {
+      existing.push({ name, worldRank: null });
+      added.push(name);
+    }
+  }
+
+  await setDoc(ref, { ...data, [key]: existing });
+  textarea.value = '';
+  document.getElementById(`bulkAdd${tier}`).classList.add('hidden');
+  await loadTiersForAdmin();
+  if (added.length) alert(`Added ${added.length} golfer(s) to Tier ${tier}.`);
+};
+
 // ─── PICKS ADMIN ──────────────────────────────────────────────────────────────
 export async function loadPicksForAdmin() {
   const tournamentId = document.getElementById('picksTournamentSelect').value;
@@ -274,12 +320,13 @@ export async function loadPicksForAdmin() {
   container.innerHTML = `
     <table class="admin-table">
       <thead><tr>
-        <th>Name</th><th>T1</th><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th><th>Submitted</th><th></th>
+        <th>Real Name</th><th>Picks Name</th><th>T1</th><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th><th>Submitted</th><th></th>
       </tr></thead>
       <tbody>
         ${picks.map(p => `
           <tr>
-            <td>${escapeHtml(p.entrantName)}</td>
+            <td>${escapeHtml(p.realName ?? p.entrantName ?? '—')}</td>
+            <td>${escapeHtml(p.entrantName ?? '—')}</td>
             <td>${escapeHtml(p.t1 ?? '—')}</td>
             <td>${escapeHtml(p.t2 ?? '—')}</td>
             <td>${escapeHtml(p.t3 ?? '—')}</td>
@@ -309,8 +356,10 @@ export async function openAddPickModal(pickId = null) {
     const snap = await getDoc(doc(getDb(), 'picks', pickId));
     if (snap.exists()) {
       const p = snap.data();
+      document.getElementById('apFormRealName').value = p.realName ?? '';
       document.getElementById('apFormName').value = p.entrantName ?? '';
       document.getElementById('apFormEmail').value = p.email ?? '';
+      document.getElementById('apFormPhone').value = p.phone ?? '';
       document.getElementById('apFormTournament').value = p.tournamentId;
     }
   } else {
@@ -356,8 +405,10 @@ export async function saveAdminPick(event) {
 
   const data = {
     tournamentId,
+    realName: document.getElementById('apFormRealName').value.trim(),
     entrantName: document.getElementById('apFormName').value.trim(),
     email: document.getElementById('apFormEmail').value.trim(),
+    phone: document.getElementById('apFormPhone').value.trim(),
   };
   for (let i = 1; i <= 6; i++) {
     data[`t${i}`] = document.getElementById(`apTier${i}`)?.value ?? '';
@@ -454,11 +505,24 @@ export async function loadPrizesForAdmin() {
 
   const { _lastUpdated, ...scoresMap } = scoreSnap.exists() ? scoreSnap.data() : {};
   const standings = calculateStandings(picks, scoresMap ?? {}, tournament.mcPenalty ?? 20);
-  const totalPool = (tournament.entryFee ?? 0) * picks.length;
+
+  const entryFee = tournament.entryFee ?? 0;
+  const seasonDeduction = 1.00;
+  const websiteDeduction = 0.50;
+  const perEntryPrize = entryFee - seasonDeduction - websiteDeduction;
+  const totalPool = perEntryPrize * picks.length;
+  const seasonPool = seasonDeduction * picks.length;
+  const websiteFund = websiteDeduction * picks.length;
+
   const payouts = calculatePrizes(standings, totalPool, tournament.prizePayouts ?? []);
 
   container.innerHTML = `
-    <p><strong>Total Pool: $${totalPool}</strong> (${picks.length} entries × $${tournament.entryFee ?? 0})</p>
+    <div class="prize-breakdown">
+      <p><strong>Entry Fee Breakdown</strong></p>
+      <p>$${entryFee.toFixed(2)} entry &minus; $${seasonDeduction.toFixed(2)} season pool &minus; $${websiteDeduction.toFixed(2)} website = <strong>$${perEntryPrize.toFixed(2)} per entry to prize pool</strong></p>
+      <p>${picks.length} entries &times; $${perEntryPrize.toFixed(2)} = <strong>Prize Pool: $${totalPool.toFixed(2)}</strong></p>
+      <p class="muted">Season Long Pool: $${seasonPool.toFixed(2)} &bull; Website Fund: $${websiteFund.toFixed(2)}</p>
+    </div>
     <table>
       <thead><tr><th>Rank</th><th>Entrant</th><th>Total</th><th>Prize</th></tr></thead>
       <tbody>
@@ -467,7 +531,7 @@ export async function loadPrizesForAdmin() {
             <td>${p.rank}</td>
             <td>${escapeHtml(p.entrantName)}</td>
             <td>${p.total >= 0 ? '+'+p.total : p.total}</td>
-            <td>${p.prize > 0 ? '$'+Math.round(p.prize) : '—'}</td>
+            <td>${p.prize > 0 ? '$'+p.prize.toFixed(2) : '—'}</td>
           </tr>
         `).join('')}
       </tbody>

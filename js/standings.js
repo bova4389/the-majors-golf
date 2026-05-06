@@ -223,6 +223,19 @@ async function loadTournamentData(tournamentId) {
     renderPrizes(tournament);
     updateRefreshButton(tournament);
 
+    // Hide standings while picks are still open — prevents entrants copying each other
+    if (tournament.status === 'open') {
+      const deadline = tournament.pickDeadline ? new Date(tournament.pickDeadline) : null;
+      if (!deadline || Date.now() < deadline.getTime()) {
+        const noData = document.getElementById('noDataMsg');
+        const revealTime = deadline ? deadline.toLocaleString() : 'picks lock';
+        noData.textContent = `Standings are hidden while picks are open. Check back after ${revealTime}.`;
+        noData.classList.remove('hidden');
+        showLoading(false);
+        return;
+      }
+    }
+
     const picksSnap = await getDocs(
       query(collection(db, 'picks'), where('tournamentId', '==', tournamentId))
     );

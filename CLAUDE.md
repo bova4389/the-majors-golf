@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Site name**: Basic Bros — Majors Pick'em (BBRC)
 - **GitHub repo**: https://github.com/bova4389/the-majors-golf.git
 - **Firebase project**: `basic-bros-majors-golf` (projectId in `js/firebase-config.js`)
-- **Hosting**: GitHub Pages (deploy from `main` branch, auto-deploy via GitHub Actions on push)
+- **Hosting**: GitHub Pages (deploy from `main` branch — push to main and the site updates automatically)
 
 ## Key Contacts
 - **Ryne** — Co-commissioner
@@ -83,7 +83,7 @@ scores/{tournamentId}
 ## picks.html — Entry Form Fields
 All 4 info fields are required; no entry password:
 1. **Your Name** (`entrantRealName`) — real name; stored as `realName`; tracked across all tournaments
-2. **Picks Name** (`entrantName`) — unique per tournament; stored as `entrantName`; "John Smith 2" for second entry
+2. **Picks Name** (`entrantName`) — unique per tournament; stored as `entrantName`; must be distinct from all other entries for that tournament
 3. **Email** — required
 4. **Cell Phone** — required
 
@@ -233,6 +233,39 @@ Wide banner logos can push `.major-banner` past viewport on mobile. Fix: `overfl
 - Refresh button disabled when `status === 'final'` ✓
 - ESPN API calls skipped for non-`locked` tournaments ✓
 - TODO: per-tournament Refresh button scoped to each major panel (when per-panel live scoring is built)
+
+## PGA Championship 2026 — Pre-Tournament Checklist
+
+### Admin Tasks (Monday when field is finalized)
+1. **Finalize tiers in admin.html** — Bulk-add all 6 tiers with the confirmed field
+2. **Confirm tournament record in Firestore has:**
+   - `espnEventId: "401811947"` ← critical for live scores
+   - `pickDeadline` set correctly (before Thursday tee times)
+   - `mcPenalty: 20`
+   - `status: "open"`
+
+### Right Before the Tournament (at pick deadline)
+3. **Manually flip status to `locked`** in admin.html — starts the 5-min auto-refresh timer on the PGA standings page
+
+### Testing Checklist
+4. **Test standings blind** — With status `open` and a future `pickDeadline`, the PGA Total tab should show *"Standings are hidden while picks are open..."* rather than the table or an infinite spinner
+5. **Test Refresh button end-to-end** — Flip status to `locked`, click Refresh on PGA tab; should hit ESPN, cache scores in Firestore `scores/{tournamentId}`, and render the table (all entries at `mcPenalty` before play starts — expected)
+6. **Verify ESPN event ID is active** — Run in browser console:
+   ```
+   fetch('https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?event=401811947').then(r=>r.json()).then(d=>console.log(d?.events?.[0]?.name, d?.events?.[0]?.competitions?.[0]?.competitors?.length))
+   ```
+   Should return event name + player count. ESPN sometimes activates event IDs 1–2 days before the tournament.
+7. **Test search on PGA tab** — Confirm entry/player name filtering works
+8. **Check mobile layout** — Refresh button + timestamp in year tab bar can overflow on small screens
+
+### During the Tournament
+- Scores auto-refresh every 5 min when status is `locked` — no manual action needed
+- Manual Refresh button available for immediate update
+- Use admin → score override for any ESPN data that looks wrong for an individual player
+
+### Known Gaps (PGA 2026, non-blockers)
+- R1–R4 round tabs show "coming soon" — will be hardcoded after the tournament like Masters/PGA 2025 was
+- U.S. Open 2025 and The Open 2025 pool standings not yet hardcoded (scoreboards done)
 
 ## Prize Payout Logic
 - Prize pool = $23.50 × entries (see Entry Fee Breakdown above)

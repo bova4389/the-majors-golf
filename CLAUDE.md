@@ -6,7 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Site name**: Basic Bros — Majors Pick'em (BBRC)
 - **GitHub repo**: https://github.com/bova4389/the-majors-golf.git
 - **Firebase project**: `basic-bros-majors-golf` (projectId in `js/firebase-config.js`)
-- **Hosting**: GitHub Pages (deploy from `main` branch — push to main and the site updates automatically)
+- **Domain**: https://basic-bros-pga-pickems.com
+- **Hosting**: DreamHost (fully hosted) — push to `main` and GitHub Actions automatically deploys via SFTP
+- **Deploy workflow**: `.github/workflows/deploy.yml` uses `wlixcc/SFTP-Deploy-Action` → uploads to `/home/mattbova/basic-bros-pga-pickems.com/` on DreamHost
+- **GitHub Actions secrets required**: `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD` (set in repo Settings → Secrets → Actions)
 
 ## Key Contacts
 - **Ryne** — Co-commissioner

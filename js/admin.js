@@ -507,26 +507,46 @@ export async function loadPrizesForAdmin() {
   const standings = calculateStandings(picks, scoresMap ?? {}, tournament.mcPenalty ?? 20);
 
   const entryFee = tournament.entryFee ?? 0;
-  const seasonDeduction = 1.00;
-  const websiteDeduction = 0.50;
-  const perEntryPrize = entryFee - seasonDeduction - websiteDeduction;
-  const totalPool = perEntryPrize * picks.length;
-  const seasonPool = seasonDeduction * picks.length;
-  const websiteFund = websiteDeduction * picks.length;
+  const isMasters = tournament.major === 'masters';
   const dailyRoundPrizes = 25 * 4; // $25 × 4 rounds
-  const overallPool = Math.max(0, totalPool - dailyRoundPrizes);
 
-  const payouts = calculatePrizes(standings, overallPool, tournament.prizePayouts ?? []);
-
-  container.innerHTML = `
-    <div class="prize-breakdown">
+  let totalPool, breakdownHtml;
+  if (isMasters) {
+    // Masters: flat $25 season pool, no website fee
+    const seasonPoolFlat = 25;
+    totalPool = entryFee * picks.length - seasonPoolFlat;
+    const overallPool = Math.max(0, totalPool - dailyRoundPrizes);
+    breakdownHtml = `
+      <p><strong>Entry Fee Breakdown</strong></p>
+      <p>$${entryFee.toFixed(2)} entry &times; ${picks.length} entries = $${(entryFee * picks.length).toFixed(2)} &minus; $${seasonPoolFlat.toFixed(2)} flat season pool = <strong>Prize Pool: $${totalPool.toFixed(2)}</strong></p>
+      <p class="muted">Round Low Scores: $${dailyRoundPrizes.toFixed(2)} ($25.00 &times; 4 rounds)</p>
+      <p><strong>Prize Pool for Overall Standings: $${overallPool.toFixed(2)}</strong></p>
+      <p class="muted">Season Long Pool: $${seasonPoolFlat.toFixed(2)} flat</p>`;
+    const payouts = calculatePrizes(standings, overallPool, tournament.prizePayouts ?? []);
+    container.innerHTML = `<div class="prize-breakdown">${breakdownHtml}</div>${buildPayoutTable(payouts)}`;
+  } else {
+    // PGA / US Open / The Open: $1/entry season pool + $0.50/entry website fee
+    const seasonDeduction = 1.00;
+    const websiteDeduction = 0.50;
+    const perEntryPrize = entryFee - seasonDeduction - websiteDeduction;
+    totalPool = perEntryPrize * picks.length;
+    const seasonPool = seasonDeduction * picks.length;
+    const websiteFund = websiteDeduction * picks.length;
+    const overallPool = Math.max(0, totalPool - dailyRoundPrizes);
+    breakdownHtml = `
       <p><strong>Entry Fee Breakdown</strong></p>
       <p>$${entryFee.toFixed(2)} entry &minus; $${seasonDeduction.toFixed(2)} season pool &minus; $${websiteDeduction.toFixed(2)} website = <strong>$${perEntryPrize.toFixed(2)} per entry to prize pool</strong></p>
       <p>${picks.length} entries &times; $${perEntryPrize.toFixed(2)} = <strong>Prize Pool: $${totalPool.toFixed(2)}</strong></p>
       <p class="muted">Round Low Scores: $${dailyRoundPrizes.toFixed(2)} ($25.00 &times; 4 rounds)</p>
       <p><strong>Prize Pool for Overall Standings: $${overallPool.toFixed(2)}</strong></p>
-      <p class="muted">Season Long Pool: $${seasonPool.toFixed(2)} &bull; Website Fund: $${websiteFund.toFixed(2)}</p>
-    </div>
+      <p class="muted">Season Long Pool: $${seasonPool.toFixed(2)} &bull; Website Fund: $${websiteFund.toFixed(2)}</p>`;
+    const payouts = calculatePrizes(standings, overallPool, tournament.prizePayouts ?? []);
+    container.innerHTML = `<div class="prize-breakdown">${breakdownHtml}</div>${buildPayoutTable(payouts)}`;
+  }
+}
+
+function buildPayoutTable(payouts) {
+  return `
     <table>
       <thead><tr><th>Rank</th><th>Entrant</th><th>Total</th><th>Prize</th></tr></thead>
       <tbody>
@@ -539,8 +559,7 @@ export async function loadPrizesForAdmin() {
           </tr>
         `).join('')}
       </tbody>
-    </table>
-  `;
+    </table>`;
 }
 
 // ─── Modals ───────────────────────────────────────────────────────────────────

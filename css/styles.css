@@ -19,6 +19,7 @@
   --shadow:      0 2px 8px rgba(0,0,0,.08);
   --radius:      8px;
   --font:        'Segoe UI', system-ui, sans-serif;
+  --header-h:    85px; /* header height used to offset sticky nav */
 }
 
 /* ── Dark mode overrides ──────────────────────────────────────────────────── */
@@ -54,19 +55,6 @@ body {
 a { color: var(--green); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
-
-/* ===== STICKY TOP BAR (index.html only — wraps header + major-nav so both scroll-lock together) ===== */
-.sticky-top-bar {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-/* When the header lives inside sticky-top-bar it doesn't need its own sticky positioning */
-.sticky-top-bar .site-header {
-  position: relative;
-  top: auto;
-  z-index: auto;
-}
 
 /* ===== HEADER ===== */
 .site-header {
@@ -176,6 +164,9 @@ a:hover { text-decoration: underline; }
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  position: sticky;
+  top: var(--header-h);
+  z-index: 49;
 }
 .major-nav::-webkit-scrollbar { display: none; }
 
@@ -1539,6 +1530,7 @@ td.top-4-pick {
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
+  :root { --header-h: 69px; }
   .major-tab       { padding: .65rem .8rem; font-size: .82rem; }
   .major-logo      { height: 48px; max-width: 160px; }
   .major-title     { font-size: 1.05rem; }
@@ -1572,6 +1564,7 @@ td.top-4-pick {
 }
 
 @media (max-width: 600px) {
+  :root { --header-h: 59px; }
   .header-logo     { height: 38px; }
   .site-name       { font-size: .88rem; }
   .major-tab       { padding: .6rem .65rem; font-size: .78rem; }

@@ -1710,12 +1710,8 @@ export async function loadSeasonLeaderboard() {
       all.push({ name, mastersTotal: r.total });
     }
 
-    // Re-rank deduplicated list (ties share rank)
-    let seasonRank = 1;
-    for (let i = 0; i < all.length; i++) {
-      if (i > 0 && all[i].mastersTotal !== all[i - 1].mastersTotal) seasonRank = i + 1;
-      all[i].rank = seasonRank;
-    }
+    // Sequential ranks — calculateStandings already broke all ties via 5th/6th scores
+    all.forEach((e, i) => { e.rank = i + 1; });
 
     if (!all.length) {
       if (loadingEl) loadingEl.classList.add('hidden');
@@ -1723,17 +1719,12 @@ export async function loadSeasonLeaderboard() {
       return;
     }
 
-    const rankCounts = {};
-    all.forEach(e => { rankCounts[e.rank] = (rankCounts[e.rank] || 0) + 1; });
-
     tbody.innerHTML = all.map(e => {
       const rankClass = e.rank <= 3 ? `rank-${e.rank}` : '';
       const rankDisp  = e.rank <= 3 ? ['🥇','🥈','🥉'][e.rank - 1] : e.rank;
-      const mTied = rankCounts[e.rank] > 1;
       const mastersDisp = e.rank === 1 ? '<strong>🥇</strong>'
         : e.rank === 2 ? '<strong>🥈</strong>'
-        : e.rank === 3 ? `<strong>🥉${mTied ? ' (T)' : ''}</strong>`
-        : mTied ? `<strong>T-${e.rank}</strong>`
+        : e.rank === 3 ? '<strong>🥉</strong>'
         : `${e.rank}`;
       return `
         <tr>

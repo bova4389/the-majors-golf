@@ -1699,10 +1699,23 @@ export async function loadSeasonLeaderboard() {
     picksSnap.forEach(d => picks.push(d.data()));
     const { _lastUpdated, ...scoresClean } = scores;
     const results = calculateStandings(picks, scoresClean, 20);
-    const all = results.map(r => {
+    // results is sorted best→worst; first occurrence of each real name = best entry
+    const seen = new Set();
+    const all = [];
+    for (const r of results) {
       const rawName = r.pick.realName || r.pick.entrantName;
-      return { name: rawName.replace(/ \d+$/, ''), rank: r.rank, total: r.total };
-    });
+      const name = rawName.replace(/ \d+$/, '');
+      if (seen.has(name)) continue;
+      seen.add(name);
+      all.push({ name, mastersTotal: r.total });
+    }
+
+    // Re-rank deduplicated list (ties share rank)
+    let seasonRank = 1;
+    for (let i = 0; i < all.length; i++) {
+      if (i > 0 && all[i].mastersTotal !== all[i - 1].mastersTotal) seasonRank = i + 1;
+      all[i].rank = seasonRank;
+    }
 
     if (!all.length) {
       if (loadingEl) loadingEl.classList.add('hidden');
@@ -1710,18 +1723,17 @@ export async function loadSeasonLeaderboard() {
       return;
     }
 
-    // Render rows — currently 1 major completed so avg = masters rank
     const rankCounts = {};
     all.forEach(e => { rankCounts[e.rank] = (rankCounts[e.rank] || 0) + 1; });
 
     tbody.innerHTML = all.map(e => {
       const rankClass = e.rank <= 3 ? `rank-${e.rank}` : '';
       const rankDisp  = e.rank <= 3 ? ['🥇','🥈','🥉'][e.rank - 1] : e.rank;
-      const tied = rankCounts[e.rank] > 1;
+      const mTied = rankCounts[e.rank] > 1;
       const mastersDisp = e.rank === 1 ? '<strong>🥇</strong>'
         : e.rank === 2 ? '<strong>🥈</strong>'
-        : e.rank === 3 ? `<strong>🥉${tied ? ' (T)' : ''}</strong>`
-        : tied ? `<strong>T-${e.rank}</strong>`
+        : e.rank === 3 ? `<strong>🥉${mTied ? ' (T)' : ''}</strong>`
+        : mTied ? `<strong>T-${e.rank}</strong>`
         : `${e.rank}`;
       return `
         <tr>

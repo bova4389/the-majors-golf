@@ -83,6 +83,17 @@ scores/{tournamentId}
 
 **Critical**: The `major` field values in Firestore come from admin.html's `<select id="tFormMajor">` — these are `masters`, `pga`, `us-open`, `the-open`. The picks.js `MAJORS` array must use these exact keys or the tournament selection grid won't match open tournaments.
 
+## Major Key Normalization
+
+Two parallel key systems exist — be careful not to confuse them:
+
+| Context | Values |
+|---------|--------|
+| Firestore `major` field / picks.js MAJORS array | `masters`, `pga`, `us-open`, `the-open` |
+| standings.js internal keys (for `tournamentsByMajor`, DOM IDs) | `masters`, `pga`, `usopen`, `theopen` |
+
+`normalizeMajorKey()` in standings.js maps Firestore values → internal keys. `us-open` → `usopen`, `the-open` → `theopen`. This function is used every time a tournament is grouped or looked up by major in the leaderboard.
+
 ## picks.html — Entry Form Fields
 All 4 info fields are required; no entry password:
 1. **Your Name** (`entrantRealName`) — real name; stored as `realName`; tracked across all tournaments
@@ -114,13 +125,11 @@ After successful submit, `showSuccessSummary()` in picks.js:
 
 ## Standings Blind
 
-`loadTournamentData()` in standings.js hides the picks table while picks are still being collected. When `status === 'open'` and `Date.now() < pickDeadline`, the function returns early after showing:
+`loadTournamentData()` and `loadPgaTournamentData()` both hide the picks table while picks are still open. When `status === 'open'` and `Date.now() < pickDeadline`, the function returns early after showing:
 
 > *"Standings are hidden while picks are open. Check back after [deadline]."*
 
-This prevents entrants from seeing each other's picks before the deadline and copying them. The blind lifts automatically once the deadline passes — even if the admin hasn't manually flipped status to `locked` yet. If no `pickDeadline` is set on the tournament, the blind stays up indefinitely while status is `open`.
-
-The auto-refresh interval (`setInterval`) only starts when `status === 'locked'`, so ESPN score fetching is entirely separate from this visibility check.
+The blind lifts automatically once the deadline passes. If no `pickDeadline` is set, the blind stays up indefinitely while status is `open`. The auto-refresh interval only starts when `status === 'locked'`.
 
 ## ESPN API
 Primary endpoint (no key required):
@@ -145,6 +154,8 @@ Per-round data available via `competitors[n].linescores[]` with `{ period (1–4
 
 `calculateStandings()` uses `effectiveScore` for all 6 tiers, picks best 4, sorts by total → 5th → 6th. Sets `isTop4` flag on each tier entry.
 
+`DEFAULT_PAYOUT_SPLIT` in standings.js (`[45, 25, 15, 10, 5]`) is used when a tournament has no `prizePayouts` config.
+
 ## Past Tournament Data (Hardcoded in standings.js)
 
 ### Scoreboard state reset pattern
@@ -162,6 +173,7 @@ let theOpenActiveYear = 2026;
 ```javascript
 const hardcodedYears = major === 'masters' ? [2025] : (major === 'pga' || major === 'usopen' || major === 'theopen') ? [2025] : [];
 ```
+Note: Masters 2026 data lives in Firestore (Firebase tournament record) and is served via `MASTERS_2026_TOTAL` shortcut, not the hardcoded years array.
 
 ### Scoreboard HTML element IDs per major
 | Major | Loading div | Table | Tbody | Search input |
@@ -175,47 +187,65 @@ const hardcodedYears = major === 'masters' ? [2025] : (major === 'pga' || major 
 | Major | Total | Round 1–4 | Payouts |
 |-------|-------|-----------|---------|
 | Masters | shared `standingsTable` / `standingsBody` | `masters-day1` … `masters-day4` | `masters-finalpayouts` |
-| PGA | `pga-total` | `pga-day1` … `pga-day4` | `pga-finalpayouts` |
+| PGA | `pga-total` (rebuilt by `clearPgaPoolPanels()`) | `pga-day1` … `pga-day4` | `pga-finalpayouts` |
 | U.S. Open | `usopen-total` | `usopen-day1` … `usopen-day4` | `usopen-finalpayouts` |
 | The Open | `theopen-total` | `theopen-day1` … `theopen-day4` | `theopen-finalpayouts` |
 
-PGA/US Open/The Open use `innerHTML` injection; Masters live data uses the shared `standingsTable` element.
+### PGA live scoring — parallel state system
+PGA has its own independent state to avoid conflicts with the Masters live system:
+- **State vars**: `pgaCurrentTournamentId`, `pgaCurrentTournamentStatus`, `pgaCachedResults`, `pgaCachedScoresMap`, `pgaRefreshTimer`
+- **Live DOM IDs**: `pgaLoadingMsg`, `pgaStandingsTable`, `pgaStandingsBody`, `pgaNoDataMsg`, `pgaStandingsSearch`, `pgaLastUpdated`, `pgaRefreshBtn`
+- **Functions**: `loadPgaTournamentData()`, `renderPgaTable()`, `pgaManualRefresh()`, `updatePgaRefreshButton()`
+
+`clearPgaPoolPanels()` **rebuilds the entire live standings HTML template** inside `#pga-total` — this is required when switching away from the hardcoded 2025 view back to 2026.
 
 ### Data shape for pool standings constants (TOTAL and rounds)
 ```javascript
 {
   rank: number,
   total: number,
-  pick: { entrantName: string },  // entrantName = Picks Name
+  pick: { entrantName: string, picksName: string },  // entrantName = real name, picksName = picks name
   tierScores: {
     t1: { score: number, status: null, golfer: string, isTop4: boolean },
     ...
   }
 }
 ```
-`isTop4` comes from the user's spreadsheet — **do not recalculate**. `status: null` for hardcoded data (MC penalty already baked into score).
+`isTop4` comes from the user's spreadsheet — **do not recalculate**. `status: null` for hardcoded data (MC penalty already baked into score). In live Firestore data, `pick.realName` holds the real name and `pick.entrantName` holds the picks name.
+
+`renderTable()` in standings.js handles both cases: `rawName = r.pick.realName || r.pick.entrantName` (strips trailing number suffix), `picksName = r.pick.picksName || r.pick.entrantName`.
 
 ### Year tab switching flow
 `switchMajorYear(major, year)` in standings.js:
-- Year with Firebase tournament → loads live data from Firestore
+- Year with Firebase tournament + Masters 2026 → `loadTournamentData()` detects year === 2026 and renders `MASTERS_2026_TOTAL` directly (skips ESPN fetch)
+- PGA year with Firebase tournament (2026) → `loadPgaTournamentData()` for live scoring
 - Masters/PGA **2025** → calls hardcoded load functions; switching *away* calls `clearXxxPoolPanels()` to wipe injected content
 - Other years with no data → Scoreboard tab, "coming soon" for pool panels
 
 **Pattern for adding future majors with hardcoded data:** always implement `clearXxxPoolPanels()` and call it in the `else` branch of the year guard in `switchMajorYear`.
 
-### 2025 completion status (as of May 2026)
+### Season Leaderboard
+`loadSeasonLeaderboard()` in standings.js renders the season tab. Currently built from `MASTERS_2026_TOTAL` (one entry per real name, best score if multiple entries). Will grow to include PGA/US Open/The Open columns as those finish. Uses `#seasonTable`, `#seasonBody`, `#seasonLoadingMsg`, `#seasonNoData`.
+
+### Bonus Pool
+`loadBonusPool()` in standings.js renders the bonus pool amount and projection. Masters contribution = $25 flat; PGA/US Open/The Open = $1 per entry (fetches pick counts from Firestore). Uses `#bonusPoolAmount`, `#seasonPayoutProjection`.
+
+### Tournament completion status (as of May 2026)
 
 **Masters 2025** (Rory McIlroy -11, Augusta) — All rounds + payouts + scoreboard ✅
 
 **PGA Championship 2025** (Scheffler -11, Quail Hollow) — All rounds + payouts + scoreboard ✅
 - Payouts: Bobby Cross 1st $405, Schumann/Pannullo T-2nd $180 ea, Bagnasco 4th $90, Bogardus 5th $45; daily: Vermilyea R1, N. Bova R2, B. Cross R3, Luke S R4 ($25 ea)
 
+**Masters 2026** (Scottie Scheffler -11, Augusta) — All rounds + payouts + scoreboard ✅ — `MASTERS_2026_TOTAL`, `MASTERS_2026_R1`–`R4` all hardcoded
+- Pool winner: **Sarah Crowell** (-33); Payouts: Sarah Crowell 1st $520, Mitch Pletcher 2nd $285, Erik Vermilyea T-3rd $142.50, Ron Pannullo T-3rd $142.50, Jeff Mersch 5th $60
+- Daily winners: Nick Bova 2 (R1), Brandon Sullivan (R2), Sarah Crowell (R3), Ron Pannullo (R4)
+
 **U.S. Open 2025** (J.J. Spaun -1, Oakmont) — Scoreboard ✅ | Pool standings ❌ not yet hardcoded
 
 **The Open Championship 2025** (Scheffler -17, Royal Portrush) — Scoreboard ✅ | Pool standings ❌ not yet hardcoded
 
-### Planned: Picks Name column for Masters historical data
-Next update needed: add `picksName` alongside `entrantName` in hardcoded standings constants. Copy current `entrantName` → `picksName`; strip trailing numbers from `entrantName` to get the real name. This enables season-long aggregation by real name across multiple entries per person.
+**PGA Championship 2026** — 🔴 Live starting May 14, 2026 (ESPN event ID `401811947`)
 
 ## CSS Gotchas
 
@@ -233,13 +263,13 @@ Wide banner logos can push `.major-banner` past viewport on mobile. Fix: `overfl
 
 ## Completed Tournament Lockdown
 - Auto-refresh skips non-`locked` tournaments ✓
-- Refresh button disabled when `status === 'final'` ✓
+- Refresh button disabled when `status === 'final'` ✓ (both Masters and PGA have their own refresh buttons)
 - ESPN API calls skipped for non-`locked` tournaments ✓
-- TODO: per-tournament Refresh button scoped to each major panel (when per-panel live scoring is built)
+- Masters 2026 skips ESPN fetch entirely — `MASTERS_2026_TOTAL` served directly ✓
 
-## PGA Championship 2026 — Pre-Tournament Checklist
+## PGA Championship 2026 — Live Tournament Guide
 
-### Admin Tasks (Monday when field is finalized)
+### Admin Tasks (before picks open)
 1. **Finalize tiers in admin.html** — Bulk-add all 6 tiers with the confirmed field
 2. **Confirm tournament record in Firestore has:**
    - `espnEventId: "401811947"` ← critical for live scores
@@ -257,21 +287,25 @@ Wide banner logos can push `.major-banner` past viewport on mobile. Fix: `overfl
    ```
    fetch('https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?event=401811947').then(r=>r.json()).then(d=>console.log(d?.events?.[0]?.name, d?.events?.[0]?.competitions?.[0]?.competitors?.length))
    ```
-   Should return event name + player count. ESPN sometimes activates event IDs 1–2 days before the tournament.
+   Should return event name + player count.
 7. **Test search on PGA tab** — Confirm entry/player name filtering works
 8. **Check mobile layout** — Refresh button + timestamp in year tab bar can overflow on small screens
 
 ### During the Tournament
 - Scores auto-refresh every 5 min when status is `locked` — no manual action needed
-- Manual Refresh button available for immediate update
+- Manual Refresh button (`pgaRefreshBtn`) available for immediate update
 - Use admin → score override for any ESPN data that looks wrong for an individual player
 
-### Known Gaps (PGA 2026, non-blockers)
-- R1–R4 round tabs show "coming soon" — will be hardcoded after the tournament like Masters/PGA 2025 was
-- U.S. Open 2025 and The Open 2025 pool standings not yet hardcoded (scoreboards done)
+### After the Tournament
+- Flip status to `final` in admin
+- Hardcode R1–R4 round standings (like Masters 2026 pattern) as `PGA_2026_R1` … `R4` constants
+- Hardcode total standings as `PGA_2026_TOTAL` and add shortcut in `loadPgaTournamentData()`
+- Update `loadSeasonLeaderboard()` to include PGA 2026 column
+- U.S. Open 2025 and The Open 2025 pool standings still need to be hardcoded (scoreboards already done)
 
 ## Prize Payout Logic
 - Prize pool = $23.50 × entries (see Entry Fee Breakdown above)
-- Admin defines payout % per place as JSON in tournament settings: `[{"place":1,"pct":40},...]`
+- Admin defines payout % per place as JSON in tournament settings: `[{"place":1,"pct":45},{"place":2,"pct":25},{"place":3,"pct":15},{"place":4,"pct":10},{"place":5,"pct":5}]`
+- If no prizePayouts JSON set, `DEFAULT_PAYOUT_SPLIT` (45/25/15/10/5) is used as fallback in standings.js
 - Ties: tied entrants split the combined prize money for those places
 - Prize display shows 2 decimal places

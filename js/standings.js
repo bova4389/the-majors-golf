@@ -148,8 +148,7 @@ export function switchMajorYear(major, year) {
     pgaActiveYear = year;
     loadPgaScoreboard();
     if (year === 2025) { loadPga2025TotalStandings(); loadPga2025Round1Standings(); loadPga2025Round2Standings(); loadPga2025Round3Standings(); loadPga2025Round4Standings(); loadPga2025Payouts(); }
-    else if (t) { loadPgaTournamentData(t.id); }
-    else { clearPgaPoolPanels(); }
+    else { clearPgaPoolPanels(); if (t) { loadPgaTournamentData(t.id); } }
   }
   if (major === 'usopen') {
     usOpenActiveYear = year;
@@ -208,8 +207,48 @@ function restoreMastersPoolPanels() {
 }
 
 function clearPgaPoolPanels() {
+  // Restore pga-total to its original live-standings structure (needed when switching away from 2025)
+  const pgaTotal = document.getElementById('pga-total');
+  if (pgaTotal) {
+    pgaTotal.innerHTML = `
+      <div class="search-bar">
+        <input type="text" id="pgaStandingsSearch" class="standings-search" placeholder="Search entry name or player..." />
+      </div>
+      <section class="table-wrapper">
+        <div id="pgaLoadingMsg" class="loading-msg">Loading standings...</div>
+        <table id="pgaStandingsTable" class="standings-table hidden">
+          <thead>
+            <tr>
+              <th class="col-rank">Rank</th>
+              <th class="col-name">Name</th>
+              <th class="col-name col-picks-name">Picks Name</th>
+              <th class="col-total">Total</th>
+              <th class="col-tier">Tier 1</th>
+              <th class="col-tier">Tier 2</th>
+              <th class="col-tier">Tier 3</th>
+              <th class="col-tier">Tier 4</th>
+              <th class="col-tier">Tier 5</th>
+              <th class="col-tier">Tier 6</th>
+            </tr>
+          </thead>
+          <tbody id="pgaStandingsBody"></tbody>
+        </table>
+        <div id="pgaNoDataMsg" class="no-data hidden">No picks found for this tournament.</div>
+      </section>`;
+    const searchInput = document.getElementById('pgaStandingsSearch');
+    if (searchInput) {
+      searchInput.addEventListener('input', e => {
+        const q = e.target.value.toLowerCase().trim();
+        document.querySelectorAll('#pgaStandingsBody tr').forEach(row => {
+          const entry   = row.dataset.entry   || '';
+          const players = row.dataset.players || '';
+          row.style.display = (!q || entry.includes(q) || players.includes(q)) ? '' : 'none';
+        });
+      });
+    }
+  }
   const placeholder = '<p style="padding:1.5rem;color:#666;font-style:italic;">Pool standings not yet available for this year.</p>';
-  ['pga-total','pga-day1','pga-day2','pga-day3','pga-day4','pga-finalpayouts'].forEach(id => {
+  ['pga-day1','pga-day2','pga-day3','pga-day4','pga-finalpayouts'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.innerHTML = placeholder;
   });

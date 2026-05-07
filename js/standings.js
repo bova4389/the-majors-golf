@@ -1748,33 +1748,17 @@ export async function loadSeasonLeaderboard() {
   if (!table) return;
 
   try {
-    const db = getDb();
-
-    // Pull all Masters 2026 picks to get remaining finishers (rank 6+)
-    const picksSnap = await getDocs(
-      query(collection(db, 'picks'), where('tournamentId', '==', 'masters-2026'))
-    );
-    const scoresSnap = await getDoc(doc(db, 'scores', 'masters-2026'));
-    const scores = scoresSnap.exists() ? scoresSnap.data() : {};
-
-    // Use calculateStandings (best 4 of 6) — same engine as the Total tab,
-    // so Season Leaderboard rank order always matches the Total standings.
-    const picks = [];
-    picksSnap.forEach(d => picks.push(d.data()));
-    const { _lastUpdated, ...scoresClean } = scores;
-    const results = calculateStandings(picks, scoresClean, 20);
-    // results is sorted best→worst; first occurrence of each real name = best entry
+    // MASTERS_2026_TOTAL is sorted best→worst; first occurrence of each entrantName = best entry
     const seen = new Set();
     const all = [];
-    for (const r of results) {
-      const rawName = r.pick.realName || r.pick.entrantName;
-      const name = rawName.replace(/ \d+$/, '');
+    for (const r of MASTERS_2026_TOTAL) {
+      const name = r.pick.entrantName;
       if (seen.has(name)) continue;
       seen.add(name);
       all.push({ name, mastersTotal: r.total });
     }
 
-    // Sequential ranks — calculateStandings already broke all ties via 5th/6th scores
+    // Assign sequential ranks (array already in best→worst order with ties broken)
     all.forEach((e, i) => { e.rank = i + 1; });
 
     if (!all.length) {

@@ -1163,6 +1163,97 @@ td.top-4-pick {
 .success-actions { display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
 
 
+/* ===== PICKS / PAYMENTS SEARCH CONTROLS ===== */
+.picks-controls {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  margin-bottom: .75rem;
+  flex-wrap: wrap;
+}
+.picks-controls input[type="text"] {
+  flex: 1;
+  min-width: 200px;
+  padding: .4rem .65rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--white);
+  color: var(--text);
+  font-size: .875rem;
+}
+.payments-controls {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  margin-bottom: .75rem;
+  flex-wrap: wrap;
+}
+.payments-controls input[type="text"] {
+  flex: 1;
+  min-width: 200px;
+  padding: .4rem .65rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--white);
+  color: var(--text);
+  font-size: .875rem;
+}
+.payments-controls select {
+  padding: .4rem .65rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--white);
+  color: var(--text);
+  font-size: .875rem;
+}
+
+/* ===== PAYMENT TRACKING ===== */
+.payment-stats {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+.payment-stat {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: .75rem 1.25rem;
+  text-align: center;
+  min-width: 120px;
+}
+.payment-stat .stat-label {
+  display: block;
+  font-size: .72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: .25rem;
+}
+.payment-stat .stat-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.payment-stat--collected { border-color: var(--green); }
+.payment-stat--collected .stat-value { color: var(--green); }
+.payment-stat--outstanding { border-color: #e67e22; }
+.payment-stat--outstanding .stat-value { color: #e67e22; }
+[data-theme="dark"] .payment-stat--outstanding .stat-value { color: #f0a060; }
+.payment-row--paid td { opacity: .6; }
+.payment-paid-cell { text-align: center; }
+.payment-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: var(--green); }
+.payment-comment {
+  width: 100%;
+  min-width: 150px;
+  padding: .3rem .5rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--white);
+  color: var(--text);
+  font-size: .85rem;
+}
+
 /* ===== UTILITY ===== */
 .hidden       { display: none !important; }
 .muted        { color: var(--text-muted); font-size: .875rem; }

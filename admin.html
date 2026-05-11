@@ -57,6 +57,7 @@
         <button class="tab-btn" onclick="showTab('picks')">Picks</button>
         <button class="tab-btn" onclick="showTab('scores')">Score Overrides</button>
         <button class="tab-btn" onclick="showTab('prizes')">Prize Calculator</button>
+        <button class="tab-btn" onclick="showTab('payments')">Payments</button>
       </div>
 
       <!-- TOURNAMENTS TAB -->
@@ -118,6 +119,28 @@
         </div>
         <div id="prizeCalcResults" class="prize-calc">
           <p class="muted">Select a final tournament to calculate payouts.</p>
+        </div>
+      </div>
+
+      <!-- PAYMENT TRACKING TAB -->
+      <div id="tab-payments" class="tab-panel hidden">
+        <div class="panel-header">
+          <h2>Payment Tracking</h2>
+          <select id="paymentsTournamentSelect" class="tournament-select" onchange="loadPaymentsForAdmin()">
+            <option value="">Select a tournament...</option>
+          </select>
+        </div>
+        <div id="paymentsStats"></div>
+        <div class="payments-controls">
+          <input type="text" id="paymentsSearch" placeholder="Search by name..." oninput="filterPaymentsTable()" />
+          <select id="paymentsFilter" onchange="filterPaymentsTable()">
+            <option value="all">All Players</option>
+            <option value="paid">Paid Only</option>
+            <option value="unpaid">Unpaid Only</option>
+          </select>
+        </div>
+        <div id="paymentsAdminTable" class="table-wrapper">
+          <p class="muted">Select a tournament to view payments.</p>
         </div>
       </div>
 
@@ -232,6 +255,7 @@
       loadPicksForAdmin, openAddPickModal, closeAddPickModal, saveAdminPick, exportPicksCsv,
       loadScoresForAdmin,
       loadPrizesForAdmin,
+      loadPaymentsForAdmin,
       closeAllModals
     } from './js/admin.js';
 
@@ -250,6 +274,7 @@
     window.saveAdminPick = saveAdminPick;
     window.loadScoresForAdmin = loadScoresForAdmin;
     window.loadPrizesForAdmin = loadPrizesForAdmin;
+    window.loadPaymentsForAdmin = loadPaymentsForAdmin;
     window.closeAllModals = closeAllModals;
     document.getElementById('footerYear').textContent = new Date().getFullYear();
 

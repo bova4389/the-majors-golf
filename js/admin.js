@@ -55,7 +55,7 @@ export function showTab(name) {
     el.classList.toggle('hidden', el.id !== `tab-${name}`);
   });
   document.querySelectorAll('.tab-btn').forEach((btn, i) => {
-    const tabs = ['tournaments','tiers','picks','scores','prizes'];
+    const tabs = ['tournaments','tiers','picks','scores','prizes','payments'];
     btn.classList.toggle('active', tabs[i] === name);
   });
 }
@@ -72,7 +72,7 @@ async function loadAllTournamentSelects() {
     `<option value="${t.id}">${t.name} (${t.year})</option>`
   ).join('');
 
-  ['tierTournamentSelect','picksTournamentSelect','scoresTournamentSelect','prizeTournamentSelect']
+  ['tierTournamentSelect','picksTournamentSelect','scoresTournamentSelect','prizeTournamentSelect','paymentsTournamentSelect']
     .forEach(id => {
       const el = document.getElementById(id);
       if (el) el.innerHTML = '<option value="">Select a tournament...</option>' + optionHtml;
@@ -412,7 +412,8 @@ export async function loadPicksForAdmin() {
   }
 
   container.innerHTML = `
-    <div style="margin-bottom:.75rem">
+    <div class="picks-controls">
+      <input type="text" id="picksSearch" placeholder="Search any column..." oninput="filterPicksTable(this.value)" />
       <button class="btn btn-sm" onclick="exportPicksCsv()">Export CSV</button>
     </div>
     <table class="admin-table">
@@ -689,6 +690,175 @@ function buildPayoutTable(payouts) {
       </tbody>
     </table>`;
 }
+
+// ─── PICKS SEARCH ─────────────────────────────────────────────────────────────
+window.filterPicksTable = function(val) {
+  const lower = val.toLowerCase();
+  document.querySelectorAll('#picksAdminTable table tbody tr').forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(lower) ? '' : 'none';
+  });
+};
+
+// ─── PAYMENT TRACKING ─────────────────────────────────────────────────────────
+let _paymentsData = {};
+let _paymentsTournamentId = null;
+let _paymentsGrouped = [];
+
+export async function loadPaymentsForAdmin() {
+  const tournamentId = document.getElementById('paymentsTournamentSelect').value;
+  const statsEl = document.getElementById('paymentsStats');
+  const container = document.getElementById('paymentsAdminTable');
+
+  if (!tournamentId) {
+    statsEl.innerHTML = '';
+    container.innerHTML = '<p class="muted">Select a tournament to view payments.</p>';
+    return;
+  }
+
+  _paymentsTournamentId = tournamentId;
+  const db = getDb();
+
+  const [picksSnap, paymentSnap] = await Promise.all([
+    getDocs(query(collection(db, 'picks'), where('tournamentId', '==', tournamentId))),
+    getDoc(doc(db, 'payments', tournamentId))
+  ]);
+
+  const picks = [];
+  picksSnap.forEach(d => picks.push({ id: d.id, ...d.data() }));
+  _paymentsData = paymentSnap.exists() ? paymentSnap.data() : {};
+
+  const grouped = {};
+  picks.forEach(p => {
+    const key = p.realName ?? p.entrantName ?? '—';
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(p.entrantName ?? '—');
+  });
+
+  _paymentsGrouped = Object.entries(grouped)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([realName, entries]) => ({
+      realName,
+      entries,
+      paid: _paymentsData[payKey(realName)]?.paid ?? false,
+      comments: _paymentsData[payKey(realName)]?.comments ?? ''
+    }));
+
+  renderPaymentsStats();
+  renderPaymentsTableRows();
+}
+
+function payKey(name) {
+  return name.replace(/[^a-zA-Z0-9]/g, '_');
+}
+
+function renderPaymentsStats() {
+  const statsEl = document.getElementById('paymentsStats');
+  if (!statsEl) return;
+  const totalEntries = _paymentsGrouped.reduce((s, r) => s + r.entries.length, 0);
+  const paidEntries  = _paymentsGrouped.filter(r => r.paid).reduce((s, r) => s + r.entries.length, 0);
+  const unpaidEntries = totalEntries - paidEntries;
+  statsEl.innerHTML = `
+    <div class="payment-stats">
+      <div class="payment-stat">
+        <span class="stat-label">Total Entries</span>
+        <span class="stat-value">${totalEntries}</span>
+      </div>
+      <div class="payment-stat payment-stat--collected">
+        <span class="stat-label">Collected</span>
+        <span class="stat-value">$${paidEntries * 25}</span>
+      </div>
+      <div class="payment-stat payment-stat--outstanding">
+        <span class="stat-label">Outstanding</span>
+        <span class="stat-value">$${unpaidEntries * 25}</span>
+      </div>
+      <div class="payment-stat">
+        <span class="stat-label">Total Owed</span>
+        <span class="stat-value">$${totalEntries * 25}</span>
+      </div>
+    </div>
+  `;
+}
+
+function renderPaymentsTableRows() {
+  const container = document.getElementById('paymentsAdminTable');
+  const searchVal  = (document.getElementById('paymentsSearch')?.value ?? '').toLowerCase();
+  const paidFilter = document.getElementById('paymentsFilter')?.value ?? 'all';
+
+  const filtered = _paymentsGrouped.filter(r => {
+    const matchesSearch = !searchVal ||
+      r.realName.toLowerCase().includes(searchVal) ||
+      r.entries.some(e => e.toLowerCase().includes(searchVal));
+    const matchesPaid = paidFilter === 'all' ||
+      (paidFilter === 'paid' && r.paid) ||
+      (paidFilter === 'unpaid' && !r.paid);
+    return matchesSearch && matchesPaid;
+  });
+
+  if (!filtered.length) {
+    container.innerHTML = '<p class="muted">No results match your filter.</p>';
+    return;
+  }
+
+  container.innerHTML = `
+    <table class="admin-table">
+      <thead><tr>
+        <th>Real Name</th>
+        <th>Entry Name(s)</th>
+        <th># Entries</th>
+        <th>Amount Owed</th>
+        <th>Paid</th>
+        <th>Comments</th>
+      </tr></thead>
+      <tbody>
+        ${filtered.map(r => `
+          <tr class="${r.paid ? 'payment-row--paid' : ''}">
+            <td>${escapeHtml(r.realName)}</td>
+            <td>${r.entries.map(e => escapeHtml(e)).join('<br>')}</td>
+            <td>${r.entries.length}</td>
+            <td>$${r.entries.length * 25}</td>
+            <td class="payment-paid-cell">
+              <input type="checkbox" class="payment-checkbox"
+                ${r.paid ? 'checked' : ''}
+                onchange="togglePayment('${escapeHtml(r.realName)}', this.checked, this)" />
+            </td>
+            <td>
+              <input type="text" class="payment-comment"
+                value="${escapeHtml(r.comments)}"
+                placeholder="Add note..."
+                onblur="savePaymentComment('${escapeHtml(r.realName)}', this.value)" />
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+window.filterPaymentsTable = function() {
+  renderPaymentsTableRows();
+};
+
+window.togglePayment = async function(realName, paid, el) {
+  if (!_paymentsTournamentId) return;
+  const key = payKey(realName);
+  if (!_paymentsData[key]) _paymentsData[key] = { paid: false, comments: '' };
+  _paymentsData[key].paid = paid;
+  const entry = _paymentsGrouped.find(r => r.realName === realName);
+  if (entry) entry.paid = paid;
+  el.closest('tr').classList.toggle('payment-row--paid', paid);
+  await setDoc(doc(getDb(), 'payments', _paymentsTournamentId), _paymentsData);
+  renderPaymentsStats();
+};
+
+window.savePaymentComment = async function(realName, comments) {
+  if (!_paymentsTournamentId) return;
+  const key = payKey(realName);
+  if (!_paymentsData[key]) _paymentsData[key] = { paid: false, comments: '' };
+  _paymentsData[key].comments = comments;
+  const entry = _paymentsGrouped.find(r => r.realName === realName);
+  if (entry) entry.comments = comments;
+  await setDoc(doc(getDb(), 'payments', _paymentsTournamentId), _paymentsData);
+};
 
 // ─── Modals ───────────────────────────────────────────────────────────────────
 export function closeAllModals() {

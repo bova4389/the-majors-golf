@@ -202,6 +202,10 @@ export async function loadTiersForAdmin() {
       <div class="tier-editor-block">
         <div class="tier-editor-header">
           <h3>Tier ${i} <span class="tier-count">(${golfers.length} golfers)</span></h3>
+          <div class="tier-header-actions">
+            <button id="removeSelectedBtn${i}" class="btn btn-sm btn-remove-selected" style="display:none" onclick="removeSelectedGolfers(${i})">Remove Selected (0)</button>
+            <button class="btn btn-sm btn-danger-outline" onclick="clearAllGolfers(${i})">Clear All</button>
+          </div>
         </div>
         <div class="golfer-list" id="golferList${i}">
           ${golfers.map(g => golferTag(i, g.name)).join('')}
@@ -224,8 +228,58 @@ export async function loadTiersForAdmin() {
 }
 
 function golferTag(tier, name) {
-  return `<span class="golfer-tag">${escapeHtml(name)}<button class="remove-golfer" onclick="removeGolfer(${tier}, '${escapeHtml(name)}')" title="Remove">×</button></span>`;
+  return `<span class="golfer-tag" onclick="toggleGolferSelect(this, ${tier})">${escapeHtml(name)}<button class="remove-golfer" onclick="event.stopPropagation(); removeGolfer(${tier}, '${escapeHtml(name)}')" title="Remove">×</button></span>`;
 }
+
+window.toggleGolferSelect = function(el, tier) {
+  el.classList.toggle('golfer-tag--selected');
+  updateRemoveSelectedBtn(tier);
+};
+
+function updateRemoveSelectedBtn(tier) {
+  const list = document.getElementById(`golferList${tier}`);
+  const btn = document.getElementById(`removeSelectedBtn${tier}`);
+  if (!list || !btn) return;
+  const count = list.querySelectorAll('.golfer-tag--selected').length;
+  if (count > 0) {
+    btn.style.display = '';
+    btn.textContent = `Remove Selected (${count})`;
+  } else {
+    btn.style.display = 'none';
+  }
+}
+
+window.clearAllGolfers = async function(tier) {
+  if (!confirm(`Remove ALL golfers from Tier ${tier}? This cannot be undone.`)) return;
+  const tournamentId = document.getElementById('tierTournamentSelect').value;
+  if (!tournamentId) return;
+  const db = getDb();
+  const ref = doc(db, 'tiers', tournamentId);
+  const snap = await getDoc(ref);
+  const data = snap.exists() ? snap.data() : {};
+  data[`tier${tier}`] = [];
+  await setDoc(ref, data);
+  await loadTiersForAdmin();
+};
+
+window.removeSelectedGolfers = async function(tier) {
+  const list = document.getElementById(`golferList${tier}`);
+  if (!list) return;
+  const selected = [...list.querySelectorAll('.golfer-tag--selected')].map(el => el.textContent.replace('×', '').trim());
+  if (!selected.length) return;
+  if (!confirm(`Remove ${selected.length} selected golfer(s) from Tier ${tier}?`)) return;
+  const tournamentId = document.getElementById('tierTournamentSelect').value;
+  if (!tournamentId) return;
+  const db = getDb();
+  const ref = doc(db, 'tiers', tournamentId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return;
+  const data = snap.data();
+  const key = `tier${tier}`;
+  data[key] = (data[key] ?? []).filter(g => !selected.includes(g.name));
+  await setDoc(ref, data);
+  await loadTiersForAdmin();
+};
 
 window.addGolfer = async function(tier, tournamentId) {
   const input = document.getElementById(`newGolfer${tier}`);

@@ -1034,8 +1034,9 @@ td.top-4-pick {
   padding: 1rem 1.25rem;
   box-shadow: var(--shadow);
 }
-.tier-editor-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .75rem; }
+.tier-editor-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .75rem; gap: .5rem; flex-wrap: wrap; }
 .tier-editor-header h3 { font-size: .95rem; font-weight: 700; color: var(--green); }
+.tier-header-actions { display: flex; gap: .4rem; align-items: center; flex-wrap: wrap; }
 .golfer-list { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .75rem; }
 .golfer-tag {
   background: var(--green-muted);
@@ -1046,7 +1047,18 @@ td.top-4-pick {
   display: flex;
   align-items: center;
   gap: .35rem;
+  cursor: pointer;
+  user-select: none;
+  border: 2px solid transparent;
+  transition: border-color .15s, background .15s;
 }
+.golfer-tag:hover { border-color: var(--green); }
+.golfer-tag--selected {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+.golfer-tag--selected .remove-golfer { color: #fff; }
 .golfer-tag .remove-golfer {
   cursor: pointer;
   font-weight: 700;
@@ -1059,6 +1071,18 @@ td.top-4-pick {
   line-height: 1;
 }
 .golfer-tag .remove-golfer:hover { opacity: 1; }
+.btn-danger-outline {
+  background: none;
+  color: var(--red);
+  border-color: var(--red);
+}
+.btn-danger-outline:hover { background: var(--red); color: #fff; }
+.btn-remove-selected {
+  background: none;
+  color: var(--red);
+  border-color: var(--red);
+}
+.btn-remove-selected:hover { background: var(--red); color: #fff; }
 .add-golfer-row { display: flex; gap: .5rem; }
 .add-golfer-row input { flex: 1; }
 .tier-count { font-size: .8rem; font-weight: 400; color: var(--text-muted); margin-left: .4rem; }

@@ -196,7 +196,11 @@ export async function loadTiersForAdmin() {
   const snap = await getDoc(doc(db, 'tiers', tournamentId));
   const tiers = snap.exists() ? snap.data() : {};
 
-  container.innerHTML = [1,2,3,4,5,6].map(i => {
+  container.innerHTML = `
+    <div style="margin-bottom:1rem;text-align:right;">
+      <button class="btn btn-sm" onclick="exportAllTiersCsv()">Export All Tiers CSV</button>
+    </div>
+  ` + [1,2,3,4,5,6].map(i => {
     const golfers = tiers[`tier${i}`] ?? [];
     return `
       <div class="tier-editor-block">
@@ -204,6 +208,7 @@ export async function loadTiersForAdmin() {
           <h3>Tier ${i} <span class="tier-count">(${golfers.length} golfers)</span></h3>
           <div class="tier-header-actions">
             <button id="removeSelectedBtn${i}" class="btn btn-sm btn-remove-selected" style="display:none" onclick="removeSelectedGolfers(${i})">Remove Selected (0)</button>
+            <button class="btn btn-sm" onclick="exportTierCsv(${i})">Export CSV</button>
             <button class="btn btn-sm btn-danger-outline" onclick="clearAllGolfers(${i})">Clear All</button>
           </div>
         </div>
@@ -279,6 +284,41 @@ window.removeSelectedGolfers = async function(tier) {
   data[key] = (data[key] ?? []).filter(g => !selected.includes(g.name));
   await setDoc(ref, data);
   await loadTiersForAdmin();
+};
+
+function downloadCsv(filename, rows) {
+  const csvEscape = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const csv = rows.map(r => r.map(csvEscape).join(',')).join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function fetchTiersData() {
+  const tournamentId = document.getElementById('tierTournamentSelect').value;
+  if (!tournamentId) { alert('Select a tournament first.'); return null; }
+  const snap = await getDoc(doc(getDb(), 'tiers', tournamentId));
+  return snap.exists() ? snap.data() : {};
+}
+
+window.exportTierCsv = async function(tier) {
+  const tiers = await fetchTiersData();
+  if (!tiers) return;
+  const golfers = tiers[`tier${tier}`] ?? [];
+  const rows = [['Tier', 'Golfer Name'], ...golfers.map(g => [`Tier ${tier}`, g.name])];
+  downloadCsv(`tier${tier}-golfers.csv`, rows);
+};
+
+window.exportAllTiersCsv = async function() {
+  const tiers = await fetchTiersData();
+  if (!tiers) return;
+  const rows = [['Tier', 'Golfer Name']];
+  for (let i = 1; i <= 6; i++) {
+    (tiers[`tier${i}`] ?? []).forEach(g => rows.push([`Tier ${i}`, g.name]));
+  }
+  downloadCsv('all-tiers-golfers.csv', rows);
 };
 
 window.addGolfer = async function(tier, tournamentId) {

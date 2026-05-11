@@ -148,7 +148,20 @@ export function switchMajorYear(major, year) {
     pgaActiveYear = year;
     loadPgaScoreboard();
     if (year === 2025) { loadPga2025TotalStandings(); loadPga2025Round1Standings(); loadPga2025Round2Standings(); loadPga2025Round3Standings(); loadPga2025Round4Standings(); loadPga2025Payouts(); }
-    else { clearPgaPoolPanels(); if (t) { loadPgaTournamentData(t.id); } }
+    else {
+      // Reset inner tab state so 2025 panels don't stay visible when switching to 2026
+      const pgaPanel = document.getElementById('panel-pga');
+      if (pgaPanel) {
+        pgaPanel.querySelectorAll('.inner-panel').forEach(p => { p.classList.remove('inner-panel-active'); p.classList.add('hidden'); });
+        pgaPanel.querySelectorAll('.inner-tab').forEach(btn => btn.classList.remove('active'));
+        const totalPanel = document.getElementById('pga-total');
+        if (totalPanel) { totalPanel.classList.remove('hidden'); totalPanel.classList.add('inner-panel-active'); }
+        const totalBtn = pgaPanel.querySelector('.inner-tab[data-inner="total"]');
+        if (totalBtn) totalBtn.classList.add('active');
+      }
+      clearPgaPoolPanels();
+      if (t) { loadPgaTournamentData(t.id); }
+    }
   }
   if (major === 'usopen') {
     usOpenActiveYear = year;

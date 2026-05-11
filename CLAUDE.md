@@ -16,6 +16,79 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Cody** — Co-commissioner
 - **Matt** — Website Vibes Guy
 
+## Priority: PII Data Split (do after current tournament closes)
+
+**Problem**: The `picks` collection stores `email` and `phone` alongside the leaderboard fields. Because the public leaderboard must be able to read `picks`, the entire document — including PII — is technically readable via the Firestore REST API by anyone who knows the project ID (which is visible in `firebase-config.js`). Email and phone are never rendered on the public leaderboard, but they are accessible if someone queries Firestore directly.
+
+**Fix**: Split PII into a separate admin-only collection at pick-submission time.
+
+### Target data model
+
+```
+picks/{autoId}                         ← publicly readable (leaderboard needs it)
+  tournamentId, realName, entrantName,
+  t1, t2, t3, t4, t5, t6, submittedAt
+
+pickDetails/{same autoId as picks}     ← admin-read-only (NEW)
+  tournamentId, realName, entrantName,
+  email, phone
+```
+
+### What needs to change
+
+1. **`js/picks.js`** — in the submit function, write two documents atomically:
+   - `picks/{id}` — everything except email and phone
+   - `pickDetails/{id}` — tournamentId, realName, entrantName, email, phone
+   Use the same auto-generated ID for both so they stay in sync.
+
+2. **`js/admin.js`** — update `loadPicksForAdmin()` and `loadPaymentsForAdmin()` to join `picks` + `pickDetails` on document ID so the admin Picks tab still shows email and phone columns. Admin visibility must not be lost.
+
+3. **`js/admin.js`** — update `saveAdminPick()` to write/update both documents.
+
+4. **`js/admin.js`** — update `deletePick()` to delete both documents.
+
+5. **`js/admin.js`** — update `exportPicksCsv()` to include email and phone sourced from `pickDetails`.
+
+6. **Firestore security rules** (Firebase Console → Firestore → Rules) — apply these rules:
+
+```js
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /picks/{id} {
+      allow read: if true;
+      allow write: if true;
+    }
+    match /pickDetails/{id} {
+      allow read, write: if request.auth != null;
+    }
+    match /tournaments/{id} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    match /tiers/{id} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    match /scores/{id} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    match /payments/{id} {
+      allow read, write: if request.auth != null;
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+```
+
+7. **Data migration** — existing picks already in Firestore have email/phone in the `picks` document. After the code ships, run a one-time migration: for each existing `picks` doc that has `email` or `phone`, create the matching `pickDetails` doc, then remove `email` and `phone` from the `picks` doc. This can be done from the browser console while logged in as admin using the Firebase SDK.
+
+### Why not do this during a live tournament
+Any code change to `picks.js` during an active submission window risks breaking the form mid-submission. Wait until the current tournament closes (status → `final`), then implement and migrate. The risk to PII in the interim is low — this is a small private pool with no realistic scraper threat.
+
 ## Tech Stack Constraints
 Plain HTML / CSS / Vanilla JS only. **Never introduce npm, Node, webpack, or any build step.** All JS loaded via `<script type="module">` or CDN `<script>` tags. Firebase JS SDK loaded from `https://www.gstatic.com/firebasejs/10.12.0/`.
 
@@ -76,6 +149,10 @@ tiers/{tournamentId}
 picks/{autoId}
   tournamentId, realName, entrantName (= Picks Name, unique per tournament),
   email, phone, t1, t2, t3, t4, t5, t6, submittedAt
+  — NOTE: email and phone will move to pickDetails once the PII split is implemented (see priority section above)
+
+pickDetails/{same autoId}  ← does not exist yet; created by the PII split
+  tournamentId, realName, entrantName, email, phone
 
 scores/{tournamentId}
   {golferName}: { score (number, to-par), position, status ('active'|'cut'|'wd'), lastUpdated }

@@ -1696,6 +1696,71 @@ td.top-4-pick {
   .major-logo      { flex-shrink: 1; }
 }
 
+/* ── Admin edit pick search ── */
+.edit-pick-search-results {
+  max-height: 320px;
+  overflow-y: auto;
+  margin-bottom: .5rem;
+}
+.edit-pick-search-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .6rem .75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: .4rem;
+  cursor: pointer;
+  transition: background .12s;
+}
+.edit-pick-search-row:hover { background: var(--gray-light); }
+.ep-real-name { font-weight: 600; }
+.ep-picks-name { font-size: .85rem; color: var(--text-muted); }
+
+/* ── Edit pick feature (picks.html) ── */
+.edit-pick-banner {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .75rem 1rem;
+  background: var(--bg-alt, #f5f7f5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 1.25rem;
+}
+.edit-pick-banner-label { font-size: .9rem; color: var(--text-muted); }
+
+.edit-pick-card {
+  display: block;
+  padding: .85rem 1rem;
+  margin-bottom: .6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background .15s;
+}
+.edit-pick-card:hover { background: var(--gray-light); }
+
+.tier-locked-pick {
+  padding: .35rem .5rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.success-pin-reminder {
+  margin: .75rem 0;
+  padding: .75rem 1rem;
+  background: #fffbea;
+  border: 1px solid #f0c040;
+  border-radius: var(--radius);
+  font-size: .95rem;
+}
+[data-theme="dark"] .success-pin-reminder {
+  background: #2a2410;
+  border-color: #8a6a00;
+  color: #f0d070;
+}
+
 /* ── Dark mode: home tab background matches logo black ── */
 [data-theme="dark"] #panel-home { background: #000; }
 

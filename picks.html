@@ -59,6 +59,12 @@
         <p id="formDeadline" class="form-deadline"></p>
       </div>
 
+      <!-- Edit previous submission shortcut -->
+      <div class="edit-pick-banner">
+        <span class="edit-pick-banner-label">Already submitted a lineup?</span>
+        <button type="button" class="btn btn-sm" onclick="openEditFlow()">Edit a Previous Submission →</button>
+      </div>
+
       <form id="picksForm" class="picks-form" onsubmit="submitPicks(event)">
 
         <!-- Entry info -->
@@ -82,6 +88,11 @@
             <label for="entrantPhone">Cell Phone <span class="required">*</span></label>
             <input type="tel" id="entrantPhone" placeholder="555-555-5555" required maxlength="20" />
           </div>
+          <div class="form-row">
+            <label for="entrantPin">Pick PIN <span class="required">*</span></label>
+            <input type="text" id="entrantPin" placeholder="4-digit PIN (e.g. 1234)" maxlength="4" inputmode="numeric" pattern="[0-9]{4}" required />
+            <small class="field-hint">Create a 4-digit number PIN. You'll use this + your email to edit your picks before the tournament starts. <strong>Tip: use the same PIN for all your entries</strong> — it makes editing much easier.</small>
+          </div>
         </div>
 
         <!-- Tier picks -->
@@ -102,6 +113,87 @@
       </form>
     </section>
 
+    <!-- Edit flow -->
+    <section id="editFlow" class="hidden">
+
+      <!-- Step 1: Lookup -->
+      <div id="editLookup">
+        <div class="form-header">
+          <button class="btn btn-sm pick-form-back" onclick="closeEditFlow()">← Submit New Picks</button>
+          <h2 id="editFlowTournamentName" class="form-title"></h2>
+          <p class="form-deadline">Edit your picks before the tournament starts</p>
+        </div>
+        <div class="form-section">
+          <h3 class="form-section-title">Find Your Submission</h3>
+          <div class="form-row">
+            <label for="editEmail">Email <span class="required">*</span></label>
+            <input type="email" id="editEmail" placeholder="you@email.com" />
+          </div>
+          <div class="form-row">
+            <label for="editPin">Pick PIN <span class="required">*</span></label>
+            <input type="text" id="editPin" placeholder="4-digit PIN" maxlength="4" inputmode="numeric" />
+            <small class="field-hint">Your PIN is the 4-digit code you created when submitting picks. Each lineup has its own PIN (or use the same PIN across all entries). If you can't remember your PIN, please reach out to the Commissioner.</small>
+          </div>
+        </div>
+        <div class="form-submit-row">
+          <button type="button" id="editFindBtn" class="btn btn-primary" onclick="lookupPicksForEdit()">Find My Picks</button>
+        </div>
+        <p id="editLookupError" class="form-error hidden"></p>
+      </div>
+
+      <!-- Step 2: List of matching picks -->
+      <div id="editPicksList" class="hidden">
+        <div class="form-header">
+          <button class="btn btn-sm pick-form-back" onclick="showEditLookup()">← Back</button>
+          <h2 class="form-title">Your Submissions</h2>
+          <p class="form-deadline">Select a submission to edit</p>
+        </div>
+        <div id="editPicksListItems"></div>
+      </div>
+
+      <!-- Step 3: Edit picks form -->
+      <div id="editPicksForm" class="hidden">
+        <div class="form-header">
+          <button class="btn btn-sm pick-form-back" onclick="backToEditList()">← Back</button>
+          <h2 id="editPickName" class="form-title"></h2>
+          <p id="editPickDeadline" class="form-deadline"></p>
+        </div>
+        <div id="editLockedBanner" class="locked-banner hidden">
+          <div class="locked-icon">🔒</div>
+          <h2>Picks Are Locked</h2>
+          <p>The tournament has started — no more edits can be made. Your current picks are shown below.</p>
+        </div>
+        <div class="form-section" id="editTierSection">
+          <h3 class="form-section-title">Your Picks</h3>
+          <div id="editTierPicksContainer" class="tier-picks-container"></div>
+        </div>
+        <div id="editSaveRow" class="form-submit-row">
+          <button type="button" class="btn btn-primary btn-lg" onclick="showEditConfirmation()">Save Changes</button>
+          <button type="button" class="btn" onclick="backToEditList()">Cancel</button>
+        </div>
+        <p id="editFormError" class="form-error hidden"></p>
+      </div>
+
+      <!-- Step 4: Edit success -->
+      <div id="editSuccess" class="hidden">
+        <div class="success-icon">✅</div>
+        <h2>Picks Updated!</h2>
+        <p id="editSuccessDetail"></p>
+        <table class="success-picks-table">
+          <tbody id="editSuccessSummary"></tbody>
+        </table>
+        <div class="success-warning">
+          ⚠️ <strong>Reminder:</strong> Standings are hidden until the tournament begins. Your updated picks will be reflected once the tournament starts.
+        </div>
+        <div class="success-actions">
+          <button class="btn" onclick="showEditLookup()">Edit Another Entry</button>
+          <button class="btn" onclick="closeEditFlow()">Submit a New Entry</button>
+          <a href="index.html" class="btn">View Standings</a>
+        </div>
+      </div>
+
+    </section>
+
     <!-- Success state -->
     <section id="successMsg" class="success-banner hidden">
       <div class="success-icon">✅</div>
@@ -110,8 +202,9 @@
       <table class="success-picks-table">
         <tbody id="successPicksSummary"></tbody>
       </table>
+      <div id="successPinReminder" class="success-pin-reminder hidden"></div>
       <div class="success-warning">
-        ⚠️ <strong>Save your picks now</strong> — standings are hidden until the tournament begins. Email yourself a copy or take a screenshot. You will not be able to view your selections again until picks lock.
+        ⚠️ <strong>Save your picks now</strong> — standings are hidden until the tournament begins. Email yourself a copy or take a screenshot. To view or edit your picks before the tournament starts, click <strong>Submit Picks</strong> → <strong>Edit a Previous Submission</strong>.
       </div>
       <div class="success-actions">
         <a id="successMailtoBtn" class="btn btn-primary hidden">📧 Email Yourself a Copy</a>
@@ -119,6 +212,20 @@
         <a href="index.html" class="btn">View Standings</a>
       </div>
     </section>
+
+    <!-- Confirmation modal -->
+    <div id="editConfirmOverlay" class="modal-overlay hidden"></div>
+    <div id="editConfirmModal" class="modal hidden">
+      <div class="modal-box">
+        <h3>Confirm Your Changes</h3>
+        <p>Are you sure you want to update your picks?</p>
+        <div id="editConfirmDiff"></div>
+        <div class="modal-actions">
+          <button class="btn" onclick="closeEditConfirm()">No, Go Back</button>
+          <button id="editConfirmSaveBtn" class="btn btn-primary" onclick="confirmEditSave()">Yes, Save Changes</button>
+        </div>
+      </div>
+    </div>
   </main>
 
   <footer class="site-footer">
@@ -127,10 +234,25 @@
 
   <script type="module">
     import { initFirebase } from './js/firebase-config.js';
-    import { loadPickForm, submitPicks, backToTournamentSelect } from './js/picks.js';
+    import {
+      loadPickForm, submitPicks, backToTournamentSelect,
+      openEditFlow, closeEditFlow,
+      showEditLookup, backToEditList,
+      lookupPicksForEdit, openEditPickFormById,
+      showEditConfirmation, closeEditConfirm, confirmEditSave
+    } from './js/picks.js';
     initFirebase();
     window.submitPicks = submitPicks;
     window.backToTournamentSelect = backToTournamentSelect;
+    window.openEditFlow = openEditFlow;
+    window.closeEditFlow = closeEditFlow;
+    window.showEditLookup = showEditLookup;
+    window.backToEditList = backToEditList;
+    window.lookupPicksForEdit = lookupPicksForEdit;
+    window.openEditPickFormById = openEditPickFormById;
+    window.showEditConfirmation = showEditConfirmation;
+    window.closeEditConfirm = closeEditConfirm;
+    window.confirmEditSave = confirmEditSave;
     document.getElementById('footerYear').textContent = new Date().getFullYear();
     loadPickForm();
 

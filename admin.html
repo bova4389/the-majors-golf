@@ -90,6 +90,7 @@
             <option value="">Select a tournament...</option>
           </select>
           <button class="btn btn-primary" onclick="openAddPickModal()">+ Add Pick</button>
+          <button class="btn" onclick="openEditPickSearch()">Edit Pick</button>
         </div>
         <div id="picksAdminTable" class="table-wrapper">
           <p class="muted">Select a tournament to view picks.</p>
@@ -208,6 +209,22 @@
     </div>
   </div>
 
+  <!-- Edit Pick Search Modal -->
+  <div id="editPickSearchModal" class="modal hidden">
+    <div class="modal-box">
+      <h3>Edit a Pick</h3>
+      <div class="form-row" style="margin-bottom:.75rem">
+        <input type="text" id="editPickSearchInput" placeholder="Search by name..." oninput="filterEditPickSearch(this.value)" autocomplete="off" />
+      </div>
+      <div id="editPickSearchResults" class="edit-pick-search-results">
+        <p class="muted">Start typing to find a pick.</p>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn" onclick="closeEditPickSearch()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Add Pick Modal -->
   <div id="addPickModal" class="modal hidden">
     <div class="modal-box">
@@ -231,6 +248,11 @@
           <label>Cell Phone</label>
           <input type="tel" id="apFormPhone" />
         </div>
+        <div class="form-row">
+          <label>Reset PIN <small style="font-weight:400">(optional — 4 digits)</small></label>
+          <input type="text" id="apFormPin" placeholder="Leave blank to keep existing PIN" maxlength="4" inputmode="numeric" />
+          <small style="display:block;margin-top:.3rem;color:var(--text-muted);font-size:.82rem">Enter a new 4-digit PIN to reset this entry's access code. The user needs their email + PIN to edit picks.</small>
+        </div>
         <div id="apTierSelects"></div>
         <div class="modal-actions">
           <button type="button" class="btn" onclick="closeAddPickModal()">Cancel</button>
@@ -253,6 +275,7 @@
       openTournamentModal, closeTournamentModal, saveTournament,
       loadTiersForAdmin,
       loadPicksForAdmin, openAddPickModal, closeAddPickModal, saveAdminPick, exportPicksCsv,
+      openEditPickSearch, closeEditPickSearch, filterEditPickSearch,
       loadScoresForAdmin,
       loadPrizesForAdmin,
       loadPaymentsForAdmin,
@@ -272,6 +295,9 @@
     window.openAddPickModal = openAddPickModal;
     window.closeAddPickModal = closeAddPickModal;
     window.saveAdminPick = saveAdminPick;
+    window.openEditPickSearch = openEditPickSearch;
+    window.closeEditPickSearch = closeEditPickSearch;
+    window.filterEditPickSearch = filterEditPickSearch;
     window.loadScoresForAdmin = loadScoresForAdmin;
     window.loadPrizesForAdmin = loadPrizesForAdmin;
     window.loadPaymentsForAdmin = loadPaymentsForAdmin;

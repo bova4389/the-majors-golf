@@ -474,6 +474,58 @@ export function exportPicksCsv() {
   URL.revokeObjectURL(url);
 }
 
+export function openEditPickSearch() {
+  const container = document.getElementById('picksAdminTable');
+  if (!container._picksData || !container._picksData.length) {
+    alert('Select a tournament and load picks first.');
+    return;
+  }
+  document.getElementById('editPickSearchInput').value = '';
+  document.getElementById('editPickSearchResults').innerHTML = '<p class="muted">Start typing to find a pick.</p>';
+  document.getElementById('editPickSearchModal').classList.remove('hidden');
+  document.getElementById('modalOverlay').classList.remove('hidden');
+  document.getElementById('editPickSearchInput').focus();
+}
+
+export function closeEditPickSearch() {
+  document.getElementById('editPickSearchModal').classList.add('hidden');
+  document.getElementById('modalOverlay').classList.add('hidden');
+}
+
+export function filterEditPickSearch(query) {
+  const container = document.getElementById('picksAdminTable');
+  const picks = container._picksData || [];
+  const resultsEl = document.getElementById('editPickSearchResults');
+  const q = query.trim().toLowerCase();
+
+  if (!q) {
+    resultsEl.innerHTML = '<p class="muted">Start typing to find a pick.</p>';
+    return;
+  }
+
+  const matches = picks.filter(p =>
+    (p.realName ?? '').toLowerCase().includes(q) ||
+    (p.entrantName ?? '').toLowerCase().includes(q)
+  );
+
+  if (!matches.length) {
+    resultsEl.innerHTML = '<p class="muted">No picks found matching that name.</p>';
+    return;
+  }
+
+  resultsEl.innerHTML = matches.map(p => `
+    <div class="edit-pick-search-row" onclick="selectPickToEdit('${p.id}')">
+      <span class="ep-real-name">${escapeHtml(p.realName ?? p.entrantName ?? '—')}</span>
+      <span class="ep-picks-name">${escapeHtml(p.entrantName ?? '—')}</span>
+    </div>
+  `).join('');
+}
+
+window.selectPickToEdit = async function(pickId) {
+  closeEditPickSearch();
+  await openAddPickModal(pickId);
+};
+
 export async function openAddPickModal(pickId = null) {
   const tournamentId = document.getElementById('picksTournamentSelect').value;
   if (!tournamentId && !pickId) { alert('Select a tournament first.'); return; }
@@ -517,6 +569,9 @@ export async function openAddPickModal(pickId = null) {
     `;
   }).join('');
 
+  // Always clear the PIN reset field — PIN is hashed and cannot be displayed
+  document.getElementById('apFormPin').value = '';
+
   document.getElementById('addPickModal').classList.remove('hidden');
   document.getElementById('modalOverlay').classList.remove('hidden');
 }
@@ -526,21 +581,34 @@ export function closeAddPickModal() {
   document.getElementById('modalOverlay').classList.add('hidden');
 }
 
+async function adminHashPin(pin, email) {
+  const data = new TextEncoder().encode(pin.trim() + ':' + email.trim().toLowerCase());
+  const buf = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 export async function saveAdminPick(event) {
   event.preventDefault();
   const db = getDb();
   const id = document.getElementById('apFormId').value;
   const tournamentId = document.getElementById('apFormTournament').value;
+  const email = document.getElementById('apFormEmail').value.trim();
 
   const data = {
     tournamentId,
     realName: document.getElementById('apFormRealName').value.trim(),
     entrantName: document.getElementById('apFormName').value.trim(),
-    email: document.getElementById('apFormEmail').value.trim(),
+    email,
     phone: document.getElementById('apFormPhone').value.trim(),
   };
   for (let i = 1; i <= 6; i++) {
     data[`t${i}`] = document.getElementById(`apTier${i}`)?.value ?? '';
+  }
+
+  // If a new PIN was entered, hash and include it
+  const rawPin = document.getElementById('apFormPin').value.trim();
+  if (/^\d{4}$/.test(rawPin) && email) {
+    data.pinHash = await adminHashPin(rawPin, email);
   }
 
   if (id) {

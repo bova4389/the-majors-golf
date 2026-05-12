@@ -492,11 +492,11 @@ export function closeEditPickSearch() {
   document.getElementById('modalOverlay').classList.add('hidden');
 }
 
-export function filterEditPickSearch(query) {
+export function filterEditPickSearch(searchText) {
   const container = document.getElementById('picksAdminTable');
   const picks = container._picksData || [];
   const resultsEl = document.getElementById('editPickSearchResults');
-  const q = query.trim().toLowerCase();
+  const q = searchText.trim().toLowerCase();
 
   if (!q) {
     resultsEl.innerHTML = '<p class="muted">Start typing to find a pick.</p>';

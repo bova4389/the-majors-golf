@@ -1680,8 +1680,11 @@ td.top-4-pick {
 
 @media (max-width: 600px) {
   :root { --header-h: 59px; }
+  .site-header     { padding: .65rem .75rem; }
+  .header-controls { flex-shrink: 0; gap: .4rem; }
+  .header-brand-link { flex-shrink: 1; min-width: 0; overflow: hidden; }
   .header-logo     { height: 38px; }
-  .site-name       { font-size: .88rem; }
+  .site-name       { font-size: .88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .major-tab       { padding: .6rem .65rem; font-size: .78rem; }
   .standings-table { font-size: .8rem; }
   .standings-table th, .standings-table td { padding: .45rem .5rem; }

@@ -772,6 +772,7 @@
     }
 
     // ── Major tab navigation ──────────────────────────────────────────────────
+    let pgaTabLoaded = false;
     window.switchMajor = function(major) {
       document.querySelectorAll('.major-panel').forEach(p => {
         p.classList.remove('panel-active');
@@ -789,6 +790,12 @@
       if (major !== 'home' && major !== 'season') document.body.classList.add('theme-' + major);
 
       sessionStorage.setItem('activeMajor', major);
+
+      // Lazy-load PGA standings on first visit to the PGA tab
+      if (major === 'pga' && !pgaTabLoaded) {
+        pgaTabLoaded = true;
+        window.switchMajorYear('pga', 2026);
+      }
     };
 
     // ── Inner (day) tab navigation ────────────────────────────────────────────

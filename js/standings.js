@@ -250,18 +250,24 @@ function clearPgaPoolPanels() {
   const pgaTotal = document.getElementById('pga-total');
   if (pgaTotal) {
     pgaTotal.innerHTML = `
-      <div class="search-bar">
+      <div class="search-bar search-bar-with-btn">
         <input type="text" id="pgaStandingsSearch" class="standings-search" placeholder="Search entry name or player..." />
+        <button class="btn btn-analysis" id="pgaPlayerAnalysisBtn" onclick="togglePgaPlayerAnalysis()">Player Analysis</button>
       </div>
-      <section class="table-wrapper">
+      <div id="pgaPlayerAnalysisView" class="player-analysis-view hidden">
+        <div id="pgaPlayerAnalysisContent" class="pa-content">
+          <div class="fp-loading">Building analysis…</div>
+        </div>
+      </div>
+      <section class="table-wrapper" id="pgaStandingsTableWrapper">
         <div id="pgaLoadingMsg" class="loading-msg">Loading standings...</div>
         <table id="pgaStandingsTable" class="standings-table hidden">
           <thead>
             <tr>
-              <th class="col-rank">Rank</th>
-              <th class="col-name">Name</th>
-              <th class="col-name col-picks-name">Picks Name</th>
-              <th class="col-total">Total</th>
+              <th class="col-rank sortable" data-sort="rank" onclick="pgaPoolSort('total','rank')">Rank <span class="sort-icon"></span></th>
+              <th class="col-name sortable" data-sort="name" onclick="pgaPoolSort('total','name')">Name <span class="sort-icon"></span></th>
+              <th class="col-name col-picks-name sortable" data-sort="picksName" onclick="pgaPoolSort('total','picksName')">Picks Name <span class="sort-icon"></span></th>
+              <th class="col-total sortable" data-sort="total" onclick="pgaPoolSort('total','total')">Total <span class="sort-icon"></span></th>
               <th class="col-tier">Tier 1</th>
               <th class="col-tier">Tier 2</th>
               <th class="col-tier">Tier 3</th>
@@ -2086,11 +2092,17 @@ export async function loadPgaPayouts() {
         const totalCls = r.total < 0 ? 'score-under' : r.total > 0 ? 'score-over' : 'score-even';
         const chipsHtml = sharedPrize > 0 ? buildFinisherChips(r) : '';
 
+        const realName  = r.pick.realName  || r.pick.entrantName;
+        const picksName = r.pick.picksName || r.pick.entrantName;
+        const nameHtml  = realName !== picksName
+          ? `<span class="fp-finisher-name">${escapeHtml(realName)}</span><span class="fp-finisher-picksname">${escapeHtml(picksName)}</span>`
+          : `<span class="fp-finisher-name">${escapeHtml(realName)}</span>`;
+
         finisherCards.push(`
           <div class="fp-finisher-card${group.length > 1 ? ' fp-tied' : ''}">
             <div class="fp-finisher-top">
               <span class="fp-rank-badge">${dispLabel}</span>
-              <span class="fp-finisher-name">${escapeHtml(r.pick.picksName || r.pick.entrantName)}</span>
+              <div class="fp-finisher-names">${nameHtml}</div>
               <span class="fp-finisher-payout">${sharedPrize > 0 ? `$${sharedPrize}` : '—'}</span>
             </div>
             <div class="fp-finisher-sub"><span class="${totalCls}">${totalDisp}</span> total</div>

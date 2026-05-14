@@ -1470,6 +1470,12 @@ td.top-4-pick {
 .pgasb-col-round  { width: 52px;  text-align: center; }
 .pgasb-col-status { width: 72px;  text-align: center; font-size: .78rem; }
 
+.pgasb-sortable { cursor: pointer; user-select: none; white-space: nowrap; }
+.pgasb-sortable:hover { opacity: .8; }
+.pgasb-sort-icon::after { content: ''; font-size: .7rem; margin-left: .25rem; opacity: .5; }
+.pgasb-sort-asc  .pgasb-sort-icon::after { content: '▲'; opacity: 1; }
+.pgasb-sort-desc .pgasb-sort-icon::after { content: '▼'; opacity: 1; }
+
 .pgasb-placeholder {
   padding: 2.5rem 1.5rem;
   text-align: center;

@@ -21,6 +21,9 @@ let pgaCachedResults           = [];
 let pgaCachedScoresMap         = {};
 let pgaRefreshTimer            = null;
 let pgaSbRefreshTimer          = null;
+let pgaScoreboardPlayers       = [];
+let pgaSbSortCol               = 'total';
+let pgaSbSortAsc               = true;
 let mastersActiveYear = 2026;
 let pgaActiveYear = 2026;
 let usOpenActiveYear = 2026;
@@ -37,6 +40,14 @@ export async function loadStandings() {
     currentTournamentId = mastersList[0].id;
     setYearTabActive('masters', mastersList[0].year);
     await loadTournamentData(mastersList[0].id);
+  }
+
+  // Pre-load PGA in background so picks are ready when user navigates to PGA tab
+  const pgaList = tournamentsByMajor['pga'] || [];
+  if (pgaList.length) {
+    pgaCurrentTournamentId = pgaList[0].id;
+    setYearTabActive('pga', pgaList[0].year);
+    loadPgaTournamentData(pgaList[0].id);
   }
 
   const searchInput = document.getElementById('standingsSearch');
@@ -3275,8 +3286,12 @@ export async function loadPgaScoreboard() {
             let dispStatus = 'Active';
             if (status.includes('cut')) dispStatus = 'CUT';
             else if (status.includes('wd') || status.includes('withdrew')) dispStatus = 'WD';
+            // Compute total from available round scores — ESPN's total field shows "E" mid-round
+            const completedRounds = rounds.filter(r => r !== null);
             const totalStr = c.score?.displayValue ?? 'E';
-            const total = totalStr === 'E' ? 0 : (parseFloat(totalStr) || 0);
+            const total = completedRounds.length > 0
+              ? completedRounds.reduce((sum, r) => sum + r, 0)
+              : (totalStr === 'E' ? 0 : (parseFloat(totalStr) || 0));
             return {
               pos: c.status?.position?.displayName ?? '-',
               name: c.athlete?.displayName ?? '',
@@ -3301,21 +3316,11 @@ export async function loadPgaScoreboard() {
     return;
   }
 
-  tbody.innerHTML = players.map(p => {
-    const totalCls  = p.total < 0 ? 'score-under' : p.total > 0 ? 'score-over' : 'score-even';
-    const statusCls = p.status === 'CUT' || p.status === 'WD' ? 'pgasb-cut' : '';
-    return `
-      <tr class="${statusCls}">
-        <td class="pgasb-col-pos">${p.pos}</td>
-        <td class="pgasb-col-player">${escapeHtml(p.name)}</td>
-        <td class="pgasb-col-total pgasb-col-total-border"><strong class="${totalCls}">${fmtRound(p.total)}</strong></td>
-        <td class="pgasb-col-round">${fmtRoundCell(p.r1)}</td>
-        <td class="pgasb-col-round">${fmtRoundCell(p.r2)}</td>
-        <td class="pgasb-col-round">${fmtRoundCell(p.r3)}</td>
-        <td class="pgasb-col-round">${fmtRoundCell(p.r4)}</td>
-        <td class="pgasb-col-status">${p.status}</td>
-      </tr>`;
-  }).join('');
+  pgaScoreboardPlayers = players;
+  pgaSbSortCol = 'total';
+  pgaSbSortAsc = true;
+  renderPgaScoreboardRows();
+  updatePgaSbSortHeaders();
 
   if (loadingEl) loadingEl.classList.add('hidden');
   table.classList.remove('hidden');
@@ -3336,6 +3341,80 @@ export async function loadPgaScoreboard() {
       });
     });
   }
+}
+
+export function pgaSbSort(col) {
+  if (pgaSbSortCol === col) {
+    pgaSbSortAsc = !pgaSbSortAsc;
+  } else {
+    pgaSbSortCol = col;
+    pgaSbSortAsc = true;
+  }
+  renderPgaScoreboardRows();
+  updatePgaSbSortHeaders();
+}
+
+function renderPgaScoreboardRows() {
+  const tbody = document.getElementById('pgaSbBody');
+  if (!tbody || !pgaScoreboardPlayers.length) return;
+
+  const statusOrder = { 'Active': 0, 'CUT': 1, 'WD': 2 };
+  const sorted = [...pgaScoreboardPlayers].sort((a, b) => {
+    let va, vb;
+    if (pgaSbSortCol === 'name') {
+      return pgaSbSortAsc
+        ? a.name.localeCompare(b.name)
+        : b.name.localeCompare(a.name);
+    } else if (pgaSbSortCol === 'status') {
+      va = statusOrder[a.status] ?? 0;
+      vb = statusOrder[b.status] ?? 0;
+    } else if (pgaSbSortCol === 'pos') {
+      va = parseFloat(a.pos) || 999;
+      vb = parseFloat(b.pos) || 999;
+    } else {
+      // total, r1, r2, r3, r4 — nulls sort last regardless of direction
+      va = a[pgaSbSortCol] ?? (pgaSbSortAsc ? Infinity : -Infinity);
+      vb = b[pgaSbSortCol] ?? (pgaSbSortAsc ? Infinity : -Infinity);
+    }
+    if (va !== vb) return pgaSbSortAsc ? va - vb : vb - va;
+    // Secondary: active before cut/wd
+    return (statusOrder[a.status] ?? 0) - (statusOrder[b.status] ?? 0);
+  });
+
+  tbody.innerHTML = sorted.map(p => {
+    const totalCls  = p.total < 0 ? 'score-under' : p.total > 0 ? 'score-over' : 'score-even';
+    const statusCls = p.status === 'CUT' || p.status === 'WD' ? 'pgasb-cut' : '';
+    return `
+      <tr class="${statusCls}">
+        <td class="pgasb-col-pos">${p.pos}</td>
+        <td class="pgasb-col-player">${escapeHtml(p.name)}</td>
+        <td class="pgasb-col-total pgasb-col-total-border"><strong class="${totalCls}">${fmtRound(p.total)}</strong></td>
+        <td class="pgasb-col-round">${fmtRoundCell(p.r1)}</td>
+        <td class="pgasb-col-round">${fmtRoundCell(p.r2)}</td>
+        <td class="pgasb-col-round">${fmtRoundCell(p.r3)}</td>
+        <td class="pgasb-col-round">${fmtRoundCell(p.r4)}</td>
+        <td class="pgasb-col-status">${p.status}</td>
+      </tr>`;
+  }).join('');
+
+  // Re-apply active search filter
+  const searchEl = document.getElementById('pgaSbSearch');
+  if (searchEl && searchEl.value) {
+    const q = searchEl.value.toLowerCase().trim();
+    tbody.querySelectorAll('tr').forEach(row => {
+      const name = row.querySelector('.pgasb-col-player')?.textContent.toLowerCase() ?? '';
+      row.style.display = !q || name.includes(q) ? '' : 'none';
+    });
+  }
+}
+
+function updatePgaSbSortHeaders() {
+  document.querySelectorAll('#pgaSbTable th[data-sort]').forEach(th => {
+    th.classList.remove('pgasb-sort-asc', 'pgasb-sort-desc');
+    if (th.dataset.sort === pgaSbSortCol) {
+      th.classList.add(pgaSbSortAsc ? 'pgasb-sort-asc' : 'pgasb-sort-desc');
+    }
+  });
 }
 
 // ─── U.S. Open 2025 Scoreboard ───────────────────────────────────────────────

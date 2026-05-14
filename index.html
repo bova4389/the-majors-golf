@@ -417,14 +417,14 @@
             <table class="pgasb-table hidden" id="pgaSbTable">
               <thead class="pgasb-head-pga">
                 <tr>
-                  <th class="pgasb-col-pos">Pos</th>
-                  <th class="pgasb-col-player">Player</th>
-                  <th class="pgasb-col-total">Total</th>
-                  <th class="pgasb-col-round">R1</th>
-                  <th class="pgasb-col-round">R2</th>
-                  <th class="pgasb-col-round">R3</th>
-                  <th class="pgasb-col-round">R4</th>
-                  <th class="pgasb-col-status">Status</th>
+                  <th class="pgasb-col-pos pgasb-sortable" data-sort="pos" onclick="pgaSbSort('pos')">Pos <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-player pgasb-sortable" data-sort="name" onclick="pgaSbSort('name')">Player <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-total pgasb-sortable" data-sort="total" onclick="pgaSbSort('total')">Total <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-round pgasb-sortable" data-sort="r1" onclick="pgaSbSort('r1')">R1 <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-round pgasb-sortable" data-sort="r2" onclick="pgaSbSort('r2')">R2 <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-round pgasb-sortable" data-sort="r3" onclick="pgaSbSort('r3')">R3 <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-round pgasb-sortable" data-sort="r4" onclick="pgaSbSort('r4')">R4 <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-status pgasb-sortable" data-sort="status" onclick="pgaSbSort('status')">Status <span class="pgasb-sort-icon"></span></th>
                 </tr>
               </thead>
               <tbody id="pgaSbBody"></tbody>
@@ -646,12 +646,13 @@
   <!-- ===== FIREBASE + APP SCRIPTS ===== -->
   <script type="module">
     import { initFirebase } from './js/firebase-config.js';
-    import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings } from './js/standings.js';
+    import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings, pgaSbSort } from './js/standings.js';
 
     initFirebase();
     window.sortBy = sortBy;
     window.manualRefresh    = manualRefresh;
     window.pgaManualRefresh = pgaManualRefresh;
+    window.pgaSbSort = pgaSbSort;
     window.switchMajorYear = switchMajorYear;
     document.getElementById('footerYear').textContent = new Date().getFullYear();
 

@@ -405,11 +405,25 @@ function parseEspnLeaderboard(data) {
   for (const c of competitors) {
     const name = c.athlete?.displayName;
     if (!name) continue;
-    const scoreStr = c.score?.displayValue ?? 'E';
-    const status = c.status?.type?.name?.toLowerCase() ?? 'active';
-    let score = 0;
-    if (scoreStr !== 'E' && !isNaN(Number(scoreStr))) score = Number(scoreStr);
 
+    // Compute score from completed round linescores — ESPN's total field shows "E" mid-round
+    const ls = c.linescores ?? [];
+    const rounds = [1,2,3,4].map(p => {
+      const r = ls.find(l => l.period === p);
+      if (!r) return null;
+      const dv = r.displayValue;
+      if (!dv || dv === '--' || dv === '-') return null;
+      if (dv === 'E') return 0;
+      const v = parseFloat(dv);
+      return isNaN(v) ? null : v;
+    });
+    const completed = rounds.filter(r => r !== null);
+    const scoreStr = c.score?.displayValue ?? 'E';
+    const score = completed.length > 0
+      ? completed.reduce((sum, r) => sum + r, 0)
+      : (scoreStr === 'E' ? 0 : (parseFloat(scoreStr) || 0));
+
+    const status = c.status?.type?.name?.toLowerCase() ?? 'active';
     let normalizedStatus = 'active';
     if (status.includes('cut')) normalizedStatus = 'cut';
     else if (status.includes('wd') || status.includes('withdrew')) normalizedStatus = 'wd';
@@ -694,6 +708,12 @@ async function loadPgaTournamentData(tournamentId) {
     const scoresMap = await fetchOrRefreshScores(tournament);
     pgaCachedScoresMap = scoresMap;
     pgaCachedResults   = calculateStandings(picks, scoresMap, tournament.mcPenalty ?? 20);
+
+    // Log any golfer names in picks that don't match ESPN — these show as +20 (mcPenalty)
+    const allPickedGolfers = new Set(picks.flatMap(p => [p.t1,p.t2,p.t3,p.t4,p.t5,p.t6].filter(Boolean)));
+    const unmatched = [...allPickedGolfers].filter(g => !scoresMap[g]);
+    if (unmatched.length) console.warn('PGA name mismatches (showing +20):', unmatched);
+
     renderPgaTable(pgaCachedResults, scoresMap);
     updatePgaLastUpdated();
     if (loadingEl) loadingEl.classList.add('hidden');

@@ -415,8 +415,11 @@
         <div id="pga-day3"          class="inner-panel hidden"><div class="coming-soon">PGA Championship 2026 — Round 3 pool standings will appear here once available.</div></div>
         <div id="pga-day4"          class="inner-panel hidden"><div class="coming-soon">PGA Championship 2026 — Round 4 pool standings will appear here once available.</div></div>
         <div id="pga-scoreboard" class="inner-panel hidden">
-          <div class="search-bar" style="margin-bottom:.75rem">
+          <div class="pgasb-controls">
             <input type="text" id="pgaSbSearch" class="standings-search" placeholder="Search player name…" />
+            <select id="pgaSbEntryFilter" class="pgasb-entry-select" onchange="pgaSbEntryFilter(this.value)">
+              <option value="">— Filter by entry —</option>
+            </select>
           </div>
           <div class="pgasb-wrapper">
             <div class="pgasb-loading" id="pgaSbLoading">Loading official scoreboard…</div>
@@ -431,6 +434,8 @@
                   <th class="pgasb-col-round pgasb-sortable" data-sort="r3" onclick="pgaSbSort('r3')">R3 <span class="pgasb-sort-icon"></span></th>
                   <th class="pgasb-col-round pgasb-sortable" data-sort="r4" onclick="pgaSbSort('r4')">R4 <span class="pgasb-sort-icon"></span></th>
                   <th class="pgasb-col-status pgasb-sortable" data-sort="status" onclick="pgaSbSort('status')">Status <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-owned pgasb-sortable" data-sort="pickCount" onclick="pgaSbSort('pickCount')">Owned <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-tier-pick">Tier(s)</th>
                 </tr>
               </thead>
               <tbody id="pgaSbBody"></tbody>
@@ -652,7 +657,7 @@
   <!-- ===== FIREBASE + APP SCRIPTS ===== -->
   <script type="module">
     import { initFirebase } from './js/firebase-config.js';
-    import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings, pgaSbSort, pgaPoolSort } from './js/standings.js';
+    import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings, pgaSbSort, pgaPoolSort, pgaSbEntryFilter } from './js/standings.js';
 
     initFirebase();
     window.sortBy = sortBy;
@@ -660,6 +665,7 @@
     window.pgaManualRefresh = pgaManualRefresh;
     window.pgaSbSort = pgaSbSort;
     window.pgaPoolSort = pgaPoolSort;
+    window.pgaSbEntryFilter = pgaSbEntryFilter;
     window.switchMajorYear = switchMajorYear;
     document.getElementById('footerYear').textContent = new Date().getFullYear();
 

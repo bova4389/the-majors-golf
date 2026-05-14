@@ -1472,6 +1472,23 @@ td.top-4-pick {
 .pgasb-col-round  { width: 52px;  text-align: center; }
 .pgasb-col-status { width: 72px;  text-align: center; font-size: .78rem; }
 
+/* Scoreboard controls bar */
+.pgasb-controls { display: flex; gap: .5rem; align-items: center; margin-bottom: .75rem; flex-wrap: wrap; }
+.pgasb-controls .standings-search { flex: 1; min-width: 160px; }
+.pgasb-entry-select { padding: .45rem .75rem; border: 1px solid var(--border); border-radius: .375rem; background: var(--card-bg); color: var(--text); font-size: .875rem; min-width: 180px; max-width: 260px; }
+[data-theme="dark"] .pgasb-entry-select { background: var(--card-bg); color: var(--text); }
+
+/* Owned / Tier columns */
+.pgasb-col-owned     { width: 80px; text-align: center; font-size: .8rem; white-space: nowrap; }
+.pgasb-col-tier-pick { width: 64px; text-align: center; font-size: .8rem; }
+.pgasb-pct           { color: var(--text-muted); font-size: .75rem; }
+
+/* Entry filter highlight/dim */
+.pgasb-entry-pick { background: rgba(251,191,36,.15) !important; }
+[data-theme="dark"] .pgasb-entry-pick { background: rgba(251,191,36,.12) !important; }
+.pgasb-entry-dim  { opacity: .4; }
+.pgasb-tier-badge { display: inline-block; background: #003087; color: #fff; font-size: .68rem; font-weight: 700; padding: .05rem .3rem; border-radius: .2rem; margin-left: .3rem; vertical-align: middle; }
+
 .pgasb-sortable { cursor: pointer; user-select: none; white-space: nowrap; }
 .pgasb-sortable:hover { opacity: .8; }
 .pgasb-sort-icon::after { content: ''; font-size: .7rem; margin-left: .25rem; opacity: .5; }

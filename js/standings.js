@@ -27,6 +27,8 @@ let pgaSbSortAsc               = true;
 let pgaPoolSortCol             = 'rank';
 let pgaPoolSortAsc             = true;
 let pgaCachedRoundResults      = {};  // { 1: results[], 2: results[], ... }
+let pgaSbSelectedEntry      = '';  // entry name currently filtered in scoreboard
+let pgaVenueSubtitle        = '';  // venue+date string captured from ESPN API
 let mastersActiveYear = 2026;
 let pgaActiveYear = 2026;
 let usOpenActiveYear = 2026;
@@ -2155,7 +2157,7 @@ export async function loadPgaPayouts() {
           <div class="fp-trophy-icon">🏆</div>
           <div>
             <h2 class="fp-title">PGA Championship 2026${isFinal ? ' — Final Results' : ''}</h2>
-            <p class="fp-subtitle">Quail Hollow Club · Charlotte, NC · May 14–17, 2026</p>
+            <p class="fp-subtitle">${pgaVenueSubtitle || 'Quail Hollow Club · Charlotte, NC'} · May 14–17, 2026</p>
           </div>
         </div>
         <div class="fp-pool-stats">
@@ -3772,6 +3774,16 @@ export async function loadPgaScoreboard() {
       const res = await fetch('https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?event=401811947');
       if (res.ok) {
         const data = await res.json();
+        // Capture venue for payouts header
+        const evComp = data?.events?.[0]?.competitions?.[0];
+        const venue = evComp?.venue;
+        if (venue) {
+          const city  = venue.address?.city  ?? '';
+          const state = venue.address?.state ?? '';
+          const vname = venue.fullName ?? '';
+          const evDates = data?.events?.[0]?.date ?? '';
+          pgaVenueSubtitle = [vname, city && state ? `${city}, ${state}` : (city || state)].filter(Boolean).join(' · ');
+        }
         const competitors = data?.events?.[0]?.competitions?.[0]?.competitors ?? [];
         if (competitors.length) {
           players = competitors.map(c => {
@@ -3844,6 +3856,34 @@ export async function loadPgaScoreboard() {
     return;
   }
 
+  // Enrich players with pick ownership data from live standings cache
+  if (pgaCachedResults.length) {
+    const pickInfoMap = {};
+    for (const r of pgaCachedResults) {
+      for (let i = 1; i <= 6; i++) {
+        const golfer = r.pick[`t${i}`];
+        if (!golfer) continue;
+        if (!pickInfoMap[golfer]) pickInfoMap[golfer] = { count: 0, tiers: new Set() };
+        pickInfoMap[golfer].count++;
+        pickInfoMap[golfer].tiers.add(i);
+      }
+    }
+    const total = pgaCachedResults.length;
+    for (const p of players) {
+      const info = pickInfoMap[p.name];
+      p.pickCount = info ? info.count : 0;
+      p.pickPct   = info ? Math.round(info.count / total * 100) : 0;
+      p.tierNums  = info ? [...info.tiers].sort((a,b) => a-b).map(n => `T${n}`) : [];
+    }
+    // Populate entry filter select
+    const sel = document.getElementById('pgaSbEntryFilter');
+    if (sel) {
+      const entries = pgaCachedResults.map(r => r.pick.picksName || r.pick.entrantName).sort((a,b) => a.localeCompare(b));
+      sel.innerHTML = '<option value="">— All entries —</option>' + entries.map(n => `<option value="${n.replace(/"/g,'&quot;')}">${n}</option>`).join('');
+      sel.value = pgaSbSelectedEntry;
+    }
+  }
+
   pgaScoreboardPlayers = players;
   pgaSbSortCol = 'total';
   pgaSbSortAsc = true;
@@ -3882,6 +3922,11 @@ export function pgaSbSort(col) {
   updatePgaSbSortHeaders();
 }
 
+export function pgaSbEntryFilter(val) {
+  pgaSbSelectedEntry = val;
+  renderPgaScoreboardRows();
+}
+
 function renderPgaScoreboardRows() {
   const tbody = document.getElementById('pgaSbBody');
   if (!tbody || !pgaScoreboardPlayers.length) return;
@@ -3899,6 +3944,10 @@ function renderPgaScoreboardRows() {
     } else if (pgaSbSortCol === 'pos') {
       va = parseFloat(a.pos) || 999;
       vb = parseFloat(b.pos) || 999;
+    } else if (pgaSbSortCol === 'pickCount') {
+      // Higher pick count = more owned = sort descending by default
+      va = a.pickCount ?? 0;
+      vb = b.pickCount ?? 0;
     } else {
       // total, r1, r2, r3, r4 — nulls sort last regardless of direction
       va = a[pgaSbSortCol] ?? (pgaSbSortAsc ? Infinity : -Infinity);
@@ -3909,19 +3958,48 @@ function renderPgaScoreboardRows() {
     return (statusOrder[a.status] ?? 0) - (statusOrder[b.status] ?? 0);
   });
 
+  // Build set of picked golfer names for the selected entry
+  let selectedPickNames = null;
+  let selectedPickTierMap = {};
+  if (pgaSbSelectedEntry) {
+    const entryResult = pgaCachedResults.find(r => (r.pick.picksName || r.pick.entrantName) === pgaSbSelectedEntry);
+    if (entryResult) {
+      selectedPickNames = new Set();
+      for (let i = 1; i <= 6; i++) {
+        const g = entryResult.pick[`t${i}`];
+        if (g) { selectedPickNames.add(g); selectedPickTierMap[g] = i; }
+      }
+    }
+  }
+
+  const hasPickData = sorted.some(p => p.pickCount != null);
+
   tbody.innerHTML = sorted.map(p => {
     const totalCls  = p.total < 0 ? 'score-under' : p.total > 0 ? 'score-over' : 'score-even';
-    const statusCls = p.status === 'CUT' || p.status === 'WD' ? 'pgasb-cut' : '';
+    let rowClass = p.status === 'CUT' || p.status === 'WD' ? 'pgasb-cut' : '';
+    if (selectedPickNames) {
+      rowClass += selectedPickNames.has(p.name) ? ' pgasb-entry-pick' : ' pgasb-entry-dim';
+    }
+    const tierBadge = selectedPickNames && selectedPickTierMap[p.name]
+      ? `<span class="pgasb-tier-badge">T${selectedPickTierMap[p.name]}</span>` : '';
+    const ownedCell = hasPickData
+      ? `<td class="pgasb-col-owned">${p.pickCount > 0 ? `${p.pickCount} <span class="pgasb-pct">(${p.pickPct}%)</span>` : '<span style="color:var(--text-muted)">—</span>'}</td>`
+      : '';
+    const tierCell = hasPickData
+      ? `<td class="pgasb-col-tier-pick">${p.tierNums?.length ? p.tierNums.join(', ') : '<span style="color:var(--text-muted)">—</span>'}</td>`
+      : '';
     return `
-      <tr class="${statusCls}">
+      <tr class="${rowClass.trim()}">
         <td class="pgasb-col-pos">${p.pos}</td>
-        <td class="pgasb-col-player">${escapeHtml(p.name)}</td>
+        <td class="pgasb-col-player">${escapeHtml(p.name)}${tierBadge}</td>
         <td class="pgasb-col-total pgasb-col-total-border"><strong class="${totalCls}">${fmtRound(p.total)}</strong></td>
         <td class="pgasb-col-round">${fmtRoundCell(p.r1)}</td>
         <td class="pgasb-col-round">${fmtRoundCell(p.r2)}</td>
         <td class="pgasb-col-round">${fmtRoundCell(p.r3)}</td>
         <td class="pgasb-col-round">${fmtRoundCell(p.r4)}</td>
         <td class="pgasb-col-status">${p.statusDetail ?? p.status}</td>
+        ${ownedCell}
+        ${tierCell}
       </tr>`;
   }).join('');
 

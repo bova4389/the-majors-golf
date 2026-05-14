@@ -2375,15 +2375,12 @@ export async function loadBonusPool() {
   if (!amountEl) return;
 
   try {
-    const db = getDb();
-    const mastersBonusAmt = 25; // flat fee taken from Masters pool
+    const mastersBonusAmt = 25; // flat fee from Masters pool
+    const pgaCount        = 41; // 41 entries × $1 — PGA Championship 2026 (finalized)
 
-    // PGA/US Open/The Open: $1 per entry — fetch counts when picks exist
-    let pgaCount = 0, usOpenCount = 0, theOpenCount = 0;
-    try {
-      const pgaSnap = await getDocs(query(collection(db, 'picks'), where('tournamentId', '==', 'pga-2026')));
-      pgaCount = pgaSnap.size;
-    } catch { /* tournament not created yet */ }
+    // US Open and The Open: fetch live counts from Firestore when available
+    const db = getDb();
+    let usOpenCount = 0, theOpenCount = 0;
     try {
       const usSnap = await getDocs(query(collection(db, 'picks'), where('tournamentId', '==', 'usopen-2026')));
       usOpenCount = usSnap.size;
@@ -2397,7 +2394,6 @@ export async function loadBonusPool() {
     amountEl.textContent = `$${total}`;
 
     if (projectionEl) {
-      const pgaAmt     = pgaCount     > 0 ? `$${pgaCount} (${pgaCount} entries × $1)`     : '$0 (pending)';
       const usOpenAmt  = usOpenCount  > 0 ? `$${usOpenCount} (${usOpenCount} entries × $1)` : '$0 (pending)';
       const theOpenAmt = theOpenCount > 0 ? `$${theOpenCount} (${theOpenCount} entries × $1)` : '$0 (pending)';
       projectionEl.innerHTML = `
@@ -2405,7 +2401,7 @@ export async function loadBonusPool() {
           <h4 class="season-bp-title">Bonus Pool Breakdown</h4>
           <div class="season-bp-rows">
             <div class="season-bp-row"><span>The Masters 2026</span><span class="season-bp-amt populated">$25 (flat fee)</span></div>
-            <div class="season-bp-row"><span>PGA Championship 2026</span><span class="season-bp-amt ${pgaCount > 0 ? 'populated' : 'pending'}">${pgaAmt}</span></div>
+            <div class="season-bp-row"><span>PGA Championship 2026</span><span class="season-bp-amt populated">$${pgaCount} (${pgaCount} entries × $1)</span></div>
             <div class="season-bp-row"><span>U.S. Open 2026</span><span class="season-bp-amt ${usOpenCount > 0 ? 'populated' : 'pending'}">${usOpenAmt}</span></div>
             <div class="season-bp-row"><span>The Open Championship 2026</span><span class="season-bp-amt ${theOpenCount > 0 ? 'populated' : 'pending'}">${theOpenAmt}</span></div>
             <div class="season-bp-row season-bp-total"><span>Total Bonus Pool</span><span>$${total}</span></div>

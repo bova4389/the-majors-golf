@@ -370,7 +370,9 @@ async function fetchOrRefreshScores(tournament) {
     const data = scoreSnap.data();
     const lastUpdated = data._lastUpdated?.toMillis?.() ?? 0;
     const age = Date.now() - lastUpdated;
-    if (tournament.status !== 'locked' || age < REFRESH_INTERVAL_MS) {
+    // Also re-fetch if cache pre-dates the per-round schema (no r1 fields)
+    const hasRoundData = Object.values(data).some(v => v && typeof v === 'object' && 'r1' in v);
+    if ((tournament.status !== 'locked' || age < REFRESH_INTERVAL_MS) && hasRoundData) {
       const { _lastUpdated, ...scores } = data;
       return scores;
     }
@@ -428,9 +430,101 @@ function parseEspnLeaderboard(data) {
     if (status.includes('cut')) normalizedStatus = 'cut';
     else if (status.includes('wd') || status.includes('withdrew')) normalizedStatus = 'wd';
 
-    scores[name] = { score, position: c.status?.position?.displayName ?? '-', status: normalizedStatus };
+    scores[name] = {
+      score,
+      r1: rounds[0], r2: rounds[1], r3: rounds[2], r4: rounds[3],
+      position: c.status?.position?.displayName ?? '-',
+      status: normalizedStatus
+    };
   }
   return scores;
+}
+
+// ─── Name reconciliation helpers ─────────────────────────────────────────────
+function normalizeName(name) {
+  return (name || '').toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z\s]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function reconcilePickNames(picks, scoresMap) {
+  const normalizedLookup = {};
+  for (const espnName of Object.keys(scoresMap)) {
+    normalizedLookup[normalizeName(espnName)] = espnName;
+  }
+  const remapped = [];
+  const result = picks.map(pick => {
+    const fixed = { ...pick };
+    for (const t of ['t1','t2','t3','t4','t5','t6']) {
+      const golfer = pick[t];
+      if (golfer && !scoresMap[golfer]) {
+        const espnName = normalizedLookup[normalizeName(golfer)];
+        if (espnName) { fixed[t] = espnName; remapped.push(`"${golfer}" → "${espnName}"`); }
+      }
+    }
+    return fixed;
+  });
+  if (remapped.length) console.info('PGA name auto-reconciled:', [...new Set(remapped)]);
+  return result;
+}
+
+function buildRoundScoresMap(scoresMap, round) {
+  const key = `r${round}`;
+  const map = {};
+  for (const [name, g] of Object.entries(scoresMap)) {
+    const rScore = g[key] ?? null;
+    map[name] = { score: rScore !== null ? rScore : 0, status: 'active', position: g.position };
+  }
+  return map;
+}
+
+function renderPgaRoundPanel(round, results) {
+  const panel = document.getElementById(`pga-day${round}`);
+  if (!panel) return;
+  if (!results.length) {
+    panel.innerHTML = '<div class="coming-soon">No round data available yet.</div>';
+    return;
+  }
+  const rows = results.map(r => {
+    const rankClass   = r.rank <= 3 ? `rank-${r.rank}` : '';
+    const rankDisplay = r.rank <= 3 ? ['🥇','🥈','🥉'][r.rank - 1] : r.rank;
+    const totalCls    = scoreClass(r.total, null);
+    const rawName     = r.pick.realName || r.pick.entrantName;
+    const realName    = rawName.replace(/ \d+$/, '');
+    const picksName   = r.pick.picksName || r.pick.entrantName;
+    const tierCells   = [1,2,3,4,5,6].map(i => {
+      const t = r.tierScores[`t${i}`];
+      const cls     = scoreClass(t.score, t.status);
+      const label   = formatScore(t.score, t.status);
+      const top4Cls = t.isTop4 ? 'top-4-pick' : '';
+      return `<td class="col-tier ${top4Cls}" title="${t.golfer}"><div class="tier-cell-card"><span class="player-name-cell">${shortName(t.golfer)}</span><small class="score-val ${cls}">${label}</small></div></td>`;
+    }).join('');
+    return `<tr>
+      <td class="col-rank ${rankClass}">${rankDisplay}</td>
+      <td class="col-name">${escapeHtml(realName)}</td>
+      <td class="col-name col-picks-name">${escapeHtml(picksName)}</td>
+      <td class="col-total"><span class="score-val ${totalCls}">${formatScore(r.total, null)}</span></td>
+      ${tierCells}
+    </tr>`;
+  }).join('');
+  panel.innerHTML = `
+    <div class="table-wrapper">
+      <table class="standings-table">
+        <thead><tr>
+          <th class="col-rank">Rank</th>
+          <th class="col-name">Name</th>
+          <th class="col-name col-picks-name">Picks Name</th>
+          <th class="col-total">R${round}</th>
+          <th class="col-tier">Tier 1</th>
+          <th class="col-tier">Tier 2</th>
+          <th class="col-tier">Tier 3</th>
+          <th class="col-tier">Tier 4</th>
+          <th class="col-tier">Tier 5</th>
+          <th class="col-tier">Tier 6</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
 }
 
 async function refreshScores(tournament) {
@@ -707,14 +801,23 @@ async function loadPgaTournamentData(tournamentId) {
 
     const scoresMap = await fetchOrRefreshScores(tournament);
     pgaCachedScoresMap = scoresMap;
-    pgaCachedResults   = calculateStandings(picks, scoresMap, tournament.mcPenalty ?? 20);
 
-    // Log any golfer names in picks that don't match ESPN — these show as +20 (mcPenalty)
-    const allPickedGolfers = new Set(picks.flatMap(p => [p.t1,p.t2,p.t3,p.t4,p.t5,p.t6].filter(Boolean)));
-    const unmatched = [...allPickedGolfers].filter(g => !scoresMap[g]);
-    if (unmatched.length) console.warn('PGA name mismatches (showing +20):', unmatched);
+    // Auto-reconcile pick names to ESPN display names (handles accents, casing, etc.)
+    const reconciledPicks = reconcilePickNames(picks, scoresMap);
+    const mcPenalty = tournament.mcPenalty ?? 20;
 
+    pgaCachedResults = calculateStandings(reconciledPicks, scoresMap, mcPenalty);
     renderPgaTable(pgaCachedResults, scoresMap);
+
+    // Render per-round standings for any round with data
+    for (let round = 1; round <= 4; round++) {
+      const hasRoundData = Object.values(scoresMap).some(g => g[`r${round}`] !== null && g[`r${round}`] !== undefined);
+      if (hasRoundData) {
+        const roundMap = buildRoundScoresMap(scoresMap, round);
+        const roundResults = calculateStandings(reconciledPicks, roundMap, 0);
+        renderPgaRoundPanel(round, roundResults);
+      }
+    }
     updatePgaLastUpdated();
     if (loadingEl) loadingEl.classList.add('hidden');
 
@@ -737,12 +840,17 @@ async function refreshPgaScores(tournament) {
     if (Object.keys(fresh).length) {
       await setDoc(doc(getDb(), 'scores', tournament.id), { ...fresh, _lastUpdated: new Date() });
       pgaCachedScoresMap = fresh;
-      pgaCachedResults   = calculateStandings(
-        pgaCachedResults.map(r => r.pick),
-        fresh,
-        tournament.mcPenalty ?? 20
-      );
+      const reconciledPicks = reconcilePickNames(pgaCachedResults.map(r => r.pick), fresh);
+      const mcPenalty = tournament.mcPenalty ?? 20;
+      pgaCachedResults = calculateStandings(reconciledPicks, fresh, mcPenalty);
       renderPgaTable(pgaCachedResults, fresh);
+      for (let round = 1; round <= 4; round++) {
+        const hasRoundData = Object.values(fresh).some(g => g[`r${round}`] !== null && g[`r${round}`] !== undefined);
+        if (hasRoundData) {
+          const roundResults = calculateStandings(reconciledPicks, buildRoundScoresMap(fresh, round), 0);
+          renderPgaRoundPanel(round, roundResults);
+        }
+      }
       updatePgaLastUpdated();
     }
   } catch (err) {

@@ -896,6 +896,7 @@ async function loadPgaTournamentData(tournamentId) {
     }
     updatePgaLastUpdated();
     loadPgaPayouts();
+    enrichPgaScoreboardWithPickData();
     if (loadingEl) loadingEl.classList.add('hidden');
 
     if (tournament.status === 'locked') {
@@ -931,6 +932,7 @@ async function refreshPgaScores(tournament) {
       }
       updatePgaLastUpdated();
       loadPgaPayouts();
+      enrichPgaScoreboardWithPickData();
     }
   } catch (err) {
     console.error('PGA score refresh error:', err);
@@ -3856,35 +3858,8 @@ export async function loadPgaScoreboard() {
     return;
   }
 
-  // Enrich players with pick ownership data from live standings cache
-  if (pgaCachedResults.length) {
-    const pickInfoMap = {};
-    for (const r of pgaCachedResults) {
-      for (let i = 1; i <= 6; i++) {
-        const golfer = r.pick[`t${i}`];
-        if (!golfer) continue;
-        if (!pickInfoMap[golfer]) pickInfoMap[golfer] = { count: 0, tiers: new Set() };
-        pickInfoMap[golfer].count++;
-        pickInfoMap[golfer].tiers.add(i);
-      }
-    }
-    const total = pgaCachedResults.length;
-    for (const p of players) {
-      const info = pickInfoMap[p.name];
-      p.pickCount = info ? info.count : 0;
-      p.pickPct   = info ? Math.round(info.count / total * 100) : 0;
-      p.tierNums  = info ? [...info.tiers].sort((a,b) => a-b).map(n => `T${n}`) : [];
-    }
-    // Populate entry filter select
-    const sel = document.getElementById('pgaSbEntryFilter');
-    if (sel) {
-      const entries = pgaCachedResults.map(r => r.pick.picksName || r.pick.entrantName).sort((a,b) => a.localeCompare(b));
-      sel.innerHTML = '<option value="">— All entries —</option>' + entries.map(n => `<option value="${n.replace(/"/g,'&quot;')}">${n}</option>`).join('');
-      sel.value = pgaSbSelectedEntry;
-    }
-  }
-
   pgaScoreboardPlayers = players;
+  enrichPgaScoreboardWithPickData();
   pgaSbSortCol = 'total';
   pgaSbSortAsc = true;
   renderPgaScoreboardRows();
@@ -3927,6 +3902,45 @@ export function pgaSbEntryFilter(val) {
   renderPgaScoreboardRows();
 }
 
+function enrichPgaScoreboardWithPickData() {
+  if (!pgaCachedResults.length || !pgaScoreboardPlayers.length) return;
+
+  const pickInfoMap = {};
+  for (const r of pgaCachedResults) {
+    for (let i = 1; i <= 6; i++) {
+      const golfer = r.pick[`t${i}`];
+      if (!golfer) continue;
+      if (!pickInfoMap[golfer]) pickInfoMap[golfer] = { count: 0, tiers: new Set() };
+      pickInfoMap[golfer].count++;
+      pickInfoMap[golfer].tiers.add(i);
+    }
+  }
+  const total = pgaCachedResults.length;
+  for (const p of pgaScoreboardPlayers) {
+    const info = pickInfoMap[p.name];
+    p.pickCount = info ? info.count : 0;
+    p.pickPct   = info ? Math.round(info.count / total * 100) : 0;
+    p.tierNums  = info ? [...info.tiers].sort((a,b) => a-b).map(n => `T${n}`) : [];
+  }
+
+  // Populate filter by real name (deduplicated, sorted)
+  const sel = document.getElementById('pgaSbEntryFilter');
+  if (sel) {
+    const seen = new Set();
+    const names = [];
+    for (const r of pgaCachedResults) {
+      const realName = r.pick.realName || r.pick.entrantName;
+      if (!seen.has(realName)) { seen.add(realName); names.push(realName); }
+    }
+    names.sort((a, b) => a.localeCompare(b));
+    sel.innerHTML = '<option value="">— Filter by name —</option>'
+      + names.map(n => `<option value="${n.replace(/"/g, '&quot;')}">${n}</option>`).join('');
+    sel.value = pgaSbSelectedEntry;
+  }
+
+  renderPgaScoreboardRows();
+}
+
 function renderPgaScoreboardRows() {
   const tbody = document.getElementById('pgaSbBody');
   if (!tbody || !pgaScoreboardPlayers.length) return;
@@ -3962,12 +3976,15 @@ function renderPgaScoreboardRows() {
   let selectedPickNames = null;
   let selectedPickTierMap = {};
   if (pgaSbSelectedEntry) {
-    const entryResult = pgaCachedResults.find(r => (r.pick.picksName || r.pick.entrantName) === pgaSbSelectedEntry);
-    if (entryResult) {
+    // Match by real name — combine picks across all entries for this person
+    const entryResults = pgaCachedResults.filter(r => (r.pick.realName || r.pick.entrantName) === pgaSbSelectedEntry);
+    if (entryResults.length) {
       selectedPickNames = new Set();
-      for (let i = 1; i <= 6; i++) {
-        const g = entryResult.pick[`t${i}`];
-        if (g) { selectedPickNames.add(g); selectedPickTierMap[g] = i; }
+      for (const r of entryResults) {
+        for (let i = 1; i <= 6; i++) {
+          const g = r.pick[`t${i}`];
+          if (g) { selectedPickNames.add(g); selectedPickTierMap[g] = i; }
+        }
       }
     }
   }

@@ -20,6 +20,7 @@ let pgaCurrentTournamentStatus = null;
 let pgaCachedResults           = [];
 let pgaCachedScoresMap         = {};
 let pgaRefreshTimer            = null;
+let pgaSbRefreshTimer          = null;
 let mastersActiveYear = 2026;
 let pgaActiveYear = 2026;
 let usOpenActiveYear = 2026;
@@ -677,6 +678,9 @@ async function loadPgaTournamentData(tournamentId) {
 
     if (tournament.status === 'locked') {
       pgaRefreshTimer = setInterval(() => refreshPgaScores(tournament), REFRESH_INTERVAL_MS);
+      if (!pgaSbRefreshTimer) {
+        pgaSbRefreshTimer = setInterval(loadPgaScoreboard, REFRESH_INTERVAL_MS);
+      }
     }
   } catch (err) {
     console.error('PGA standings error:', err);
@@ -3236,6 +3240,9 @@ export async function loadPgaScoreboard() {
   const tbody     = document.getElementById('pgaSbBody');
   if (!table) return;
 
+  // Clear any existing auto-refresh timer on every call
+  if (pgaSbRefreshTimer) { clearInterval(pgaSbRefreshTimer); pgaSbRefreshTimer = null; }
+
   // Reset state on every call so stale data never persists across year switches
   table.classList.add('hidden');
   if (tbody) tbody.innerHTML = '';
@@ -3312,6 +3319,11 @@ export async function loadPgaScoreboard() {
 
   if (loadingEl) loadingEl.classList.add('hidden');
   table.classList.remove('hidden');
+
+  // Auto-refresh scoreboard every 5 min during live tournament
+  if (pgaActiveYear !== 2025 && pgaCurrentTournamentStatus === 'locked') {
+    pgaSbRefreshTimer = setInterval(loadPgaScoreboard, REFRESH_INTERVAL_MS);
+  }
 
   const searchEl = document.getElementById('pgaSbSearch');
   if (searchEl && !searchEl.dataset.wired) {

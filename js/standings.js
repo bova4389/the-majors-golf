@@ -172,7 +172,18 @@ export function switchMajorYear(major, year) {
         if (totalBtn) totalBtn.classList.add('active');
       }
       clearPgaPoolPanels();
-      if (t) { loadPgaTournamentData(t.id); }
+      if (t) {
+        loadPgaTournamentData(t.id);
+      } else {
+        // No tournament in Firestore — show message instead of frozen spinner
+        const loadingEl = document.getElementById('pgaLoadingMsg');
+        const noDataEl  = document.getElementById('pgaNoDataMsg');
+        if (loadingEl) loadingEl.classList.add('hidden');
+        if (noDataEl) {
+          noDataEl.textContent = 'PGA Championship 2026 tournament not found. Check admin setup.';
+          noDataEl.classList.remove('hidden');
+        }
+      }
     }
   }
   if (major === 'usopen') {

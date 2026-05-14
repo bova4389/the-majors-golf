@@ -379,18 +379,24 @@
           <button class="inner-tab tab-payouts" data-inner="finalpayouts" onclick="switchInnerTab('pga','finalpayouts')">Final Payouts</button>
         </div>
         <div id="pga-total" class="inner-panel inner-panel-active">
-          <div class="search-bar">
+          <div class="search-bar search-bar-with-btn">
             <input type="text" id="pgaStandingsSearch" class="standings-search" placeholder="Search entry name or player..." />
+            <button class="btn btn-analysis" id="pgaPlayerAnalysisBtn" onclick="togglePgaPlayerAnalysis()">Player Analysis</button>
           </div>
-          <section class="table-wrapper">
+          <div id="pgaPlayerAnalysisView" class="player-analysis-view hidden">
+            <div id="pgaPlayerAnalysisContent" class="pa-content">
+              <div class="fp-loading">Building analysis…</div>
+            </div>
+          </div>
+          <section class="table-wrapper" id="pgaStandingsTableWrapper">
             <div id="pgaLoadingMsg" class="loading-msg">Loading standings...</div>
             <table id="pgaStandingsTable" class="standings-table hidden">
               <thead>
                 <tr>
-                  <th class="col-rank">Rank</th>
-                  <th class="col-name">Name</th>
-                  <th class="col-name col-picks-name">Picks Name</th>
-                  <th class="col-total">Total</th>
+                  <th class="col-rank sortable" data-sort="rank" onclick="pgaPoolSort('total','rank')">Rank <span class="sort-icon"></span></th>
+                  <th class="col-name sortable" data-sort="name" onclick="pgaPoolSort('total','name')">Name <span class="sort-icon"></span></th>
+                  <th class="col-name col-picks-name sortable" data-sort="picksName" onclick="pgaPoolSort('total','picksName')">Picks Name <span class="sort-icon"></span></th>
+                  <th class="col-total sortable" data-sort="total" onclick="pgaPoolSort('total','total')">Total <span class="sort-icon"></span></th>
                   <th class="col-tier">Tier 1</th>
                   <th class="col-tier">Tier 2</th>
                   <th class="col-tier">Tier 3</th>
@@ -646,13 +652,14 @@
   <!-- ===== FIREBASE + APP SCRIPTS ===== -->
   <script type="module">
     import { initFirebase } from './js/firebase-config.js';
-    import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings, pgaSbSort } from './js/standings.js';
+    import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings, pgaSbSort, pgaPoolSort } from './js/standings.js';
 
     initFirebase();
     window.sortBy = sortBy;
     window.manualRefresh    = manualRefresh;
     window.pgaManualRefresh = pgaManualRefresh;
     window.pgaSbSort = pgaSbSort;
+    window.pgaPoolSort = pgaPoolSort;
     window.switchMajorYear = switchMajorYear;
     document.getElementById('footerYear').textContent = new Date().getFullYear();
 
@@ -770,6 +777,38 @@
         <div class="pa-grid pa-grid-tiers">${ownershipHtml}</div>
         <div class="pa-section-title">Field Insights</div>
         <div class="pa-grid pa-grid-insights">${uniqueHtml}${contrarianHtml}${stackedHtml}${corrHtml}</div>`;
+    }
+
+    // ── PGA Player Analysis toggle ────────────────────────────────────────────
+    let pgaAnalysisBuilt = false;
+    let pgaAnalysisVisible = false;
+    window.togglePgaPlayerAnalysis = function() {
+      const view    = document.getElementById('pgaPlayerAnalysisView');
+      const wrapper = document.getElementById('pgaStandingsTableWrapper');
+      const btn     = document.getElementById('pgaPlayerAnalysisBtn');
+      pgaAnalysisVisible = !pgaAnalysisVisible;
+
+      view.classList.toggle('hidden', !pgaAnalysisVisible);
+      if (wrapper) wrapper.classList.toggle('hidden', pgaAnalysisVisible);
+      btn.textContent = pgaAnalysisVisible ? 'View Leaderboard' : 'Player Analysis';
+      btn.classList.toggle('btn-analysis-active', pgaAnalysisVisible);
+
+      if (pgaAnalysisVisible && !pgaAnalysisBuilt) {
+        buildPgaPlayerAnalysis();
+        pgaAnalysisBuilt = true;
+      }
+    };
+
+    async function buildPgaPlayerAnalysis() {
+      const container = document.getElementById('pgaPlayerAnalysisContent');
+      if (!container) return;
+      try {
+        const { getPgaPlayerAnalysisData } = await import('./js/standings.js');
+        const data = getPgaPlayerAnalysisData();
+        container.innerHTML = renderPlayerAnalysis(data);
+      } catch(e) {
+        container.innerHTML = '<div class="coming-soon">Player analysis unavailable — check back once picks are loaded.</div>';
+      }
     }
 
     // ── Major tab navigation ──────────────────────────────────────────────────

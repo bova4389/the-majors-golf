@@ -24,6 +24,9 @@ let pgaSbRefreshTimer          = null;
 let pgaScoreboardPlayers       = [];
 let pgaSbSortCol               = 'total';
 let pgaSbSortAsc               = true;
+let pgaPoolSortCol             = 'rank';
+let pgaPoolSortAsc             = true;
+let pgaCachedRoundResults      = {};  // { 1: results[], 2: results[], ... }
 let mastersActiveYear = 2026;
 let pgaActiveYear = 2026;
 let usOpenActiveYear = 2026;
@@ -443,6 +446,8 @@ function parseEspnLeaderboard(data) {
 // ─── Name reconciliation helpers ─────────────────────────────────────────────
 function normalizeName(name) {
   return (name || '').toLowerCase()
+    // Map characters that don't decompose via NFD
+    .replace(/ø/g, 'o').replace(/ð/g, 'd').replace(/þ/g, 'th').replace(/ł/g, 'l').replace(/æ/g, 'ae')
     .normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z\s]/g, '').replace(/\s+/g, ' ').trim();
 }
@@ -485,36 +490,20 @@ function renderPgaRoundPanel(round, results) {
     panel.innerHTML = '<div class="coming-soon">No round data available yet.</div>';
     return;
   }
-  const rows = results.map(r => {
-    const rankClass   = r.rank <= 3 ? `rank-${r.rank}` : '';
-    const rankDisplay = r.rank <= 3 ? ['🥇','🥈','🥉'][r.rank - 1] : r.rank;
-    const totalCls    = scoreClass(r.total, null);
-    const rawName     = r.pick.realName || r.pick.entrantName;
-    const realName    = rawName.replace(/ \d+$/, '');
-    const picksName   = r.pick.picksName || r.pick.entrantName;
-    const tierCells   = [1,2,3,4,5,6].map(i => {
-      const t = r.tierScores[`t${i}`];
-      const cls     = scoreClass(t.score, t.status);
-      const label   = formatScore(t.score, t.status);
-      const top4Cls = t.isTop4 ? 'top-4-pick' : '';
-      return `<td class="col-tier ${top4Cls}" title="${t.golfer}"><div class="tier-cell-card"><span class="player-name-cell">${shortName(t.golfer)}</span><small class="score-val ${cls}">${label}</small></div></td>`;
-    }).join('');
-    return `<tr>
-      <td class="col-rank ${rankClass}">${rankDisplay}</td>
-      <td class="col-name">${escapeHtml(realName)}</td>
-      <td class="col-name col-picks-name">${escapeHtml(picksName)}</td>
-      <td class="col-total"><span class="score-val ${totalCls}">${formatScore(r.total, null)}</span></td>
-      ${tierCells}
-    </tr>`;
-  }).join('');
+
+  // Build panel HTML skeleton with search bar, sortable thead, and named tbody/table ids
   panel.innerHTML = `
+    <div class="search-bar">
+      <input type="text" id="pgaRoundSearch${round}" class="standings-search" placeholder="Search entry or player…"
+        oninput="(function(q){document.querySelectorAll('#pgaRoundBody${round} tr').forEach(row=>{const e=row.dataset.entry||'';const p=row.dataset.players||'';row.style.display=(!q||e.includes(q)||p.includes(q))?'':'none';})})(this.value.toLowerCase().trim())" />
+    </div>
     <div class="table-wrapper">
-      <table class="standings-table">
+      <table id="pgaRoundTable${round}" class="standings-table">
         <thead><tr>
-          <th class="col-rank">Rank</th>
-          <th class="col-name">Name</th>
-          <th class="col-name col-picks-name">Picks Name</th>
-          <th class="col-total">R${round}</th>
+          <th class="col-rank sortable" data-sort="rank" onclick="pgaPoolSort('r${round}','rank')">Rank <span class="sort-icon"></span></th>
+          <th class="col-name sortable" data-sort="name" onclick="pgaPoolSort('r${round}','name')">Name <span class="sort-icon"></span></th>
+          <th class="col-name col-picks-name sortable" data-sort="picksName" onclick="pgaPoolSort('r${round}','picksName')">Picks Name <span class="sort-icon"></span></th>
+          <th class="col-total sortable" data-sort="total" onclick="pgaPoolSort('r${round}','total')">R${round} <span class="sort-icon"></span></th>
           <th class="col-tier">Tier 1</th>
           <th class="col-tier">Tier 2</th>
           <th class="col-tier">Tier 3</th>
@@ -522,9 +511,12 @@ function renderPgaRoundPanel(round, results) {
           <th class="col-tier">Tier 5</th>
           <th class="col-tier">Tier 6</th>
         </tr></thead>
-        <tbody>${rows}</tbody>
+        <tbody id="pgaRoundBody${round}"></tbody>
       </table>
     </div>`;
+
+  renderPgaPoolRows(`r${round}`, results);
+  updatePgaPoolSortHeaders(`r${round}`);
 }
 
 async function refreshScores(tournament) {
@@ -718,7 +710,45 @@ function renderPgaTable(results, scoresMap) {
   table.classList.remove('hidden');
   noData.classList.add('hidden');
 
-  tbody.innerHTML = results.map(r => {
+  pgaCachedResults = results;
+  renderPgaPoolRows('total', results);
+  updatePgaPoolSortHeaders('total');
+}
+
+function renderPgaPoolRows(tab, results) {
+  let tbodyId, searchId, roundNum;
+  if (tab === 'total') {
+    tbodyId  = 'pgaStandingsBody';
+    searchId = 'pgaStandingsSearch';
+  } else {
+    roundNum = parseInt(tab.replace('r', ''), 10);
+    tbodyId  = `pgaRoundBody${roundNum}`;
+    searchId = `pgaRoundSearch${roundNum}`;
+  }
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+
+  // Sort results
+  const sorted = [...results].sort((a, b) => {
+    let va, vb;
+    if (pgaPoolSortCol === 'name') {
+      const na = (a.pick.realName || a.pick.entrantName || '').replace(/ \d+$/, '');
+      const nb = (b.pick.realName || b.pick.entrantName || '').replace(/ \d+$/, '');
+      return pgaPoolSortAsc ? na.localeCompare(nb) : nb.localeCompare(na);
+    } else if (pgaPoolSortCol === 'picksName') {
+      const na = a.pick.picksName || a.pick.entrantName || '';
+      const nb = b.pick.picksName || b.pick.entrantName || '';
+      return pgaPoolSortAsc ? na.localeCompare(nb) : nb.localeCompare(na);
+    } else {
+      // rank or total — sort by r.total numerically
+      va = a.total;
+      vb = b.total;
+      if (va !== vb) return pgaPoolSortAsc ? va - vb : vb - va;
+      return 0;
+    }
+  });
+
+  tbody.innerHTML = sorted.map(r => {
     const rankClass   = r.rank <= 3 ? `rank-${r.rank}` : '';
     const rankDisplay = r.rank <= 3 ? ['🥇', '🥈', '🥉'][r.rank - 1] : r.rank;
     const totalCls    = scoreClass(r.total, null);
@@ -746,7 +776,8 @@ function renderPgaTable(results, scoresMap) {
       </tr>`;
   }).join('');
 
-  const searchInput = document.getElementById('pgaStandingsSearch');
+  // Re-apply active search filter
+  const searchInput = document.getElementById(searchId);
   if (searchInput && searchInput.value) {
     const q = searchInput.value.toLowerCase().trim();
     tbody.querySelectorAll('tr').forEach(row => {
@@ -755,6 +786,42 @@ function renderPgaTable(results, scoresMap) {
       row.style.display = (!q || entry.includes(q) || players.includes(q)) ? '' : 'none';
     });
   }
+}
+
+export function pgaPoolSort(tab, col) {
+  if (pgaPoolSortCol === col) {
+    pgaPoolSortAsc = !pgaPoolSortAsc;
+  } else {
+    pgaPoolSortCol = col;
+    pgaPoolSortAsc = true; // default asc for all cols including rank
+  }
+  if (tab === 'total') {
+    if (pgaCachedResults.length) renderPgaPoolRows('total', pgaCachedResults);
+  } else {
+    const round = parseInt(tab.replace('r', ''), 10);
+    if (pgaCachedRoundResults[round] && pgaCachedRoundResults[round].length) {
+      renderPgaPoolRows(tab, pgaCachedRoundResults[round]);
+    }
+  }
+  updatePgaPoolSortHeaders(tab);
+}
+
+function updatePgaPoolSortHeaders(tab) {
+  let tableId;
+  if (tab === 'total') {
+    tableId = 'pgaStandingsTable';
+  } else {
+    const round = parseInt(tab.replace('r', ''), 10);
+    tableId = `pgaRoundTable${round}`;
+  }
+  const table = document.getElementById(tableId);
+  if (!table) return;
+  table.querySelectorAll('thead th[data-sort]').forEach(th => {
+    th.classList.remove('pool-sort-asc', 'pool-sort-desc');
+    if (th.dataset.sort === pgaPoolSortCol) {
+      th.classList.add(pgaPoolSortAsc ? 'pool-sort-asc' : 'pool-sort-desc');
+    }
+  });
 }
 
 async function loadPgaTournamentData(tournamentId) {
@@ -815,10 +882,12 @@ async function loadPgaTournamentData(tournamentId) {
       if (hasRoundData) {
         const roundMap = buildRoundScoresMap(scoresMap, round);
         const roundResults = calculateStandings(reconciledPicks, roundMap, 0);
+        pgaCachedRoundResults[round] = roundResults;
         renderPgaRoundPanel(round, roundResults);
       }
     }
     updatePgaLastUpdated();
+    loadPgaPayouts();
     if (loadingEl) loadingEl.classList.add('hidden');
 
     if (tournament.status === 'locked') {
@@ -848,10 +917,12 @@ async function refreshPgaScores(tournament) {
         const hasRoundData = Object.values(fresh).some(g => g[`r${round}`] !== null && g[`r${round}`] !== undefined);
         if (hasRoundData) {
           const roundResults = calculateStandings(reconciledPicks, buildRoundScoresMap(fresh, round), 0);
+          pgaCachedRoundResults[round] = roundResults;
           renderPgaRoundPanel(round, roundResults);
         }
       }
       updatePgaLastUpdated();
+      loadPgaPayouts();
     }
   } catch (err) {
     console.error('PGA score refresh error:', err);
@@ -980,6 +1051,66 @@ function emptyAnalysis() {
     stacked: [],
     correlations: [],
   };
+}
+
+export function getPgaPlayerAnalysisData() {
+  if (!pgaCachedResults.length) return emptyAnalysis();
+  const picks = pgaCachedResults.map(r => r.pick);
+  const scores = pgaCachedScoresMap;
+  const total = picks.length;
+
+  function scoreDisplay(name) {
+    const s = scores[name];
+    if (!s) return { scoreStr: '—', scoreCls: '' };
+    if (s.status === 'cut') return { scoreStr: 'MC', scoreCls: 'score-mc' };
+    if (s.status === 'wd')  return { scoreStr: 'WD', scoreCls: 'score-mc' };
+    const v = s.score ?? 0;
+    return {
+      scoreStr: v === 0 ? 'E' : (v > 0 ? `+${v}` : `${v}`),
+      scoreCls: v < 0 ? 'score-under' : v > 0 ? 'score-over' : 'score-even',
+    };
+  }
+
+  const ownership = [1,2,3,4,5,6].map(tierNum => {
+    const key = `t${tierNum}`;
+    const counts = {};
+    picks.forEach(p => { const g = p[key]; if (g) counts[g] = (counts[g] || 0) + 1; });
+    const golfers = Object.entries(counts)
+      .map(([name, count]) => ({ name, count, pct: Math.round(count / total * 100), ...scoreDisplay(name) }))
+      .sort((a, b) => b.count - a.count);
+    return { tierNum, golfers };
+  });
+
+  const lineupKeys = new Set(picks.map(p =>
+    [p.t1,p.t2,p.t3,p.t4,p.t5,p.t6].map(g => g || '').join('|')
+  ));
+  const unique = { uniqueCount: lineupKeys.size, total, pct: Math.round(lineupKeys.size / total * 100) };
+
+  const allGolferCounts = {};
+  picks.forEach(p => {
+    [p.t1,p.t2,p.t3,p.t4,p.t5,p.t6].forEach(g => { if (g) allGolferCounts[g] = (allGolferCounts[g] || 0) + 1; });
+  });
+  const contrarian = Object.entries(allGolferCounts)
+    .filter(([, c]) => c / total < 0.10)
+    .map(([name, count]) => ({ name, count, pct: Math.round(count / total * 100), ...scoreDisplay(name) }))
+    .sort((a, b) => (scores[a.name]?.score ?? 999) - (scores[b.name]?.score ?? 999))
+    .slice(0, 10);
+
+  const stacked = pgaCachedResults.slice(0, 3).map(r => {
+    const v = r.total;
+    return { name: r.pick.picksName || r.pick.entrantName, scoreStr: v === 0 ? 'E' : (v > 0 ? `+${v}` : `${v}`), scoreCls: v < 0 ? 'score-under' : v > 0 ? 'score-over' : 'score-even' };
+  });
+
+  const pairCounts = {};
+  picks.forEach(p => {
+    if (p.t1 && p.t2) { const key = `${p.t1}||${p.t2}`; pairCounts[key] = (pairCounts[key] || 0) + 1; }
+  });
+  const correlations = Object.entries(pairCounts)
+    .map(([key, count]) => { const [t1, t2] = key.split('||'); return { t1, t2, count }; })
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3);
+
+  return { ownership, unique, contrarian, stacked, correlations };
 }
 
 // ─── Masters 2025 PGA Scoreboard ─────────────────────────────────────────────
@@ -1880,6 +2011,193 @@ export async function loadMastersPayouts() {
   }
 }
 
+// ─── PGA Championship 2026 Live Payouts ──────────────────────────────────────
+export async function loadPgaPayouts() {
+  const fp = document.getElementById('pga-finalpayouts');
+  if (!fp) return;
+
+  // Need standings data to show anything
+  if (!pgaCachedResults.length) {
+    fp.innerHTML = '<div class="coming-soon">Standings are loading — check back shortly.</div>';
+    return;
+  }
+
+  try {
+    const db = getDb();
+    // Fetch tournament to get entry count and payout config
+    const tSnap = pgaCurrentTournamentId
+      ? await getDoc(doc(db, 'tournaments', pgaCurrentTournamentId))
+      : null;
+    const tournament = tSnap?.exists() ? tSnap.data() : null;
+    const entryFee = tournament?.entryFee ?? 25;
+    const deductionPerEntry = 1.50; // $1 season bonus + $0.50 website
+    const netPerEntry = entryFee - deductionPerEntry; // $23.50
+
+    // Entry count from picks in pgaCachedResults (one entry = one pick doc)
+    const entryCount = pgaCachedResults.length;
+    const pool = Math.floor(entryCount * netPerEntry);
+    const dailyPool = 4 * 25; // $25 × 4 rounds
+    const placePool = pool; // all goes to place finishers
+
+    const payoutSplit = tournament?.prizePayouts ?? DEFAULT_PAYOUT_SPLIT;
+    const isFinal = pgaCurrentTournamentStatus === 'final';
+    const statusLabel = isFinal ? '' : '<span class="fp-live-badge">LIVE — Projected</span>';
+
+    // Build place finisher cards from current standings
+    // Group by rank to handle ties
+    const byRank = {};
+    for (const r of pgaCachedResults) {
+      if (!byRank[r.rank]) byRank[r.rank] = [];
+      byRank[r.rank].push(r);
+    }
+
+    let place = 1;
+    const finisherCards = [];
+    const tiedGroups = [];
+    for (const group of Object.values(byRank)) {
+      const places = Array.from({ length: group.length }, (_, i) => place + i);
+      const totalPct = places.reduce((sum, p) => {
+        const cfg = payoutSplit.find(c => c.place === p);
+        return sum + (cfg ? cfg.pct : 0);
+      }, 0);
+      const rawPrize = (placePool * totalPct) / 100;
+      const sharedPrize = rawPrize > 0 ? Math.floor(rawPrize / group.length) : 0;
+
+      if (group.length > 1 && sharedPrize > 0) {
+        const splitTotal = Math.floor(rawPrize);
+        const origAmts = places.map(p => {
+          const cfg = payoutSplit.find(c => c.place === p);
+          return cfg ? Math.floor(placePool * cfg.pct / 100) : 0;
+        }).filter(a => a > 0);
+        if (origAmts.length > 1) {
+          tiedGroups.push({ places, origAmts, sharedPrize });
+        }
+      }
+
+      for (const r of group) {
+        const placeNum = places[0];
+        let dispLabel;
+        if (group.length > 1) {
+          dispLabel = placeNum === 1 ? '🥇 T-1st' : placeNum === 2 ? '🥈 T-2nd' : placeNum === 3 ? '🥉 T-3rd' : `T-${placeNum}th`;
+        } else {
+          dispLabel = placeNum === 1 ? '🥇 1st' : placeNum === 2 ? '🥈 2nd' : placeNum === 3 ? '🥉 3rd' : `${placeNum}th`;
+        }
+        const totalDisp = r.total === 0 ? 'E' : r.total > 0 ? `+${r.total}` : `${r.total}`;
+        const totalCls = r.total < 0 ? 'score-under' : r.total > 0 ? 'score-over' : 'score-even';
+        const chipsHtml = sharedPrize > 0 ? buildFinisherChips(r) : '';
+
+        finisherCards.push(`
+          <div class="fp-finisher-card${group.length > 1 ? ' fp-tied' : ''}">
+            <div class="fp-finisher-top">
+              <span class="fp-rank-badge">${dispLabel}</span>
+              <span class="fp-finisher-name">${escapeHtml(r.pick.picksName || r.pick.entrantName)}</span>
+              <span class="fp-finisher-payout">${sharedPrize > 0 ? `$${sharedPrize}` : '—'}</span>
+            </div>
+            <div class="fp-finisher-sub"><span class="${totalCls}">${totalDisp}</span> total</div>
+            ${chipsHtml}
+          </div>`);
+      }
+      place += group.length;
+      if (place > 5) break; // only show top 5 payout positions
+    }
+
+    // Tie-split notes
+    const tieNotes = tiedGroups.map(tg => {
+      const combined = tg.origAmts.reduce((s, a) => s + a, 0);
+      return `T-${tg.places[0]} Tie: ${tg.origAmts.map(a => `$${a}`).join(' + ')} = $${combined} combined, split → <strong>$${tg.sharedPrize} each</strong>`;
+    }).join('<br>');
+
+    // Daily round winners
+    const roundCards = [1,2,3,4].map(r => {
+      const roundResults = pgaCachedRoundResults[r];
+      let winnerName = '—';
+      let winnerTotal = null;
+      if (roundResults && roundResults.length) {
+        const winner = roundResults[0];
+        winnerName = escapeHtml(winner.pick.picksName || winner.pick.entrantName);
+        winnerTotal = winner.total;
+        // Show tied label if multiple entries share rank 1
+        if (roundResults.filter(x => x.rank === 1).length > 1) {
+          winnerName += ' (tied)';
+        }
+      }
+      const hasData = roundResults && roundResults.length;
+      const scoreDisp = winnerTotal !== null ? (winnerTotal === 0 ? 'E' : winnerTotal > 0 ? `+${winnerTotal}` : `${winnerTotal}`) : '';
+      const scoreCls = winnerTotal !== null ? (winnerTotal < 0 ? 'score-under' : winnerTotal > 0 ? 'score-over' : 'score-even') : '';
+      const roundLabel = hasData ? `R${r} F` : `R${r}`;
+      const statusText = hasData ? '' : '<span style="color:var(--text-muted);font-size:.8rem"> — pending</span>';
+      return `
+        <div class="fp-daily-card">
+          <div class="fp-daily-card-top">
+            <span class="fp-round-badge fp-round-badge-pga">${roundLabel}</span>
+            <span class="fp-winner-name">${winnerName}${statusText}</span>
+            <span class="fp-winner-payout">${hasData ? '$25' : '—'}</span>
+          </div>
+          ${hasData && winnerTotal !== null ? `<div style="padding:.25rem .75rem .5rem;font-size:.8rem;color:var(--text-muted)">Round total: <span class="${scoreCls}">${scoreDisp}</span></div>` : ''}
+        </div>`;
+    }).join('');
+
+    fp.innerHTML = `
+      <div class="fp-header fp-header-pga">
+        <div class="fp-header-left">
+          <div class="fp-trophy-icon">🏆</div>
+          <div>
+            <h2 class="fp-title">PGA Championship 2026${isFinal ? ' — Final Results' : ''}</h2>
+            <p class="fp-subtitle">Quail Hollow Club · Charlotte, NC · May 14–17, 2026</p>
+          </div>
+        </div>
+        <div class="fp-pool-stats">
+          <div class="fp-stat">
+            <span class="fp-stat-label">Total Pool</span>
+            <span class="fp-stat-val">$${pool}</span>
+          </div>
+          <div class="fp-stat">
+            <span class="fp-stat-label">Daily High Scores</span>
+            <span class="fp-stat-val">$${dailyPool}</span>
+          </div>
+          <div class="fp-stat">
+            <span class="fp-stat-label">Entries</span>
+            <span class="fp-stat-val">${entryCount}</span>
+          </div>
+        </div>
+      </div>
+
+      ${tieNotes ? `<div class="fp-tie-note">${tieNotes}</div>` : ''}
+
+      <div class="fp-two-col">
+        <div class="fp-section">
+          <h3 class="fp-section-title fp-section-title-pga">Place Finishers ${statusLabel}</h3>
+          <div class="fp-finishers">${finisherCards.join('') || '<div class="coming-soon">No standings data yet.</div>'}</div>
+        </div>
+        <div class="fp-section">
+          <h3 class="fp-section-title fp-section-title-pga">Daily High Score Winners</h3>
+          <div class="fp-daily-winners">${roundCards}</div>
+        </div>
+      </div>`;
+  } catch (err) {
+    console.error('PGA payouts error:', err);
+    fp.innerHTML = '<div class="coming-soon">Unable to load payout data.</div>';
+  }
+}
+
+function buildFinisherChips(result) {
+  const chips = [1,2,3,4,5,6].map(i => {
+    const t = result.tierScores[`t${i}`];
+    if (!t) return '';
+    const s = t.score ?? 0;
+    const cls = t.status === 'cut' || t.status === 'wd' ? 'score-mc'
+      : s < 0 ? 'score-under' : s > 0 ? 'score-over' : 'score-even';
+    let scoreStr;
+    if (t.status === 'cut') scoreStr = 'MC';
+    else if (t.status === 'wd') scoreStr = 'WD';
+    else scoreStr = s === 0 ? 'E' : s > 0 ? `+${s}` : `${s}`;
+    const lastName = (t.golfer || '').split(' ').slice(1).join(' ') || (t.golfer || '');
+    const dim = t.isTop4 ? '' : ' style="opacity:.55"';
+    return `<span class="fp-pick-chip"${dim}><span class="fp-pick-name">${escapeHtml(lastName)}</span><span class="fp-pick-score ${cls}">${scoreStr}</span></span>`;
+  }).join('');
+  return `<div class="fp-picks-row"><div class="fp-picks-chips">${chips}</div></div>`;
+}
+
 // ─── Season Leaderboard ───────────────────────────────────────────────────────
 // ─── Masters 2026 Total Standings (finalized, hardcoded) ──────────────────────
 // Total = best 4 of 6 tier scores (lowest = best). isTop4 flags the 4 counting scores.
@@ -1954,41 +2272,79 @@ export async function loadSeasonLeaderboard() {
   if (!table) return;
 
   try {
-    // MASTERS_2026_TOTAL is sorted best→worst; first occurrence of each entrantName = best entry
+    // Build map keyed by real name → best result per major
+    // MASTERS_2026_TOTAL: sorted best→worst; first occurrence = best entry per person
+    const entrantMap = {};
     const seen = new Set();
-    const all = [];
     for (const r of MASTERS_2026_TOTAL) {
       const name = r.pick.entrantName;
       if (seen.has(name)) continue;
       seen.add(name);
-      all.push({ name, mastersTotal: r.total });
+      entrantMap[name] = { name, mastersRank: r.rank };
     }
 
-    // Assign sequential ranks (array already in best→worst order with ties broken)
-    all.forEach((e, i) => { e.rank = i + 1; });
+    // PGA 2026: use pgaCachedResults (live or loaded); best entry per person
+    const pgaSeen = new Set();
+    for (const r of pgaCachedResults) {
+      const name = r.pick.realName || r.pick.entrantName;
+      if (pgaSeen.has(name)) continue;
+      pgaSeen.add(name);
+      if (!entrantMap[name]) entrantMap[name] = { name };
+      entrantMap[name].pgaRank = r.rank;
+    }
 
+    const all = Object.values(entrantMap);
     if (!all.length) {
       if (loadingEl) loadingEl.classList.add('hidden');
       if (noData) noData.classList.remove('hidden');
       return;
     }
 
+    // Compute avg finish across completed majors (Masters + PGA if available)
+    for (const e of all) {
+      const ranks = [e.mastersRank, e.pgaRank].filter(r => r != null);
+      e.avgFinish = ranks.length ? (ranks.reduce((s, r) => s + r, 0) / ranks.length) : null;
+    }
+
+    // Sort by avg finish (ascending); if same avg, sort by best single rank
+    all.sort((a, b) => {
+      if (a.avgFinish == null && b.avgFinish == null) return 0;
+      if (a.avgFinish == null) return 1;
+      if (b.avgFinish == null) return -1;
+      return a.avgFinish !== b.avgFinish ? a.avgFinish - b.avgFinish
+        : Math.min(a.mastersRank ?? 999, a.pgaRank ?? 999) - Math.min(b.mastersRank ?? 999, b.pgaRank ?? 999);
+    });
+
+    // Assign overall season rank (tied if same avg)
+    let seasonRank = 1;
+    for (let i = 0; i < all.length; i++) {
+      if (i > 0 && all[i].avgFinish !== all[i-1].avgFinish) seasonRank = i + 1;
+      all[i].seasonRank = seasonRank;
+    }
+
+    const pgaLive = pgaCachedResults.length > 0 && pgaCurrentTournamentStatus === 'locked';
+
     tbody.innerHTML = all.map(e => {
-      const rankClass = e.rank <= 3 ? `rank-${e.rank}` : '';
-      const rankDisp  = e.rank <= 3 ? ['🥇','🥈','🥉'][e.rank - 1] : e.rank;
-      const mastersDisp = e.rank === 1 ? '<strong>🥇</strong>'
-        : e.rank === 2 ? '<strong>🥈</strong>'
-        : e.rank === 3 ? '<strong>🥉</strong>'
-        : `${e.rank}`;
+      const rc = e.seasonRank <= 3 ? `rank-${e.seasonRank}` : '';
+      const rankDisp = e.seasonRank <= 3 ? ['🥇','🥈','🥉'][e.seasonRank - 1] : e.seasonRank;
+      const mastersCell = e.mastersRank != null
+        ? (e.mastersRank === 1 ? '<strong>🥇</strong>' : e.mastersRank === 2 ? '<strong>🥈</strong>' : e.mastersRank === 3 ? '<strong>🥉</strong>' : e.mastersRank)
+        : '<span style="color:var(--text-muted)">—</span>';
+      const pgaCell = e.pgaRank != null
+        ? `${e.pgaRank}${pgaLive ? ' <span style="font-size:.7rem;color:#f59e0b">▶</span>' : ''}`
+        : '<span style="color:var(--text-muted)">—</span>';
+      const avgCell = e.avgFinish != null
+        ? `<strong>${e.avgFinish % 1 === 0 ? e.avgFinish : e.avgFinish.toFixed(1)}</strong>`
+        : '<span style="color:var(--text-muted)">—</span>';
       return `
         <tr>
-          <td class="col-rank ${rankClass}">${rankDisp}</td>
+          <td class="col-rank ${rc}">${rankDisp}</td>
           <td class="col-name">${escapeHtml(e.name)}</td>
-          <td style="text-align:center">${mastersDisp}</td>
+          <td style="text-align:center">${mastersCell}</td>
+          <td style="text-align:center">${pgaCell}</td>
           <td style="text-align:center;color:var(--text-muted)">—</td>
           <td style="text-align:center;color:var(--text-muted)">—</td>
-          <td style="text-align:center;color:var(--text-muted)">—</td>
-          <td style="text-align:center;font-weight:700">${e.rank}</td>
+          <td style="text-align:center;font-weight:700">${avgCell}</td>
         </tr>`;
     }).join('');
 
@@ -3421,10 +3777,34 @@ export async function loadPgaScoreboard() {
               const v = parseFloat(dv);
               return isNaN(v) ? null : v;
             });
-            const status = c.status?.type?.name?.toLowerCase() ?? 'active';
+            const statusTypeName = c.status?.type?.name ?? '';
+            const statusLower = statusTypeName.toLowerCase();
             let dispStatus = 'Active';
-            if (status.includes('cut')) dispStatus = 'CUT';
-            else if (status.includes('wd') || status.includes('withdrew')) dispStatus = 'WD';
+            if (statusLower.includes('cut')) dispStatus = 'CUT';
+            else if (statusLower.includes('wd') || statusLower.includes('withdrew')) dispStatus = 'WD';
+            // Build richer status detail for active players
+            let statusDetail = dispStatus;
+            if (dispStatus === 'Active') {
+              const thru   = c.status?.thru ?? 0;
+              const period = c.status?.period ?? 0;
+              const teeTime = c.teeTime ?? null;
+              if (statusTypeName.includes('PLAY_COMPLETE') || thru === 18) {
+                statusDetail = period ? `R${period} F` : 'F';
+              } else if (thru > 0) {
+                statusDetail = `Hole ${thru}`;
+              } else if (teeTime) {
+                try {
+                  const dt = new Date(teeTime);
+                  statusDetail = dt.toLocaleTimeString('en-US', {
+                    hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/New_York'
+                  }).replace(':00 ', ' ') + ' ET';
+                } catch { statusDetail = 'Scheduled'; }
+              } else if (statusTypeName.includes('SCHEDULED')) {
+                statusDetail = 'Scheduled';
+              } else {
+                statusDetail = 'Active';
+              }
+            }
             // Compute total from available round scores — ESPN's total field shows "E" mid-round
             const completedRounds = rounds.filter(r => r !== null);
             const totalStr = c.score?.displayValue ?? 'E';
@@ -3437,6 +3817,7 @@ export async function loadPgaScoreboard() {
               total,
               r1: rounds[0], r2: rounds[1], r3: rounds[2], r4: rounds[3],
               status: dispStatus,
+              statusDetail,
             };
           }).filter(p => p.name).sort((a, b) => {
             const statusOrder = { 'Active': 0, 'CUT': 1, 'WD': 2 };
@@ -3532,7 +3913,7 @@ function renderPgaScoreboardRows() {
         <td class="pgasb-col-round">${fmtRoundCell(p.r2)}</td>
         <td class="pgasb-col-round">${fmtRoundCell(p.r3)}</td>
         <td class="pgasb-col-round">${fmtRoundCell(p.r4)}</td>
-        <td class="pgasb-col-status">${p.status}</td>
+        <td class="pgasb-col-status">${p.statusDetail ?? p.status}</td>
       </tr>`;
   }).join('');
 

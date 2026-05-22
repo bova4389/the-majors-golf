@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Basic Bros — Majors Pick'em [v2]</title>
+  <title>Basic Bros — Majors Pick'em</title>
   <link rel="stylesheet" href="css/styles.css?v=20260522" />
 </head>
 <body>
@@ -730,6 +730,67 @@
     <p>Basic Bros — Majors Pick'em &copy; <span id="footerYear"></span></p>
   </footer>
 
+  <!-- ===== NAVIGATION + THEME (plain script — runs unconditionally, no module dependency) ===== -->
+  <script>
+    var pgaTabLoaded = false;
+
+    window.switchMajor = function(major) {
+      document.querySelectorAll('.major-panel').forEach(function(p) {
+        p.classList.remove('panel-active');
+        p.classList.add('hidden');
+      });
+      document.querySelectorAll('.major-tab').forEach(function(t) { t.classList.remove('active'); });
+
+      var panel = document.getElementById('panel-' + major);
+      if (panel) { panel.classList.remove('hidden'); panel.classList.add('panel-active'); }
+
+      var tab = document.querySelector('.major-tab[data-major="' + major + '"]');
+      if (tab) tab.classList.add('active');
+
+      document.body.className = document.body.className.replace(/\btheme-\S+/g, '').trim();
+      if (major !== 'home' && major !== 'season') document.body.classList.add('theme-' + major);
+
+      sessionStorage.setItem('activeMajor', major);
+
+      if (major === 'pga' && !pgaTabLoaded) {
+        pgaTabLoaded = true;
+        if (window.switchMajorYear) window.switchMajorYear('pga', 2026);
+      }
+    };
+
+    window.switchInnerTab = function(major, inner) {
+      var majorPanel = document.getElementById('panel-' + major);
+      if (!majorPanel) return;
+      majorPanel.querySelectorAll('.inner-panel').forEach(function(p) {
+        p.classList.remove('inner-panel-active');
+        p.classList.add('hidden');
+      });
+      majorPanel.querySelectorAll('.inner-tab').forEach(function(t) { t.classList.remove('active'); });
+      var innerPanel = document.getElementById(major + '-' + inner);
+      if (innerPanel) { innerPanel.classList.remove('hidden'); innerPanel.classList.add('inner-panel-active'); }
+      var btn = majorPanel.querySelector('.inner-tab[data-inner="' + inner + '"]');
+      if (btn) btn.classList.add('active');
+    };
+
+    window.toggleTheme = function() {
+      var html = document.documentElement;
+      var isDark = html.getAttribute('data-theme') === 'dark';
+      var next = isDark ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('themeToggle').textContent = isDark ? '☀️' : '🌙';
+      localStorage.setItem('theme', next);
+    };
+
+    // Restore theme and last-viewed tab immediately on load
+    (function() {
+      var savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.getElementById('themeToggle').textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+      var savedMajor = sessionStorage.getItem('activeMajor');
+      if (savedMajor && savedMajor !== 'home') window.switchMajor(savedMajor);
+    })();
+  </script>
+
   <!-- ===== FIREBASE + APP SCRIPTS ===== -->
   <script type="module">
     import { initFirebase } from './js/firebase-config.js';
@@ -982,70 +1043,6 @@
       }
     }
 
-    // ── Major tab navigation ──────────────────────────────────────────────────
-    let pgaTabLoaded = false;
-    window.switchMajor = function(major) {
-      document.querySelectorAll('.major-panel').forEach(p => {
-        p.classList.remove('panel-active');
-        p.classList.add('hidden');
-      });
-      document.querySelectorAll('.major-tab').forEach(t => t.classList.remove('active'));
-
-      const panel = document.getElementById('panel-' + major);
-      if (panel) { panel.classList.remove('hidden'); panel.classList.add('panel-active'); }
-
-      const tab = document.querySelector('.major-tab[data-major="' + major + '"]');
-      if (tab) tab.classList.add('active');
-
-      document.body.className = document.body.className.replace(/\btheme-\S+/g, '').trim();
-      if (major !== 'home' && major !== 'season') document.body.classList.add('theme-' + major);
-
-      sessionStorage.setItem('activeMajor', major);
-
-      // Lazy-load PGA standings on first visit to the PGA tab
-      if (major === 'pga' && !pgaTabLoaded) {
-        pgaTabLoaded = true;
-        window.switchMajorYear('pga', 2026);
-      }
-    };
-
-    // ── Inner (day) tab navigation ────────────────────────────────────────────
-    window.switchInnerTab = function(major, inner) {
-      const majorPanel = document.getElementById('panel-' + major);
-      if (!majorPanel) return;
-
-      majorPanel.querySelectorAll('.inner-panel').forEach(p => {
-        p.classList.remove('inner-panel-active');
-        p.classList.add('hidden');
-      });
-      majorPanel.querySelectorAll('.inner-tab').forEach(t => t.classList.remove('active'));
-
-      const innerPanel = document.getElementById(major + '-' + inner);
-      if (innerPanel) { innerPanel.classList.remove('hidden'); innerPanel.classList.add('inner-panel-active'); }
-
-      const btn = majorPanel.querySelector('.inner-tab[data-inner="' + inner + '"]');
-      if (btn) btn.classList.add('active');
-    };
-
-    // ── Dark / light mode toggle ──────────────────────────────────────────────
-    window.toggleTheme = function() {
-      const html = document.documentElement;
-      const isDark = html.getAttribute('data-theme') === 'dark';
-      const next = isDark ? 'light' : 'dark';
-      html.setAttribute('data-theme', next);
-      document.getElementById('themeToggle').textContent = isDark ? '☀️' : '🌙';
-      localStorage.setItem('theme', next);
-    };
-
-    // ── Restore saved preferences on page load ────────────────────────────────
-    (function init() {
-      const savedTheme = localStorage.getItem('theme') || 'light';
-      document.documentElement.setAttribute('data-theme', savedTheme);
-      document.getElementById('themeToggle').textContent = savedTheme === 'dark' ? '🌙' : '☀️';
-
-      const savedMajor = sessionStorage.getItem('activeMajor');
-      if (savedMajor && savedMajor !== 'home') window.switchMajor(savedMajor);
-    })();
   </script>
 
 </body>

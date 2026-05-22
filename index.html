@@ -751,12 +751,13 @@
     window.theOpenPoolSort = theOpenPoolSort;
     window.theOpenSbEntryFilter = theOpenSbEntryFilter;
     window.switchMajorYear = switchMajorYear;
-    document.getElementById('footerYear').textContent = new Date().getFullYear();
+    const footerYearEl = document.getElementById('footerYear');
+    if (footerYearEl) footerYearEl.textContent = new Date().getFullYear();
 
     loadStandings();
 
-    // PGA standings search filter
-    document.getElementById('pgaStandingsSearch').addEventListener('input', e => {
+    // Pool standings search filters — null-safe in case of version skew between HTML and JS
+    document.getElementById('pgaStandingsSearch')?.addEventListener('input', e => {
       const q = e.target.value.toLowerCase().trim();
       document.querySelectorAll('#pgaStandingsBody tr').forEach(row => {
         const entry   = row.dataset.entry   || '';
@@ -764,9 +765,7 @@
         row.style.display = (!q || entry.includes(q) || players.includes(q)) ? '' : 'none';
       });
     });
-
-    // US Open standings search filter
-    document.getElementById('usOpenStandingsSearch').addEventListener('input', e => {
+    document.getElementById('usOpenStandingsSearch')?.addEventListener('input', e => {
       const q = e.target.value.toLowerCase().trim();
       document.querySelectorAll('#usOpenStandingsBody tr').forEach(row => {
         const entry   = row.dataset.entry   || '';
@@ -774,9 +773,7 @@
         row.style.display = (!q || entry.includes(q) || players.includes(q)) ? '' : 'none';
       });
     });
-
-    // The Open standings search filter
-    document.getElementById('theOpenStandingsSearch').addEventListener('input', e => {
+    document.getElementById('theOpenStandingsSearch')?.addEventListener('input', e => {
       const q = e.target.value.toLowerCase().trim();
       document.querySelectorAll('#theOpenStandingsBody tr').forEach(row => {
         const entry   = row.dataset.entry   || '';

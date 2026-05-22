@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Basic Bros — Majors Pick'em</title>
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/styles.css?v=20260522" />
 </head>
 <body>
 
@@ -475,6 +475,8 @@
         <div class="year-tab-bar" id="usopen-year-tabs">
           <button class="year-tab active" data-year="2026" onclick="switchMajorYear('usopen', 2026)">2026</button>
           <button class="year-tab" data-year="2025" onclick="switchMajorYear('usopen', 2025)">2025</button>
+          <button id="usOpenRefreshBtn" class="btn btn-sm" onclick="usOpenManualRefresh()">Refresh</button>
+          <span id="usOpenLastUpdated" class="last-updated" style="font-size:.8rem;color:var(--text-muted);margin-left:.5rem;"></span>
         </div>
         <div class="inner-tab-bar">
           <button class="inner-tab active" data-inner="total"        onclick="switchInnerTab('usopen','total')">Total</button>
@@ -485,28 +487,64 @@
           <button class="inner-tab"        data-inner="scoreboard"   onclick="switchInnerTab('usopen','scoreboard')">PGA Scoreboard</button>
           <button class="inner-tab tab-payouts" data-inner="finalpayouts" onclick="switchInnerTab('usopen','finalpayouts')">Final Payouts</button>
         </div>
-        <div id="usopen-total"         class="inner-panel inner-panel-active"><div class="coming-soon">U.S. Open 2026 pool standings will appear here once available.</div></div>
+        <div id="usopen-total" class="inner-panel inner-panel-active">
+          <div class="search-bar search-bar-with-btn">
+            <input type="text" id="usOpenStandingsSearch" class="standings-search" placeholder="Search entry name or player..." />
+            <button class="btn btn-analysis" id="usOpenPlayerAnalysisBtn" onclick="toggleUsOpenPlayerAnalysis()">Player Analysis</button>
+          </div>
+          <div id="usOpenPlayerAnalysisView" class="player-analysis-view hidden">
+            <div id="usOpenPlayerAnalysisContent" class="pa-content">
+              <div class="fp-loading">Building analysis…</div>
+            </div>
+          </div>
+          <section class="table-wrapper" id="usOpenStandingsTableWrapper">
+            <div id="usOpenLoadingMsg" class="loading-msg">Loading standings...</div>
+            <table id="usOpenStandingsTable" class="standings-table hidden">
+              <thead>
+                <tr>
+                  <th class="col-rank sortable" data-sort="rank" onclick="usOpenPoolSort('total','rank')">Rank <span class="sort-icon"></span></th>
+                  <th class="col-name sortable" data-sort="name" onclick="usOpenPoolSort('total','name')">Name <span class="sort-icon"></span></th>
+                  <th class="col-name col-picks-name sortable" data-sort="picksName" onclick="usOpenPoolSort('total','picksName')">Picks Name <span class="sort-icon"></span></th>
+                  <th class="col-total sortable" data-sort="total" onclick="usOpenPoolSort('total','total')">Total <span class="sort-icon"></span></th>
+                  <th class="col-tier">Tier 1</th>
+                  <th class="col-tier">Tier 2</th>
+                  <th class="col-tier">Tier 3</th>
+                  <th class="col-tier">Tier 4</th>
+                  <th class="col-tier">Tier 5</th>
+                  <th class="col-tier">Tier 6</th>
+                </tr>
+              </thead>
+              <tbody id="usOpenStandingsBody"></tbody>
+            </table>
+            <div id="usOpenNoDataMsg" class="no-data hidden">No picks found for this tournament.</div>
+          </section>
+        </div>
         <div id="usopen-day1"          class="inner-panel hidden"><div class="coming-soon">U.S. Open 2026 — Round 1 pool standings will appear here once available.</div></div>
         <div id="usopen-day2"          class="inner-panel hidden"><div class="coming-soon">U.S. Open 2026 — Round 2 pool standings will appear here once available.</div></div>
         <div id="usopen-day3"          class="inner-panel hidden"><div class="coming-soon">U.S. Open 2026 — Round 3 pool standings will appear here once available.</div></div>
         <div id="usopen-day4"          class="inner-panel hidden"><div class="coming-soon">U.S. Open 2026 — Round 4 pool standings will appear here once available.</div></div>
         <div id="usopen-scoreboard" class="inner-panel hidden">
-          <div class="search-bar" style="margin-bottom:.75rem">
+          <div class="pgasb-controls">
             <input type="text" id="usopenSbSearch" class="standings-search" placeholder="Search player name…" />
+            <select id="usOpenSbEntryFilter" class="pgasb-entry-select" onchange="usOpenSbEntryFilter(this.value)">
+              <option value="">— Filter by entry —</option>
+            </select>
           </div>
           <div class="pgasb-wrapper">
             <div class="pgasb-loading" id="usopenSbLoading">Loading official scoreboard…</div>
             <table class="pgasb-table hidden" id="usopenSbTable">
               <thead class="pgasb-head-usopen">
                 <tr>
-                  <th class="pgasb-col-pos">Pos</th>
-                  <th class="pgasb-col-player">Player</th>
-                  <th class="pgasb-col-total">Total</th>
-                  <th class="pgasb-col-round">R1</th>
-                  <th class="pgasb-col-round">R2</th>
-                  <th class="pgasb-col-round">R3</th>
-                  <th class="pgasb-col-round">R4</th>
-                  <th class="pgasb-col-status">Status</th>
+                  <th class="pgasb-col-pos pgasb-sortable" data-sort="pos" onclick="usOpenSbSort('pos')">Pos <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-player pgasb-sortable" data-sort="name" onclick="usOpenSbSort('name')">Player <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-total pgasb-sortable" data-sort="total" onclick="usOpenSbSort('total')">Total <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-round pgasb-sortable" data-sort="r1" onclick="usOpenSbSort('r1')">R1 <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-round pgasb-sortable" data-sort="r2" onclick="usOpenSbSort('r2')">R2 <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-round pgasb-sortable" data-sort="r3" onclick="usOpenSbSort('r3')">R3 <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-round pgasb-sortable" data-sort="r4" onclick="usOpenSbSort('r4')">R4 <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-status pgasb-sortable" data-sort="status" onclick="usOpenSbSort('status')">Status <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-owned pgasb-sortable" data-sort="pickCount" onclick="usOpenSbSort('pickCount')">Owned <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-tier-pick">Tier(s)</th>
                 </tr>
               </thead>
               <tbody id="usopenSbBody"></tbody>
@@ -546,6 +584,8 @@
         <div class="year-tab-bar" id="theopen-year-tabs">
           <button class="year-tab active" data-year="2026" onclick="switchMajorYear('theopen', 2026)">2026</button>
           <button class="year-tab" data-year="2025" onclick="switchMajorYear('theopen', 2025)">2025</button>
+          <button id="theOpenRefreshBtn" class="btn btn-sm" onclick="theOpenManualRefresh()">Refresh</button>
+          <span id="theOpenLastUpdated" class="last-updated" style="font-size:.8rem;color:var(--text-muted);margin-left:.5rem;"></span>
         </div>
         <div class="inner-tab-bar">
           <button class="inner-tab active" data-inner="total"        onclick="switchInnerTab('theopen','total')">Total</button>
@@ -556,28 +596,64 @@
           <button class="inner-tab"        data-inner="scoreboard"   onclick="switchInnerTab('theopen','scoreboard')">PGA Scoreboard</button>
           <button class="inner-tab tab-payouts" data-inner="finalpayouts" onclick="switchInnerTab('theopen','finalpayouts')">Final Payouts</button>
         </div>
-        <div id="theopen-total"         class="inner-panel inner-panel-active"><div class="coming-soon">The Open Championship 2026 pool standings will appear here once available.</div></div>
+        <div id="theopen-total" class="inner-panel inner-panel-active">
+          <div class="search-bar search-bar-with-btn">
+            <input type="text" id="theOpenStandingsSearch" class="standings-search" placeholder="Search entry name or player..." />
+            <button class="btn btn-analysis" id="theOpenPlayerAnalysisBtn" onclick="toggleTheOpenPlayerAnalysis()">Player Analysis</button>
+          </div>
+          <div id="theOpenPlayerAnalysisView" class="player-analysis-view hidden">
+            <div id="theOpenPlayerAnalysisContent" class="pa-content">
+              <div class="fp-loading">Building analysis…</div>
+            </div>
+          </div>
+          <section class="table-wrapper" id="theOpenStandingsTableWrapper">
+            <div id="theOpenLoadingMsg" class="loading-msg">Loading standings...</div>
+            <table id="theOpenStandingsTable" class="standings-table hidden">
+              <thead>
+                <tr>
+                  <th class="col-rank sortable" data-sort="rank" onclick="theOpenPoolSort('total','rank')">Rank <span class="sort-icon"></span></th>
+                  <th class="col-name sortable" data-sort="name" onclick="theOpenPoolSort('total','name')">Name <span class="sort-icon"></span></th>
+                  <th class="col-name col-picks-name sortable" data-sort="picksName" onclick="theOpenPoolSort('total','picksName')">Picks Name <span class="sort-icon"></span></th>
+                  <th class="col-total sortable" data-sort="total" onclick="theOpenPoolSort('total','total')">Total <span class="sort-icon"></span></th>
+                  <th class="col-tier">Tier 1</th>
+                  <th class="col-tier">Tier 2</th>
+                  <th class="col-tier">Tier 3</th>
+                  <th class="col-tier">Tier 4</th>
+                  <th class="col-tier">Tier 5</th>
+                  <th class="col-tier">Tier 6</th>
+                </tr>
+              </thead>
+              <tbody id="theOpenStandingsBody"></tbody>
+            </table>
+            <div id="theOpenNoDataMsg" class="no-data hidden">No picks found for this tournament.</div>
+          </section>
+        </div>
         <div id="theopen-day1"          class="inner-panel hidden"><div class="coming-soon">The Open Championship 2026 — Round 1 pool standings will appear here once available.</div></div>
         <div id="theopen-day2"          class="inner-panel hidden"><div class="coming-soon">The Open Championship 2026 — Round 2 pool standings will appear here once available.</div></div>
         <div id="theopen-day3"          class="inner-panel hidden"><div class="coming-soon">The Open Championship 2026 — Round 3 pool standings will appear here once available.</div></div>
         <div id="theopen-day4"          class="inner-panel hidden"><div class="coming-soon">The Open Championship 2026 — Round 4 pool standings will appear here once available.</div></div>
         <div id="theopen-scoreboard" class="inner-panel hidden">
-          <div class="search-bar" style="margin-bottom:.75rem">
+          <div class="pgasb-controls">
             <input type="text" id="theopenSbSearch" class="standings-search" placeholder="Search player name…" />
+            <select id="theOpenSbEntryFilter" class="pgasb-entry-select" onchange="theOpenSbEntryFilter(this.value)">
+              <option value="">— Filter by entry —</option>
+            </select>
           </div>
           <div class="pgasb-wrapper">
             <div class="pgasb-loading" id="theopenSbLoading">Loading official scoreboard…</div>
             <table class="pgasb-table hidden" id="theopenSbTable">
               <thead class="pgasb-head-theopen">
                 <tr>
-                  <th class="pgasb-col-pos">Pos</th>
-                  <th class="pgasb-col-player">Player</th>
-                  <th class="pgasb-col-total">Total</th>
-                  <th class="pgasb-col-round">R1</th>
-                  <th class="pgasb-col-round">R2</th>
-                  <th class="pgasb-col-round">R3</th>
-                  <th class="pgasb-col-round">R4</th>
-                  <th class="pgasb-col-status">Status</th>
+                  <th class="pgasb-col-pos pgasb-sortable" data-sort="pos" onclick="theOpenSbSort('pos')">Pos <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-player pgasb-sortable" data-sort="name" onclick="theOpenSbSort('name')">Player <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-total pgasb-sortable" data-sort="total" onclick="theOpenSbSort('total')">Total <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-round pgasb-sortable" data-sort="r1" onclick="theOpenSbSort('r1')">R1 <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-round pgasb-sortable" data-sort="r2" onclick="theOpenSbSort('r2')">R2 <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-round pgasb-sortable" data-sort="r3" onclick="theOpenSbSort('r3')">R3 <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-round pgasb-sortable" data-sort="r4" onclick="theOpenSbSort('r4')">R4 <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-status pgasb-sortable" data-sort="status" onclick="theOpenSbSort('status')">Status <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-owned pgasb-sortable" data-sort="pickCount" onclick="theOpenSbSort('pickCount')">Owned <span class="pgasb-sort-icon"></span></th>
+                  <th class="pgasb-col-tier-pick">Tier(s)</th>
                 </tr>
               </thead>
               <tbody id="theopenSbBody"></tbody>
@@ -613,10 +689,10 @@
 
         <!-- Completed majors status indicator -->
         <div class="season-progress-bar">
-          <span class="season-progress-label">Completed Majors: <strong>1 of 4</strong></span>
+          <span class="season-progress-label">Completed Majors: <strong>2 of 4</strong></span>
           <div class="season-major-status-list">
             <span class="sms-item sms-complete">✓ The Masters 2026</span>
-            <span class="sms-item sms-pending">⏳ PGA Championship 2026</span>
+            <span class="sms-item sms-complete">✓ PGA Championship 2026</span>
             <span class="sms-item sms-pending">⏳ U.S. Open 2026</span>
             <span class="sms-item sms-pending">⏳ The Open Championship 2026</span>
           </div>
@@ -657,7 +733,7 @@
   <!-- ===== FIREBASE + APP SCRIPTS ===== -->
   <script type="module">
     import { initFirebase } from './js/firebase-config.js';
-    import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings, pgaSbSort, pgaPoolSort, pgaSbEntryFilter } from './js/standings.js';
+    import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings, pgaSbSort, pgaPoolSort, pgaSbEntryFilter, usOpenPoolSort, usOpenSbSort, usOpenSbEntryFilter, usOpenManualRefresh, loadUsOpenPayouts, theOpenPoolSort, theOpenSbSort, theOpenSbEntryFilter, theOpenManualRefresh, loadTheOpenPayouts } from './js/standings.js';
 
     initFirebase();
     window.sortBy = sortBy;
@@ -666,6 +742,14 @@
     window.pgaSbSort = pgaSbSort;
     window.pgaPoolSort = pgaPoolSort;
     window.pgaSbEntryFilter = pgaSbEntryFilter;
+    window.usOpenManualRefresh = usOpenManualRefresh;
+    window.usOpenSbSort = usOpenSbSort;
+    window.usOpenPoolSort = usOpenPoolSort;
+    window.usOpenSbEntryFilter = usOpenSbEntryFilter;
+    window.theOpenManualRefresh = theOpenManualRefresh;
+    window.theOpenSbSort = theOpenSbSort;
+    window.theOpenPoolSort = theOpenPoolSort;
+    window.theOpenSbEntryFilter = theOpenSbEntryFilter;
     window.switchMajorYear = switchMajorYear;
     document.getElementById('footerYear').textContent = new Date().getFullYear();
 
@@ -675,6 +759,26 @@
     document.getElementById('pgaStandingsSearch').addEventListener('input', e => {
       const q = e.target.value.toLowerCase().trim();
       document.querySelectorAll('#pgaStandingsBody tr').forEach(row => {
+        const entry   = row.dataset.entry   || '';
+        const players = row.dataset.players || '';
+        row.style.display = (!q || entry.includes(q) || players.includes(q)) ? '' : 'none';
+      });
+    });
+
+    // US Open standings search filter
+    document.getElementById('usOpenStandingsSearch').addEventListener('input', e => {
+      const q = e.target.value.toLowerCase().trim();
+      document.querySelectorAll('#usOpenStandingsBody tr').forEach(row => {
+        const entry   = row.dataset.entry   || '';
+        const players = row.dataset.players || '';
+        row.style.display = (!q || entry.includes(q) || players.includes(q)) ? '' : 'none';
+      });
+    });
+
+    // The Open standings search filter
+    document.getElementById('theOpenStandingsSearch').addEventListener('input', e => {
+      const q = e.target.value.toLowerCase().trim();
+      document.querySelectorAll('#theOpenStandingsBody tr').forEach(row => {
         const entry   = row.dataset.entry   || '';
         const players = row.dataset.players || '';
         row.style.display = (!q || entry.includes(q) || players.includes(q)) ? '' : 'none';
@@ -811,6 +915,70 @@
       try {
         const { getPgaPlayerAnalysisData } = await import('./js/standings.js');
         const data = getPgaPlayerAnalysisData();
+        container.innerHTML = renderPlayerAnalysis(data);
+      } catch(e) {
+        container.innerHTML = '<div class="coming-soon">Player analysis unavailable — check back once picks are loaded.</div>';
+      }
+    }
+
+    // ── US Open Player Analysis toggle ────────────────────────────────────────
+    let usOpenAnalysisBuilt = false;
+    let usOpenAnalysisVisible = false;
+    window.toggleUsOpenPlayerAnalysis = function() {
+      const view    = document.getElementById('usOpenPlayerAnalysisView');
+      const wrapper = document.getElementById('usOpenStandingsTableWrapper');
+      const btn     = document.getElementById('usOpenPlayerAnalysisBtn');
+      usOpenAnalysisVisible = !usOpenAnalysisVisible;
+
+      view.classList.toggle('hidden', !usOpenAnalysisVisible);
+      if (wrapper) wrapper.classList.toggle('hidden', usOpenAnalysisVisible);
+      btn.textContent = usOpenAnalysisVisible ? 'View Leaderboard' : 'Player Analysis';
+      btn.classList.toggle('btn-analysis-active', usOpenAnalysisVisible);
+
+      if (usOpenAnalysisVisible && !usOpenAnalysisBuilt) {
+        buildUsOpenPlayerAnalysis();
+        usOpenAnalysisBuilt = true;
+      }
+    };
+
+    async function buildUsOpenPlayerAnalysis() {
+      const container = document.getElementById('usOpenPlayerAnalysisContent');
+      if (!container) return;
+      try {
+        const { getUsOpenPlayerAnalysisData } = await import('./js/standings.js');
+        const data = getUsOpenPlayerAnalysisData();
+        container.innerHTML = renderPlayerAnalysis(data);
+      } catch(e) {
+        container.innerHTML = '<div class="coming-soon">Player analysis unavailable — check back once picks are loaded.</div>';
+      }
+    }
+
+    // ── The Open Player Analysis toggle ──────────────────────────────────────
+    let theOpenAnalysisBuilt = false;
+    let theOpenAnalysisVisible = false;
+    window.toggleTheOpenPlayerAnalysis = function() {
+      const view    = document.getElementById('theOpenPlayerAnalysisView');
+      const wrapper = document.getElementById('theOpenStandingsTableWrapper');
+      const btn     = document.getElementById('theOpenPlayerAnalysisBtn');
+      theOpenAnalysisVisible = !theOpenAnalysisVisible;
+
+      view.classList.toggle('hidden', !theOpenAnalysisVisible);
+      if (wrapper) wrapper.classList.toggle('hidden', theOpenAnalysisVisible);
+      btn.textContent = theOpenAnalysisVisible ? 'View Leaderboard' : 'Player Analysis';
+      btn.classList.toggle('btn-analysis-active', theOpenAnalysisVisible);
+
+      if (theOpenAnalysisVisible && !theOpenAnalysisBuilt) {
+        buildTheOpenPlayerAnalysis();
+        theOpenAnalysisBuilt = true;
+      }
+    };
+
+    async function buildTheOpenPlayerAnalysis() {
+      const container = document.getElementById('theOpenPlayerAnalysisContent');
+      if (!container) return;
+      try {
+        const { getTheOpenPlayerAnalysisData } = await import('./js/standings.js');
+        const data = getTheOpenPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {
         container.innerHTML = '<div class="coming-soon">Player analysis unavailable — check back once picks are loaded.</div>';

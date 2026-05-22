@@ -89,6 +89,15 @@ service cloud.firestore {
 ### Why not do this during a live tournament
 Any code change to `picks.js` during an active submission window risks breaking the form mid-submission. Wait until the current tournament closes (status → `final`), then implement and migrate. The risk to PII in the interim is low — this is a small private pool with no realistic scraper threat.
 
+## Cache Busting (Required — Do Not Remove)
+
+Safari on mobile caches pages aggressively. To prevent users from seeing stale versions after a deployment:
+
+1. **`.htaccess`** (already in this repo) — sends `no-cache` headers for all HTML/JS/CSS files. Never delete it.
+2. **`?v=YYYYMMDD` on CSS links** — all three HTML files reference `css/styles.css?v=YYYYMMDD`. **Update this date whenever you change `styles.css`.**
+
+If you add any new local `<script src>` or `<link rel="stylesheet">` tags, include `?v=YYYYMMDD` on those too.
+
 ## Tech Stack Constraints
 Plain HTML / CSS / Vanilla JS only. **Never introduce npm, Node, webpack, or any build step.** All JS loaded via `<script type="module">` or CDN `<script>` tags. Firebase JS SDK loaded from `https://www.gstatic.com/firebasejs/10.12.0/`.
 

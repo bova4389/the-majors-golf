@@ -1,8 +1,8 @@
-import { getDb } from './firebase-config.js';
+import { getDb } from './firebase-config.js?v=20260522';
 import {
   collection, doc, getDocs, getDoc, query, where, setDoc
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-import { calculateStandings, formatScore, scoreClass } from './scoring.js';
+import { calculateStandings, formatScore, scoreClass } from './scoring.js?v=20260522';
 
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 let currentTournamentId = null;

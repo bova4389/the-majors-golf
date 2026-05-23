@@ -44,11 +44,7 @@
     <!-- ================================================================
          HOME PANEL
     ================================================================ -->
-    <!-- Diagnostic banner — hidden by default, shown if module fails or data errors occur -->
-    <div id="_errBanner" style="display:none;background:#c00;color:#fff;padding:10px 16px;font-size:14px;font-family:monospace;z-index:9999;position:sticky;top:0"></div>
-    <div id="_moduleStatus" style="display:none;background:#555;color:#fff;padding:6px 16px;font-size:12px;font-family:monospace"></div>
-
-    <section id="panel-home" class="major-panel panel-active" data-major="home">
+<section id="panel-home" class="major-panel panel-active" data-major="home">
       <div class="container">
 
         <div class="home-hero">
@@ -734,24 +730,6 @@
     <p>Basic Bros — Majors Pick'em &copy; <span id="footerYear"></span></p>
   </footer>
 
-  <!-- ===== ERROR DIAGNOSTICS (plain script — catches module and promise errors) ===== -->
-  <script>
-    window._moduleLoaded = false;
-    window._dataError = null;
-
-    window.addEventListener('error', function(e) {
-      console.error('Global error:', e.message, e.filename, e.lineno);
-    });
-
-    window.addEventListener('unhandledrejection', function(e) {
-      var msg = e.reason ? (e.reason.message || String(e.reason)) : 'Unknown error';
-      console.error('Unhandled promise rejection:', msg, e.reason);
-      window._dataError = msg;
-      var banner = document.getElementById('_errBanner');
-      if (banner) { banner.textContent = 'Data load error: ' + msg; banner.style.display = 'block'; }
-    });
-  </script>
-
   <!-- ===== NAVIGATION + THEME (plain script — runs unconditionally, no module dependency) ===== -->
   <script>
     var pgaTabLoaded = false;
@@ -811,13 +789,6 @@
       var savedMajor = sessionStorage.getItem('activeMajor');
       if (savedMajor && savedMajor !== 'home') window.switchMajor(savedMajor);
 
-      // After 5s, if module never loaded, show an error banner
-      setTimeout(function() {
-        if (!window._moduleLoaded) {
-          var statusEl = document.getElementById('_moduleStatus');
-          if (statusEl) { statusEl.textContent = 'ERROR: JS module failed to load — check browser console for details'; statusEl.style.display = 'block'; statusEl.style.background = '#c00'; }
-        }
-      }, 5000);
     })();
   </script>
 
@@ -825,11 +796,6 @@
   <script type="module">
     import { initFirebase } from './js/firebase-config.js?v=20260522c';
     import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings, pgaSbSort, pgaPoolSort, pgaSbEntryFilter, usOpenPoolSort, usOpenSbSort, usOpenSbEntryFilter, usOpenManualRefresh, loadUsOpenPayouts, theOpenPoolSort, theOpenSbSort, theOpenSbEntryFilter, theOpenManualRefresh, loadTheOpenPayouts } from './js/standings.js?v=20260522c';
-
-    // Signal that module imports succeeded
-    window._moduleLoaded = true;
-    var statusEl = document.getElementById('_moduleStatus');
-    if (statusEl) { statusEl.textContent = 'Module loaded OK — Firebase initializing…'; statusEl.style.display = 'block'; }
 
     initFirebase();
     window.sortBy = sortBy;
@@ -850,13 +816,7 @@
     const footerYearEl = document.getElementById('footerYear');
     if (footerYearEl) footerYearEl.textContent = new Date().getFullYear();
 
-    loadStandings().then(function() {
-      if (statusEl) { statusEl.textContent = 'Module OK · Firebase OK · Data loaded'; }
-    }).catch(function(err) {
-      var msg = err ? (err.message || String(err)) : 'Unknown';
-      if (statusEl) { statusEl.textContent = 'Module OK · loadStandings() FAILED: ' + msg; }
-      console.error('loadStandings failed:', err);
-    });
+    loadStandings();
 
     // Pool standings search filters — null-safe in case of version skew between HTML and JS
     document.getElementById('pgaStandingsSearch')?.addEventListener('input', e => {

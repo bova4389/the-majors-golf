@@ -1,8 +1,8 @@
-﻿import { getDb } from './firebase-config.js?v=20260522c';
+﻿import { getDb } from './firebase-config.js?v=20260522d';
 import {
   collection, doc, getDocs, getDoc, query, where, setDoc
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-import { calculateStandings, formatScore, scoreClass } from './scoring.js?v=20260522c';
+import { calculateStandings, formatScore, scoreClass } from './scoring.js?v=20260522d';
 
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 let currentTournamentId = null;
@@ -1507,10 +1507,10 @@ function loadMasters2025Payouts() {
   fp.innerHTML = `
     <div class="fp-header fp-header-masters">
       <div class="fp-header-left">
-        <div class="fp-trophy-icon">ðŸ†</div>
+        <div class="fp-trophy-icon">\uD83C\uDFC6</div>
         <div>
           <h2 class="fp-title">The Masters 2025 \u2014 Final Results</h2>
-          <p class="fp-subtitle">Augusta National Golf Club Â· April 10\u201413, 2025</p>
+          <p class="fp-subtitle">Augusta National Golf Club \u00B7 April 10\u201413, 2025</p>
         </div>
       </div>
       <div class="fp-pool-stats">
@@ -2206,7 +2206,7 @@ export async function loadPgaPayouts() {
     // Entry count from picks in pgaCachedResults (one entry = one pick doc)
     const entryCount = pgaCachedResults.length;
     const pool = Math.floor(entryCount * netPerEntry);
-    const dailyPool = 4 * 25; // $25 Ã— 4 rounds
+    const dailyPool = 4 * 25; // $25 \u00D7 4 rounds
     const placePool = pool; // all goes to place finishers
 
     const payoutSplit = tournament?.prizePayouts ?? DEFAULT_PAYOUT_SPLIT;
@@ -2316,10 +2316,10 @@ export async function loadPgaPayouts() {
     fp.innerHTML = `
       <div class="fp-header fp-header-pga">
         <div class="fp-header-left">
-          <div class="fp-trophy-icon">ðŸ†</div>
+          <div class="fp-trophy-icon">\uD83C\uDFC6</div>
           <div>
             <h2 class="fp-title">PGA Championship 2026${isFinal ? ' \u2014 Final Results' : ''}</h2>
-            <p class="fp-subtitle">${pgaVenueSubtitle || 'Aronimink Golf Club Â· Newtown Square, Pennsylvania'} Â· May 14\u201417, 2026</p>
+            <p class="fp-subtitle">${pgaVenueSubtitle || 'Aronimink Golf Club \u00B7 Newtown Square, Pennsylvania'} \u00B7 May 14\u201417, 2026</p>
           </div>
         </div>
         <div class="fp-pool-stats">
@@ -2581,7 +2581,7 @@ export async function loadBonusPool() {
 
   try {
     const mastersBonusAmt = 25; // flat fee from Masters pool
-    const pgaCount        = 41; // 41 entries Ã— $1 \u2014 PGA Championship 2026 (finalized)
+    const pgaCount        = 41; // 41 entries \u00D7 $1 \u2014 PGA Championship 2026 (finalized)
 
     // US Open and The Open: fetch live counts from Firestore when available
     const db = getDb();
@@ -2599,14 +2599,14 @@ export async function loadBonusPool() {
     amountEl.textContent = `$${total}`;
 
     if (projectionEl) {
-      const usOpenAmt  = usOpenCount  > 0 ? `$${usOpenCount} (${usOpenCount} entries Ã— $1)` : '$0 (pending)';
-      const theOpenAmt = theOpenCount > 0 ? `$${theOpenCount} (${theOpenCount} entries Ã— $1)` : '$0 (pending)';
+      const usOpenAmt  = usOpenCount  > 0 ? `$${usOpenCount} (${usOpenCount} entries \u00D7 $1)` : '$0 (pending)';
+      const theOpenAmt = theOpenCount > 0 ? `$${theOpenCount} (${theOpenCount} entries \u00D7 $1)` : '$0 (pending)';
       projectionEl.innerHTML = `
         <div class="season-bp-breakdown">
           <h4 class="season-bp-title">Bonus Pool Breakdown</h4>
           <div class="season-bp-rows">
             <div class="season-bp-row"><span>The Masters 2026</span><span class="season-bp-amt populated">$25 (flat fee)</span></div>
-            <div class="season-bp-row"><span>PGA Championship 2026</span><span class="season-bp-amt populated">$${pgaCount} (${pgaCount} entries Ã— $1)</span></div>
+            <div class="season-bp-row"><span>PGA Championship 2026</span><span class="season-bp-amt populated">$${pgaCount} (${pgaCount} entries \u00D7 $1)</span></div>
             <div class="season-bp-row"><span>U.S. Open 2026</span><span class="season-bp-amt ${usOpenCount > 0 ? 'populated' : 'pending'}">${usOpenAmt}</span></div>
             <div class="season-bp-row"><span>The Open Championship 2026</span><span class="season-bp-amt ${theOpenCount > 0 ? 'populated' : 'pending'}">${theOpenAmt}</span></div>
             <div class="season-bp-row season-bp-total"><span>Total Bonus Pool</span><span>$${total}</span></div>
@@ -3358,10 +3358,10 @@ function loadPga2025Payouts() {
   fp.innerHTML = `
     <div class="fp-header fp-header-pga">
       <div class="fp-header-left">
-        <div class="fp-trophy-icon">ðŸ†</div>
+        <div class="fp-trophy-icon">\uD83C\uDFC6</div>
         <div>
           <h2 class="fp-title">PGA Championship 2025 \u2014 Final Results</h2>
-          <p class="fp-subtitle">Quail Hollow Club Â· Charlotte, NC Â· May 15\u201418, 2025</p>
+          <p class="fp-subtitle">Quail Hollow Club \u00B7 Charlotte, NC \u00B7 May 15\u201418, 2025</p>
         </div>
       </div>
       <div class="fp-pool-stats">
@@ -3985,7 +3985,7 @@ export async function loadPgaScoreboard() {
           const state = venue.address?.state ?? '';
           const vname = venue.fullName ?? '';
           const evDates = data?.events?.[0]?.date ?? '';
-          pgaVenueSubtitle = [vname, city && state ? `${city}, ${state}` : (city || state)].filter(Boolean).join(' Â· ');
+          pgaVenueSubtitle = [vname, city && state ? `${city}, ${state}` : (city || state)].filter(Boolean).join(' \u00B7 ');
         }
         const competitors = data?.events?.[0]?.competitions?.[0]?.competitors ?? [];
         if (competitors.length) {
@@ -4846,10 +4846,10 @@ export async function loadUsOpenPayouts() {
     fp.innerHTML = `
       <div class="fp-header fp-header-usopen">
         <div class="fp-header-left">
-          <div class="fp-trophy-icon">ðŸ†</div>
+          <div class="fp-trophy-icon">\uD83C\uDFC6</div>
           <div>
             <h2 class="fp-title">U.S. Open 2026${isFinal ? ' \u2014 Final Results' : ''}</h2>
-            <p class="fp-subtitle">${usOpenVenueSubtitle || 'Shinnecock Hills Golf Club Â· Southampton, New York'} Â· June 15\u201418, 2026</p>
+            <p class="fp-subtitle">${usOpenVenueSubtitle || 'Shinnecock Hills Golf Club \u00B7 Southampton, New York'} \u00B7 June 15\u201418, 2026</p>
           </div>
         </div>
         <div class="fp-pool-stats">
@@ -5508,10 +5508,10 @@ export async function loadTheOpenPayouts() {
     fp.innerHTML = `
       <div class="fp-header fp-header-theopen">
         <div class="fp-header-left">
-          <div class="fp-trophy-icon">ðŸ†</div>
+          <div class="fp-trophy-icon">\uD83C\uDFC6</div>
           <div>
             <h2 class="fp-title">The Open Championship 2026${isFinal ? ' \u2014 Final Results' : ''}</h2>
-            <p class="fp-subtitle">${theOpenVenueSubtitle || 'Royal Birkdale Golf Club Â· Southport, England'} Â· July 17\u201420, 2026</p>
+            <p class="fp-subtitle">${theOpenVenueSubtitle || 'Royal Birkdale Golf Club \u00B7 Southport, England'} \u00B7 July 17\u201420, 2026</p>
           </div>
         </div>
         <div class="fp-pool-stats">

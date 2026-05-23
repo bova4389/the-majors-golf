@@ -1,8 +1,8 @@
-﻿import { getDb } from './firebase-config.js?v=20260522d';
+﻿import { getDb } from './firebase-config.js?v=20260523a';
 import {
   collection, doc, getDocs, getDoc, query, where, setDoc
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-import { calculateStandings, formatScore, scoreClass } from './scoring.js?v=20260522d';
+import { calculateStandings, formatScore, scoreClass } from './scoring.js?v=20260523a';
 
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 let currentTournamentId = null;
@@ -2448,48 +2448,56 @@ export async function loadSeasonLeaderboard() {
   if (!table) return;
 
   try {
-    // Build map keyed by real name â†’ best finishing rank per major
-    // Each major is read from its own cached results array. First occurrence per
-    // person = best entry (arrays are already sorted bestâ†’worst by calculateStandings).
+    // Build map keyed by normalized name (lowercase) â†’ best finishing rank per major.
+    // Case-insensitive so "matt tuck" (hardcoded) matches "Matt Tuck" (Firestore realName).
+    // Each major takes the first occurrence per person = best entry (arrays sorted best->worst).
     const entrantMap = {};
+    function normalKey(n) { return (n || ‘’).toLowerCase().trim(); }
 
     // Masters 2026 (hardcoded)
     const mastersSeen = new Set();
     for (const r of MASTERS_2026_TOTAL) {
-      const name = r.pick.entrantName;
-      if (mastersSeen.has(name)) continue;
-      mastersSeen.add(name);
-      entrantMap[name] = { name, mastersRank: r.rank };
+      const raw = r.pick.entrantName;
+      const key = normalKey(raw);
+      if (mastersSeen.has(key)) continue;
+      mastersSeen.add(key);
+      entrantMap[key] = { name: raw, mastersRank: r.rank };
     }
 
     // PGA 2026 (live from Firestore via pgaCachedResults)
     const pgaSeen = new Set();
     for (const r of pgaCachedResults) {
-      const name = r.pick.realName || r.pick.entrantName;
-      if (pgaSeen.has(name)) continue;
-      pgaSeen.add(name);
-      if (!entrantMap[name]) entrantMap[name] = { name };
-      entrantMap[name].pgaRank = r.rank;
+      const raw = r.pick.realName || r.pick.entrantName;
+      const key = normalKey(raw);
+      if (pgaSeen.has(key)) continue;
+      pgaSeen.add(key);
+      if (!entrantMap[key]) entrantMap[key] = { name: raw };
+      else entrantMap[key].name = raw; // prefer Firestore name (user-entered, better-capitalized)
+      entrantMap[key].pgaRank = r.rank;
     }
 
     // US Open 2026 (live from Firestore via usOpenCachedResults)
     const usOpenSeen = new Set();
     for (const r of usOpenCachedResults) {
-      const name = r.pick.realName || r.pick.entrantName;
-      if (usOpenSeen.has(name)) continue;
-      usOpenSeen.add(name);
-      if (!entrantMap[name]) entrantMap[name] = { name };
-      entrantMap[name].usOpenRank = r.rank;
+      const raw = r.pick.realName || r.pick.entrantName;
+      const key = normalKey(raw);
+      if (usOpenSeen.has(key)) continue;
+      usOpenSeen.add(key);
+      if (!entrantMap[key]) entrantMap[key] = { name: raw };
+      else if (!entrantMap[key].pgaRank) entrantMap[key].name = raw;
+      entrantMap[key].usOpenRank = r.rank;
     }
 
     // The Open 2026 (live from Firestore via theOpenCachedResults)
     const theOpenSeen = new Set();
     for (const r of theOpenCachedResults) {
-      const name = r.pick.realName || r.pick.entrantName;
-      if (theOpenSeen.has(name)) continue;
-      theOpenSeen.add(name);
-      if (!entrantMap[name]) entrantMap[name] = { name };
-      entrantMap[name].theOpenRank = r.rank;
+      const raw = r.pick.realName || r.pick.entrantName;
+      const key = normalKey(raw);
+      if (theOpenSeen.has(key)) continue;
+      theOpenSeen.add(key);
+      if (!entrantMap[key]) entrantMap[key] = { name: raw };
+      else if (!entrantMap[key].pgaRank && !entrantMap[key].usOpenRank) entrantMap[key].name = raw;
+      entrantMap[key].theOpenRank = r.rank;
     }
 
     // Determine which majors are completed (picks locked or final)
@@ -2567,6 +2575,37 @@ export async function loadSeasonLeaderboard() {
 
     if (loadingEl) loadingEl.classList.add('hidden');
     table.classList.remove('hidden');
+
+    // "What Could Have Been" — entered some majors but not all completed ones
+    const wcwbSection = document.getElementById('wcwbSection');
+    const wcwbBody    = document.getElementById('wcwbBody');
+    if (wcwbSection && wcwbBody) {
+      const ineligible = Object.values(entrantMap).filter(e =>
+        !eligible.includes(e) &&
+        (e.mastersRank != null || e.pgaRank != null || e.usOpenRank != null || e.theOpenRank != null)
+      );
+      if (ineligible.length) {
+        for (const e of ineligible) {
+          const ranks = [e.mastersRank, e.pgaRank, e.usOpenRank, e.theOpenRank].filter(r => r != null);
+          e.avgFinish = ranks.length ? ranks.reduce((s, r) => s + r, 0) / ranks.length : null;
+        }
+        ineligible.sort((a, b) => {
+          if (a.avgFinish == null) return 1;
+          if (b.avgFinish == null) return -1;
+          return a.avgFinish - b.avgFinish;
+        });
+        wcwbBody.innerHTML = ineligible.map(e => `
+          <tr>
+            <td class="col-name">${escapeHtml(e.name)}</td>
+            <td style="text-align:center">${majorCell(e.mastersRank, false)}</td>
+            <td style="text-align:center">${majorCell(e.pgaRank, pgaLive)}</td>
+            <td style="text-align:center">${majorCell(e.usOpenRank, usOpenLive)}</td>
+            <td style="text-align:center">${majorCell(e.theOpenRank, theOpenLive)}</td>
+            <td style="text-align:center;font-weight:700;color:var(--text-muted)">${e.avgFinish != null ? (e.avgFinish % 1 === 0 ? e.avgFinish : e.avgFinish.toFixed(1)) : '—'}</td>
+          </tr>`).join('');
+        wcwbSection.classList.remove('hidden');
+      }
+    }
   } catch(err) {
     console.error('Season leaderboard error:', err);
     if (loadingEl) loadingEl.textContent = 'Unable to load season standings.';

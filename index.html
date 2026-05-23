@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Basic Bros — Majors Pick'em</title>
-  <link rel="stylesheet" href="css/styles.css?v=20260522d" />
+  <link rel="stylesheet" href="css/styles.css?v=20260523a" />
 </head>
 <body>
 
@@ -718,6 +718,29 @@
           <div id="seasonNoData" class="no-data hidden">No season data available yet.</div>
         </div>
 
+        <!-- "What Could Have Been" — players who entered some but not all majors -->
+        <div id="wcwbSection" class="hidden" style="margin-top:2rem">
+          <div style="display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap;margin-bottom:.6rem">
+            <h3 style="margin:0;font-size:1rem;font-weight:700;color:var(--text-primary)">What Could Have Been</h3>
+            <span style="font-size:.78rem;color:var(--text-muted);font-style:italic">Entered some majors but not all — not eligible for season prize</span>
+          </div>
+          <div class="table-wrapper">
+            <table id="wcwbTable" class="standings-table" style="opacity:.8">
+              <thead>
+                <tr>
+                  <th class="col-name">Participant</th>
+                  <th style="width:80px;text-align:center">Masters '26</th>
+                  <th style="width:80px;text-align:center">PGA '26</th>
+                  <th style="width:80px;text-align:center">US Open '26</th>
+                  <th style="width:80px;text-align:center">The Open '26</th>
+                  <th style="width:90px;text-align:center">Avg (entered)</th>
+                </tr>
+              </thead>
+              <tbody id="wcwbBody"></tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- Season payout projection -->
         <div class="season-payout-projection" id="seasonPayoutProjection"></div>
 
@@ -794,8 +817,8 @@
 
   <!-- ===== FIREBASE + APP SCRIPTS ===== -->
   <script type="module">
-    import { initFirebase } from './js/firebase-config.js?v=20260522d';
-    import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings, pgaSbSort, pgaPoolSort, pgaSbEntryFilter, usOpenPoolSort, usOpenSbSort, usOpenSbEntryFilter, usOpenManualRefresh, loadUsOpenPayouts, theOpenPoolSort, theOpenSbSort, theOpenSbEntryFilter, theOpenManualRefresh, loadTheOpenPayouts } from './js/standings.js?v=20260522d';
+    import { initFirebase } from './js/firebase-config.js?v=20260523a';
+    import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings, pgaSbSort, pgaPoolSort, pgaSbEntryFilter, usOpenPoolSort, usOpenSbSort, usOpenSbEntryFilter, usOpenManualRefresh, loadUsOpenPayouts, theOpenPoolSort, theOpenSbSort, theOpenSbEntryFilter, theOpenManualRefresh, loadTheOpenPayouts } from './js/standings.js?v=20260523a';
 
     initFirebase();
     window.sortBy = sortBy;
@@ -879,7 +902,7 @@
       const container = document.getElementById('playerAnalysisContent');
       if (!container) return;
       try {
-        const { getPlayerAnalysisData } = await import('./js/standings.js?v=20260522d');
+        const { getPlayerAnalysisData } = await import('./js/standings.js?v=20260523a');
         const data = await getPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {
@@ -972,7 +995,7 @@
       const container = document.getElementById('pgaPlayerAnalysisContent');
       if (!container) return;
       try {
-        const { getPgaPlayerAnalysisData } = await import('./js/standings.js?v=20260522d');
+        const { getPgaPlayerAnalysisData } = await import('./js/standings.js?v=20260523a');
         const data = getPgaPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {
@@ -1004,7 +1027,7 @@
       const container = document.getElementById('usOpenPlayerAnalysisContent');
       if (!container) return;
       try {
-        const { getUsOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260522d');
+        const { getUsOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260523a');
         const data = getUsOpenPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {
@@ -1036,7 +1059,7 @@
       const container = document.getElementById('theOpenPlayerAnalysisContent');
       if (!container) return;
       try {
-        const { getTheOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260522d');
+        const { getTheOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260523a');
         const data = getTheOpenPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {

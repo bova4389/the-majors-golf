@@ -1,8 +1,8 @@
-﻿import { getDb } from './firebase-config.js?v=20260522';
+﻿import { getDb } from './firebase-config.js?v=20260522b';
 import {
   collection, doc, getDocs, getDoc, query, where, setDoc
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-import { calculateStandings, formatScore, scoreClass } from './scoring.js?v=20260522';
+import { calculateStandings, formatScore, scoreClass } from './scoring.js?v=20260522b';
 
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 let currentTournamentId = null;
@@ -658,7 +658,7 @@ function renderTable(results, scoresMap) {
 
   tbody.innerHTML = results.map(r => {
     const rankClass = r.rank <= 3 ? `rank-${r.rank}` : '';
-    const rankDisplay = r.rank <= 3 ? ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰'][r.rank - 1] : r.rank;
+    const rankDisplay = r.rank <= 3 ? ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'][r.rank - 1] : r.rank;
     const totalCls = scoreClass(r.total, null);
 
     // Live Firestore picks: realName = real name, entrantName = picks name
@@ -856,7 +856,7 @@ function renderPgaPoolRows(tab, results) {
 
   tbody.innerHTML = sorted.map(r => {
     const rankClass   = r.rank <= 3 ? `rank-${r.rank}` : '';
-    const rankDisplay = r.rank <= 3 ? ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰'][r.rank - 1] : r.rank;
+    const rankDisplay = r.rank <= 3 ? ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'][r.rank - 1] : r.rank;
     const totalCls    = scoreClass(r.total, null);
     const rawName     = r.pick.realName || r.pick.entrantName;
     const realName    = rawName.replace(/ \d+$/, '');
@@ -1441,9 +1441,9 @@ function loadMasters2025Payouts() {
   if (!fp) return;
 
   const finishers = [
-    { display: 'ðŸ¥‡ 1st', name: 'Robert Stephenson 2', payout: '$475' },
-    { display: 'ðŸ¥ˆ 2nd', name: 'Morgan 3',            payout: '$265' },
-    { display: 'ðŸ¥‰ 3rd', name: 'Jake Bogardus',       payout: '$160' },
+    { display: '\uD83E\uDD47 1st', name: 'Robert Stephenson 2', payout: '$475' },
+    { display: '\uD83E\uDD48 2nd', name: 'Morgan 3',            payout: '$265' },
+    { display: '\uD83E\uDD49 3rd', name: 'Jake Bogardus',       payout: '$160' },
     { display: '4th',    name: 'Erik Vermilyea',      payout: '$100' },
     { display: '5th',    name: 'Matt Bova 2',         payout: '$50'  },
   ];
@@ -1646,7 +1646,7 @@ function loadMasters2025Round2Standings() {
   const container = document.getElementById('masters-day2');
   if (!container) return;
 
-  const medals = ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰'];
+  const medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
   const rows = MASTERS_2025_R2.map(entry => {
     const rankDisplay = entry.rank <= 3 ? medals[entry.rank - 1] : entry.rank;
     const rankClass   = entry.rank <= 3 ? `rank-${entry.rank}` : '';
@@ -1751,7 +1751,7 @@ function loadMasters2025Round3Standings() {
   const container = document.getElementById('masters-day3');
   if (!container) return;
 
-  const medals = ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰'];
+  const medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
   const rows = MASTERS_2025_R3.map(entry => {
     const rankDisplay = entry.rank <= 3 ? medals[entry.rank - 1] : entry.rank;
     const rankClass   = entry.rank <= 3 ? `rank-${entry.rank}` : '';
@@ -1856,7 +1856,7 @@ function loadMasters2025Round4Standings() {
   const container = document.getElementById('masters-day4');
   if (!container) return;
 
-  const medals = ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰'];
+  const medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
   const rows = MASTERS_2025_R4.map(entry => {
     const rankDisplay = entry.rank <= 3 ? medals[entry.rank - 1] : entry.rank;
     const rankClass   = entry.rank <= 3 ? `rank-${entry.rank}` : '';
@@ -1911,7 +1911,7 @@ function loadMasters2025Round1Standings() {
   const container = document.getElementById('masters-day1');
   if (!container) return;
 
-  const medals = ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰'];
+  const medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
   const rows = MASTERS_2025_R1.map(entry => {
     const rankDisplay = entry.rank <= 3 ? medals[entry.rank - 1] : entry.rank;
     const rankClass   = entry.rank <= 3 ? `rank-${entry.rank}` : '';
@@ -2089,10 +2089,10 @@ export async function loadMastersScoreboard() {
 
 // â”€â”€â”€ Masters 2026 Final Payouts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const MASTERS_2026_FINISHERS = [
-  { display: 'ðŸ¥‡ 1st',   name: 'Sarah Crowell',   payout: '$520.00',  tied: false },
-  { display: 'ðŸ¥ˆ 2nd',   name: 'Mitch Pletcher',  payout: '$285.00',  tied: false },
-  { display: 'ðŸ¥‰ T-3rd', name: 'Erik Vermilyea',  payout: '$142.50',  tied: true  },
-  { display: 'ðŸ¥‰ T-3rd', name: 'Ron Pannullo',    payout: '$142.50',  tied: true  },
+  { display: '\uD83E\uDD47 1st',   name: 'Sarah Crowell',   payout: '$520.00',  tied: false },
+  { display: '\uD83E\uDD48 2nd',   name: 'Mitch Pletcher',  payout: '$285.00',  tied: false },
+  { display: '\uD83E\uDD49 T-3rd', name: 'Erik Vermilyea',  payout: '$142.50',  tied: true  },
+  { display: '\uD83E\uDD49 T-3rd', name: 'Ron Pannullo',    payout: '$142.50',  tied: true  },
   { display: '5th',      name: 'Jeff Mersch',     payout: '$60.00',   tied: false },
 ];
 
@@ -2248,9 +2248,9 @@ export async function loadPgaPayouts() {
         const placeNum = places[0];
         let dispLabel;
         if (group.length > 1) {
-          dispLabel = placeNum === 1 ? 'ðŸ¥‡ T-1st' : placeNum === 2 ? 'ðŸ¥ˆ T-2nd' : placeNum === 3 ? 'ðŸ¥‰ T-3rd' : `T-${placeNum}th`;
+          dispLabel = placeNum === 1 ? '\uD83E\uDD47 T-1st' : placeNum === 2 ? '\uD83E\uDD48 T-2nd' : placeNum === 3 ? '\uD83E\uDD49 T-3rd' : `T-${placeNum}th`;
         } else {
-          dispLabel = placeNum === 1 ? 'ðŸ¥‡ 1st' : placeNum === 2 ? 'ðŸ¥ˆ 2nd' : placeNum === 3 ? 'ðŸ¥‰ 3rd' : `${placeNum}th`;
+          dispLabel = placeNum === 1 ? '\uD83E\uDD47 1st' : placeNum === 2 ? '\uD83E\uDD48 2nd' : placeNum === 3 ? '\uD83E\uDD49 3rd' : `${placeNum}th`;
         }
         const totalDisp = r.total === 0 ? 'E' : r.total > 0 ? `+${r.total}` : `${r.total}`;
         const totalCls = r.total < 0 ? 'score-under' : r.total > 0 ? 'score-over' : 'score-even';
@@ -2530,14 +2530,14 @@ export async function loadSeasonLeaderboard() {
 
     function majorCell(rank, isLive) {
       if (rank == null) return '<span style="color:var(--text-muted)">â€”</span>';
-      const medal = rank === 1 ? 'ðŸ¥‡' : rank === 2 ? 'ðŸ¥ˆ' : rank === 3 ? 'ðŸ¥‰' : null;
+      const medal = rank === 1 ? '\uD83E\uDD47' : rank === 2 ? '\uD83E\uDD48' : rank === 3 ? '\uD83E\uDD49' : null;
       const display = medal ? `<strong>${medal}</strong>` : rank;
       return `${display}${isLive ? liveIcon : ''}`;
     }
 
     tbody.innerHTML = all.map(e => {
       const rc = e.seasonRank <= 3 ? `rank-${e.seasonRank}` : '';
-      const rankDisp = e.seasonRank <= 3 ? ['ðŸ¥‡','ðŸ¥ˆ','ðŸ¥‰'][e.seasonRank - 1] : e.seasonRank;
+      const rankDisp = e.seasonRank <= 3 ? ['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'][e.seasonRank - 1] : e.seasonRank;
       const avgCell = e.avgFinish != null
         ? `<strong>${e.avgFinish % 1 === 0 ? e.avgFinish : e.avgFinish.toFixed(1)}</strong>`
         : '<span style="color:var(--text-muted)">â€”</span>';
@@ -2600,7 +2600,7 @@ export async function loadBonusPool() {
             <div class="season-bp-row season-bp-total"><span>Total Bonus Pool</span><span>$${total}</span></div>
           </div>
           <div class="season-bp-payouts">
-            <span class="season-bp-payout-item">ðŸ¥‡ Winner: <strong>$${total}</strong> (100%)</span>
+            <span class="season-bp-payout-item">\uD83E\uDD47 Winner: <strong>$${total}</strong> (100%)</span>
           </div>
         </div>`;
     }
@@ -2704,7 +2704,7 @@ export function loadRound1Standings() {
     processed[i].rank = rank;
   }
 
-  const medals = ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰'];
+  const medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
   const rows = processed.map(entry => {
     const rankDisplay = entry.rank <= 3 ? medals[entry.rank - 1] : entry.rank;
     const rankClass = entry.rank <= 3 ? `rank-${entry.rank}` : '';
@@ -2844,7 +2844,7 @@ export function loadRound2Standings() {
     processed[i].rank = rank;
   }
 
-  const medals = ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰'];
+  const medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
   const rows = processed.map(entry => {
     const rankDisplay = entry.rank <= 3 ? medals[entry.rank - 1] : entry.rank;
     const rankClass = entry.rank <= 3 ? `rank-${entry.rank}` : '';
@@ -2984,7 +2984,7 @@ export function loadRound3Standings() {
     processed[i].rank = rank;
   }
 
-  const medals = ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰'];
+  const medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
   const rows = processed.map(entry => {
     const rankDisplay = entry.rank <= 3 ? medals[entry.rank - 1] : entry.rank;
     const rankClass = entry.rank <= 3 ? `rank-${entry.rank}` : '';
@@ -3124,7 +3124,7 @@ export function loadRound4Standings() {
     processed[i].rank = rank;
   }
 
-  const medals = ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰'];
+  const medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
   const rows = processed.map(entry => {
     const rankDisplay = entry.rank <= 3 ? medals[entry.rank - 1] : entry.rank;
     const rankClass = entry.rank <= 3 ? `rank-${entry.rank}` : '';
@@ -3223,7 +3223,7 @@ function loadPga2025TotalStandings() {
   const container = document.getElementById('pga-total');
   if (!container) return;
 
-  const medals = ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰'];
+  const medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
   const rows = PGA_2025_TOTAL.map(entry => {
     const rankDisplay = entry.rank <= 3 ? medals[entry.rank - 1] : entry.rank;
     const rankClass   = entry.rank <= 3 ? `rank-${entry.rank}` : '';
@@ -3280,9 +3280,9 @@ function loadPga2025Payouts() {
   if (!fp) return;
 
   const finishers = [
-    { display: 'ðŸ¥‡ 1st',   name: 'Bobby Cross',    payout: '$405' },
-    { display: 'ðŸ¥ˆ T-2nd', name: 'Chris Schumann', payout: '$180' },
-    { display: 'ðŸ¥ˆ T-2nd', name: 'Ron Pannullo',   payout: '$180' },
+    { display: '\uD83E\uDD47 1st',   name: 'Bobby Cross',    payout: '$405' },
+    { display: '\uD83E\uDD48 T-2nd', name: 'Chris Schumann', payout: '$180' },
+    { display: '\uD83E\uDD48 T-2nd', name: 'Ron Pannullo',   payout: '$180' },
     { display: '4th',      name: 'Jeff Bagnasco',  payout: '$90'  },
     { display: '5th',      name: 'Jake Bogardus',  payout: '$45'  },
   ];
@@ -3428,7 +3428,7 @@ function loadPga2025Round1Standings() {
   const container = document.getElementById('pga-day1');
   if (!container) return;
 
-  const medals = ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰'];
+  const medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
   const rows = PGA_2025_R1.map(entry => {
     const rankDisplay = entry.rank <= 3 ? medals[entry.rank - 1] : entry.rank;
     const rankClass   = entry.rank <= 3 ? `rank-${entry.rank}` : '';
@@ -3528,7 +3528,7 @@ function loadPga2025Round2Standings() {
   const container = document.getElementById('pga-day2');
   if (!container) return;
 
-  const medals = ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰'];
+  const medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
   const rows = PGA_2025_R2.map(entry => {
     const rankDisplay = entry.rank <= 3 ? medals[entry.rank - 1] : entry.rank;
     const rankClass   = entry.rank <= 3 ? `rank-${entry.rank}` : '';
@@ -3628,7 +3628,7 @@ function loadPga2025Round3Standings() {
   const container = document.getElementById('pga-day3');
   if (!container) return;
 
-  const medals = ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰'];
+  const medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
   const rows = PGA_2025_R3.map(entry => {
     const rankDisplay = entry.rank <= 3 ? medals[entry.rank - 1] : entry.rank;
     const rankClass   = entry.rank <= 3 ? `rank-${entry.rank}` : '';
@@ -3728,7 +3728,7 @@ function loadPga2025Round4Standings() {
   const container = document.getElementById('pga-day4');
   if (!container) return;
 
-  const medals = ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰'];
+  const medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
   const rows = PGA_2025_R4.map(entry => {
     const rankDisplay = entry.rank <= 3 ? medals[entry.rank - 1] : entry.rank;
     const rankClass   = entry.rank <= 3 ? `rank-${entry.rank}` : '';
@@ -4556,7 +4556,7 @@ function renderUsOpenPoolRows(tab, results) {
 
   tbody.innerHTML = sorted.map(r => {
     const rankClass   = r.rank <= 3 ? `rank-${r.rank}` : '';
-    const rankDisplay = r.rank <= 3 ? ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰'][r.rank - 1] : r.rank;
+    const rankDisplay = r.rank <= 3 ? ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'][r.rank - 1] : r.rank;
     const totalCls    = scoreClass(r.total, null);
     const rawName     = r.pick.realName || r.pick.entrantName;
     const realName    = rawName.replace(/ \d+$/, '');
@@ -4769,9 +4769,9 @@ export async function loadUsOpenPayouts() {
         const placeNum = places[0];
         let dispLabel;
         if (group.length > 1) {
-          dispLabel = placeNum === 1 ? 'ðŸ¥‡ T-1st' : placeNum === 2 ? 'ðŸ¥ˆ T-2nd' : placeNum === 3 ? 'ðŸ¥‰ T-3rd' : `T-${placeNum}th`;
+          dispLabel = placeNum === 1 ? '\uD83E\uDD47 T-1st' : placeNum === 2 ? '\uD83E\uDD48 T-2nd' : placeNum === 3 ? '\uD83E\uDD49 T-3rd' : `T-${placeNum}th`;
         } else {
-          dispLabel = placeNum === 1 ? 'ðŸ¥‡ 1st' : placeNum === 2 ? 'ðŸ¥ˆ 2nd' : placeNum === 3 ? 'ðŸ¥‰ 3rd' : `${placeNum}th`;
+          dispLabel = placeNum === 1 ? '\uD83E\uDD47 1st' : placeNum === 2 ? '\uD83E\uDD48 2nd' : placeNum === 3 ? '\uD83E\uDD49 3rd' : `${placeNum}th`;
         }
         const totalDisp = r.total === 0 ? 'E' : r.total > 0 ? `+${r.total}` : `${r.total}`;
         const totalCls = r.total < 0 ? 'score-under' : r.total > 0 ? 'score-over' : 'score-even';
@@ -5218,7 +5218,7 @@ function renderTheOpenPoolRows(tab, results) {
 
   tbody.innerHTML = sorted.map(r => {
     const rankClass   = r.rank <= 3 ? `rank-${r.rank}` : '';
-    const rankDisplay = r.rank <= 3 ? ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰'][r.rank - 1] : r.rank;
+    const rankDisplay = r.rank <= 3 ? ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'][r.rank - 1] : r.rank;
     const totalCls    = scoreClass(r.total, null);
     const rawName     = r.pick.realName || r.pick.entrantName;
     const realName    = rawName.replace(/ \d+$/, '');
@@ -5431,9 +5431,9 @@ export async function loadTheOpenPayouts() {
         const placeNum = places[0];
         let dispLabel;
         if (group.length > 1) {
-          dispLabel = placeNum === 1 ? 'ðŸ¥‡ T-1st' : placeNum === 2 ? 'ðŸ¥ˆ T-2nd' : placeNum === 3 ? 'ðŸ¥‰ T-3rd' : `T-${placeNum}th`;
+          dispLabel = placeNum === 1 ? '\uD83E\uDD47 T-1st' : placeNum === 2 ? '\uD83E\uDD48 T-2nd' : placeNum === 3 ? '\uD83E\uDD49 T-3rd' : `T-${placeNum}th`;
         } else {
-          dispLabel = placeNum === 1 ? 'ðŸ¥‡ 1st' : placeNum === 2 ? 'ðŸ¥ˆ 2nd' : placeNum === 3 ? 'ðŸ¥‰ 3rd' : `${placeNum}th`;
+          dispLabel = placeNum === 1 ? '\uD83E\uDD47 1st' : placeNum === 2 ? '\uD83E\uDD48 2nd' : placeNum === 3 ? '\uD83E\uDD49 3rd' : `${placeNum}th`;
         }
         const totalDisp = r.total === 0 ? 'E' : r.total > 0 ? `+${r.total}` : `${r.total}`;
         const totalCls = r.total < 0 ? 'score-under' : r.total > 0 ? 'score-over' : 'score-even';

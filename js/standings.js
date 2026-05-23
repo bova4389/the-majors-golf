@@ -1,4 +1,4 @@
-import { getDb } from './firebase-config.js?v=20260522';
+﻿import { getDb } from './firebase-config.js?v=20260522';
 import {
   collection, doc, getDocs, getDoc, query, where, setDoc
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
@@ -552,9 +552,9 @@ function parseEspnLeaderboard(data) {
 // â”€â”€â”€ Name reconciliation helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function normalizeName(name) {
   return (name || '').toLowerCase()
-    // Map characters that don't decompose via NFD
-    .replace(/Ã¸/g, 'o').replace(/Ã°/g, 'd').replace(/Ã¾/g, 'th').replace(/Å‚/g, 'l').replace(/Ã¦/g, 'ae')
-    .normalize('NFD').replace(/[Ì€-Í¯]/g, '')
+    // \u escapes are ASCII-only and survive any future re-encoding
+    .replace(/\u00f8/g, 'o').replace(/\u00f0/g, 'd').replace(/\u00fe/g, 'th').replace(/\u0142/g, 'l').replace(/\u00e6/g, 'ae')
+    .normalize('NFD').replace(/[\u0300-\u036F]/g, '')
     .replace(/[^a-z\s]/g, '').replace(/\s+/g, ' ').trim();
 }
 

@@ -1,8 +1,8 @@
-﻿import { getDb } from './firebase-config.js?v=20260523b';
+﻿import { getDb } from './firebase-config.js?v=20260523c';
 import {
   collection, doc, getDocs, getDoc, query, where, setDoc
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-import { calculateStandings, formatScore, scoreClass } from './scoring.js?v=20260523b';
+import { calculateStandings, formatScore, scoreClass } from './scoring.js?v=20260523c';
 
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 let currentTournamentId = null;
@@ -518,7 +518,14 @@ async function fetchOrRefreshScores(tournament) {
 async function fetchEspnScores(espnEventId) {
   try {
     const url = `https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?event=${espnEventId}`;
-    const res = await fetch(url);
+    const ac = new AbortController();
+    const timeout = setTimeout(() => ac.abort(), 10000);
+    let res;
+    try {
+      res = await fetch(url, { signal: ac.signal });
+    } finally {
+      clearTimeout(timeout);
+    }
     if (!res.ok) return {};
     const data = await res.json();
     return parseEspnLeaderboard(data);

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Basic Bros — Majors Pick'em</title>
-  <link rel="stylesheet" href="css/styles.css?v=20260523a" />
+  <link rel="stylesheet" href="css/styles.css?v=20260523c" />
 </head>
 <body>
 
@@ -817,8 +817,8 @@
 
   <!-- ===== FIREBASE + APP SCRIPTS ===== -->
   <script type="module">
-    import { initFirebase } from './js/firebase-config.js?v=20260523b';
-    import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings, pgaSbSort, pgaPoolSort, pgaSbEntryFilter, usOpenPoolSort, usOpenSbSort, usOpenSbEntryFilter, usOpenManualRefresh, loadUsOpenPayouts, theOpenPoolSort, theOpenSbSort, theOpenSbEntryFilter, theOpenManualRefresh, loadTheOpenPayouts } from './js/standings.js?v=20260523b';
+    import { initFirebase } from './js/firebase-config.js?v=20260523c';
+    import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings, pgaSbSort, pgaPoolSort, pgaSbEntryFilter, usOpenPoolSort, usOpenSbSort, usOpenSbEntryFilter, usOpenManualRefresh, loadUsOpenPayouts, theOpenPoolSort, theOpenSbSort, theOpenSbEntryFilter, theOpenManualRefresh, loadTheOpenPayouts } from './js/standings.js?v=20260523c';
 
     initFirebase();
     window.sortBy = sortBy;
@@ -902,7 +902,7 @@
       const container = document.getElementById('playerAnalysisContent');
       if (!container) return;
       try {
-        const { getPlayerAnalysisData } = await import('./js/standings.js?v=20260523a');
+        const { getPlayerAnalysisData } = await import('./js/standings.js?v=20260523c');
         const data = await getPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {
@@ -995,7 +995,7 @@
       const container = document.getElementById('pgaPlayerAnalysisContent');
       if (!container) return;
       try {
-        const { getPgaPlayerAnalysisData } = await import('./js/standings.js?v=20260523a');
+        const { getPgaPlayerAnalysisData } = await import('./js/standings.js?v=20260523c');
         const data = getPgaPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {
@@ -1027,7 +1027,7 @@
       const container = document.getElementById('usOpenPlayerAnalysisContent');
       if (!container) return;
       try {
-        const { getUsOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260523a');
+        const { getUsOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260523c');
         const data = getUsOpenPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {
@@ -1059,7 +1059,7 @@
       const container = document.getElementById('theOpenPlayerAnalysisContent');
       if (!container) return;
       try {
-        const { getTheOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260523a');
+        const { getTheOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260523c');
         const data = getTheOpenPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {

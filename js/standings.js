@@ -1,8 +1,8 @@
-﻿import { getDb } from './firebase-config.js?v=20260522b';
+﻿import { getDb } from './firebase-config.js?v=20260522c';
 import {
   collection, doc, getDocs, getDoc, query, where, setDoc
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-import { calculateStandings, formatScore, scoreClass } from './scoring.js?v=20260522b';
+import { calculateStandings, formatScore, scoreClass } from './scoring.js?v=20260522c';
 
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 let currentTournamentId = null;
@@ -197,7 +197,7 @@ export function switchMajorYear(major, year) {
         const totalBtn = majorPanel.querySelector('.inner-tab[data-inner="total"]');
         if (totalBtn) totalBtn.classList.add('active');
       } else {
-        // No pool data â€” jump to scoreboard tab
+        // No pool data \u2014 jump to scoreboard tab
         const sbPanel = document.getElementById(major + '-scoreboard');
         if (sbPanel) { sbPanel.classList.remove('hidden'); sbPanel.classList.add('inner-panel-active'); }
         const sbBtn = majorPanel.querySelector('.inner-tab[data-inner="scoreboard"]');
@@ -229,7 +229,7 @@ export function switchMajorYear(major, year) {
       if (t) {
         loadPgaTournamentData(t.id);
       } else {
-        // No tournament in Firestore â€” show message instead of frozen spinner
+        // No tournament in Firestore \u2014 show message instead of frozen spinner
         const loadingEl = document.getElementById('pgaLoadingMsg');
         const noDataEl  = document.getElementById('pgaNoDataMsg');
         if (loadingEl) loadingEl.classList.add('hidden');
@@ -244,7 +244,7 @@ export function switchMajorYear(major, year) {
     usOpenActiveYear = year;
     loadUsOpenScoreboard();
     if (year === 2025) {
-      // 2025 is scoreboard-only (no pool data) â€” nothing more to do
+      // 2025 is scoreboard-only (no pool data) \u2014 nothing more to do
     } else {
       // Reset pool tab panels so 2025 data doesn't linger
       const usOpenPanel = document.getElementById('panel-usopen');
@@ -273,7 +273,7 @@ export function switchMajorYear(major, year) {
     theOpenActiveYear = year;
     loadTheOpenScoreboard();
     if (year === 2025) {
-      // 2025 is scoreboard-only â€” nothing more to do
+      // 2025 is scoreboard-only \u2014 nothing more to do
     } else {
       const theOpenPanel = document.getElementById('panel-theopen');
       if (theOpenPanel) {
@@ -302,7 +302,7 @@ export function switchMajorYear(major, year) {
 function clearMastersPoolPanels() {
   const placeholder = '<div class="coming-soon">2025 Masters pool data coming soon.</div>';
 
-  // Total tab â€” clear table, show placeholder message
+  // Total tab \u2014 clear table, show placeholder message
   const table = document.getElementById('standingsTable');
   const body  = document.getElementById('standingsBody');
   const loading = document.getElementById('loadingMsg');
@@ -318,7 +318,7 @@ function clearMastersPoolPanels() {
     if (el) el.innerHTML = placeholder;
   });
 
-  // Final Payouts â€” save existing HTML then replace
+  // Final Payouts \u2014 save existing HTML then replace
   const fp = document.getElementById('masters-finalpayouts');
   if (fp) {
     if (!savedMastersFpHtml) savedMastersFpHtml = fp.innerHTML;
@@ -356,7 +356,7 @@ function clearPgaPoolPanels() {
       </div>
       <div id="pgaPlayerAnalysisView" class="player-analysis-view hidden">
         <div id="pgaPlayerAnalysisContent" class="pa-content">
-          <div class="fp-loading">Building analysisâ€¦</div>
+          <div class="fp-loading">Building analysis\u2026</div>
         </div>
       </div>
       <section class="table-wrapper" id="pgaStandingsTableWrapper">
@@ -416,7 +416,7 @@ async function loadTournamentData(tournamentId) {
     renderPrizes(tournament);
     updateRefreshButton(tournament);
 
-    // Hide standings while picks are still open â€” prevents entrants copying each other
+    // Hide standings while picks are still open \u2014 prevents entrants copying each other
     if (tournament.status === 'open') {
       const deadline = tournament.pickDeadline ? new Date(tournament.pickDeadline) : null;
       if (!deadline || Date.now() < deadline.getTime()) {
@@ -429,7 +429,7 @@ async function loadTournamentData(tournamentId) {
       }
     }
 
-    // Masters 2026 Total standings are finalized and hardcoded â€” skip live ESPN fetch
+    // Masters 2026 Total standings are finalized and hardcoded \u2014 skip live ESPN fetch
     if (tournament.year === 2026 && normalizeMajorKey(tournament.major) === 'masters') {
       renderTable(MASTERS_2026_TOTAL, {});
       updateLastUpdated();
@@ -465,7 +465,7 @@ function updateRefreshButton(tournament) {
   if (!btn) return;
   const isFinal = tournament.status === 'final';
   btn.disabled = isFinal;
-  btn.title = isFinal ? 'Tournament is final â€” live updates are disabled' : '';
+  btn.title = isFinal ? 'Tournament is final \u2014 live updates are disabled' : '';
   btn.classList.toggle('btn-disabled', isFinal);
 }
 
@@ -517,7 +517,7 @@ function parseEspnLeaderboard(data) {
     const name = c.athlete?.displayName;
     if (!name) continue;
 
-    // Compute score from completed round linescores â€” ESPN's total field shows "E" mid-round
+    // Compute score from completed round linescores \u2014 ESPN's total field shows "E" mid-round
     const ls = c.linescores ?? [];
     const rounds = [1,2,3,4].map(p => {
       const r = ls.find(l => l.period === p);
@@ -600,7 +600,7 @@ function renderPgaRoundPanel(round, results) {
   // Build panel HTML skeleton with search bar, sortable thead, and named tbody/table ids
   panel.innerHTML = `
     <div class="search-bar">
-      <input type="text" id="pgaRoundSearch${round}" class="standings-search" placeholder="Search entry or playerâ€¦"
+      <input type="text" id="pgaRoundSearch${round}" class="standings-search" placeholder="Search entry or player\u2026"
         oninput="(function(q){document.querySelectorAll('#pgaRoundBody${round} tr').forEach(row=>{const e=row.dataset.entry||'';const p=row.dataset.players||'';row.style.display=(!q||e.includes(q)||p.includes(q))?'':'none';})})(this.value.toLowerCase().trim())" />
     </div>
     <div class="table-wrapper">
@@ -726,14 +726,14 @@ function renderPrizes(tournament) {
   const payouts = tournament.prizePayouts ?? DEFAULT_PAYOUT_SPLIT;
   grid.innerHTML = payouts.map(p => {
     const amt = (total * p.pct / 100).toFixed(2).replace(/\.00$/, '');
-    return `<div class="prize-item"><strong>$${amt}</strong> â€” ${ordinal(p.place)} (${p.pct}%)</div>`;
+    return `<div class="prize-item"><strong>$${amt}</strong> \u2014 ${ordinal(p.place)} (${p.pct}%)</div>`;
   }).join('');
 }
 
 function renderStatusLabel(tournament) {
   const el = document.getElementById('statusLabel');
   if (!el) return;
-  // "Final" is communicated by the "Final Payouts" tab itself â€” hide the pill when final
+  // "Final" is communicated by the "Final Payouts" tab itself \u2014 hide the pill when final
   if (tournament.status === 'final') { el.textContent = ''; el.className = 'status-label inner-tab-status'; return; }
   const labels = { open: 'Picks Open', locked: 'In Progress' };
   const cls    = { open: 'status-open', locked: 'status-locked' };
@@ -846,7 +846,7 @@ function renderPgaPoolRows(tab, results) {
       const nb = b.pick.picksName || b.pick.entrantName || '';
       return pgaPoolSortAsc ? na.localeCompare(nb) : nb.localeCompare(na);
     } else {
-      // rank or total â€” sort by r.total numerically
+      // rank or total \u2014 sort by r.total numerically
       va = a.total;
       vb = b.total;
       if (va !== vb) return pgaPoolSortAsc ? va - vb : vb - va;
@@ -1042,7 +1042,7 @@ async function refreshPgaScores(tournament) {
 // â”€â”€â”€ Season-only tournament loader (US Open, The Open) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Fetches picks + scores for a tournament that is locked or final, stores results
 // in the major-specific cache, and calls loadSeasonLeaderboard to update the tab.
-// Does not touch any pool-tab DOM â€” it only feeds the season leaderboard columns.
+// Does not touch any pool-tab DOM \u2014 it only feeds the season leaderboard columns.
 async function loadActiveSeasonTournamentData(major, tournamentId) {
   if (major === 'usopen' && usOpenRefreshTimer) { clearInterval(usOpenRefreshTimer); usOpenRefreshTimer = null; }
   if (major === 'theopen' && theOpenRefreshTimer) { clearInterval(theOpenRefreshTimer); theOpenRefreshTimer = null; }
@@ -1104,7 +1104,7 @@ function updatePgaRefreshButton(tournament) {
   if (!btn) return;
   const isFinal = tournament.status === 'final';
   btn.disabled = isFinal;
-  btn.title = isFinal ? 'Tournament is final â€” live updates are disabled' : '';
+  btn.title = isFinal ? 'Tournament is final \u2014 live updates are disabled' : '';
   btn.classList.toggle('btn-disabled', isFinal);
 }
 
@@ -1136,7 +1136,7 @@ export async function getPlayerAnalysisData() {
 
   function scoreDisplay(name) {
     const s = scores[name];
-    if (!s) return { scoreStr: 'â€”', scoreCls: '' };
+    if (!s) return { scoreStr: '\u2014', scoreCls: '' };
     if (s.status === 'cut') return { scoreStr: 'MC', scoreCls: 'score-mc' };
     if (s.status === 'wd')  return { scoreStr: 'WD', scoreCls: 'score-mc' };
     const v = s.score ?? 0;
@@ -1162,7 +1162,7 @@ export async function getPlayerAnalysisData() {
     return { tierNum, golfers };
   });
 
-  // Unique lineups â€” serialize each entry's 6 picks as a sorted key
+  // Unique lineups \u2014 serialize each entry's 6 picks as a sorted key
   const lineupKeys = new Set(picks.map(p =>
     [p.t1,p.t2,p.t3,p.t4,p.t5,p.t6].map(g => g || '').join('|')
   ));
@@ -1172,7 +1172,7 @@ export async function getPlayerAnalysisData() {
     pct: Math.round(lineupKeys.size / total * 100),
   };
 
-  // Contrarian picks â€” any golfer picked by < 10% of entries, sorted by score
+  // Contrarian picks \u2014 any golfer picked by < 10% of entries, sorted by score
   const allGolferCounts = {};
   picks.forEach(p => {
     [p.t1,p.t2,p.t3,p.t4,p.t5,p.t6].forEach(g => {
@@ -1189,7 +1189,7 @@ export async function getPlayerAnalysisData() {
     })
     .slice(0, 10);
 
-  // Most stacked â€” top 3 entries by lowest current total (uses cachedResults if available)
+  // Most stacked \u2014 top 3 entries by lowest current total (uses cachedResults if available)
   const stacked = (cachedResults.length ? cachedResults : [])
     .slice(0, 3)
     .map(r => ({
@@ -1197,7 +1197,7 @@ export async function getPlayerAnalysisData() {
       ...(() => { const v = r.total; return { scoreStr: v === 0 ? 'E' : (v > 0 ? `+${v}` : `${v}`), scoreCls: v < 0 ? 'score-under' : v > 0 ? 'score-over' : 'score-even' }; })(),
     }));
 
-  // Tier 1 â†” Tier 2 correlations â€” top 3 pairings
+  // Tier 1 â†” Tier 2 correlations \u2014 top 3 pairings
   const pairCounts = {};
   picks.forEach(p => {
     if (p.t1 && p.t2) {
@@ -1231,7 +1231,7 @@ export function getPgaPlayerAnalysisData() {
 
   function scoreDisplay(name) {
     const s = scores[name];
-    if (!s) return { scoreStr: 'â€”', scoreCls: '' };
+    if (!s) return { scoreStr: '\u2014', scoreCls: '' };
     if (s.status === 'cut') return { scoreStr: 'MC', scoreCls: 'score-mc' };
     if (s.status === 'wd')  return { scoreStr: 'WD', scoreCls: 'score-mc' };
     const v = s.score ?? 0;
@@ -1509,8 +1509,8 @@ function loadMasters2025Payouts() {
       <div class="fp-header-left">
         <div class="fp-trophy-icon">ðŸ†</div>
         <div>
-          <h2 class="fp-title">The Masters 2025 â€” Final Results</h2>
-          <p class="fp-subtitle">Augusta National Golf Club Â· April 10â€“13, 2025</p>
+          <h2 class="fp-title">The Masters 2025 \u2014 Final Results</h2>
+          <p class="fp-subtitle">Augusta National Golf Club Â· April 10\u201413, 2025</p>
         </div>
       </div>
       <div class="fp-pool-stats">
@@ -1988,12 +1988,12 @@ const MASTERS_2026_FIELD = [
 ];
 
 function fmtRound(n) {
-  if (n === null || n === undefined) return 'â€”';
+  if (n === null || n === undefined) return '\u2014';
   return n === 0 ? 'E' : (n > 0 ? `+${n}` : `${n}`);
 }
 
 function fmtRoundCell(n) {
-  if (n === null || n === undefined) return '<span style="color:var(--text-muted)">â€”</span>';
+  if (n === null || n === undefined) return '<span style="color:var(--text-muted)">\u2014</span>';
   const s   = n === 0 ? 'E' : (n > 0 ? `+${n}` : `${n}`);
   const cls = n < 0 ? 'score-under' : n > 0 ? 'score-over' : 'score-even';
   return `<strong class="${cls}">${s}</strong>`;
@@ -2129,7 +2129,7 @@ export async function loadMastersPayouts() {
     const scoresSnap = await getDoc(doc(db, 'scores', 'masters-2026'));
     const scores = scoresSnap.exists() ? scoresSnap.data() : {};
 
-    // Place finisher picks â€” show actual tournament scores from Firestore
+    // Place finisher picks \u2014 show actual tournament scores from Firestore
     function renderPicksWithScores(targetId, entrantName) {
       const row = document.getElementById(targetId);
       if (!row) return;
@@ -2139,7 +2139,7 @@ export async function loadMastersPayouts() {
       if (!golfers.length) return;
       row.innerHTML = `<div class="fp-picks-chips">${golfers.map(g => {
         const s = scores[g];
-        let scoreStr = 'â€”', cls = '';
+        let scoreStr = '\u2014', cls = '';
         if (s) {
           scoreStr = s.score === 0 ? 'E' : (s.score > 0 ? `+${s.score}` : `${s.score}`);
           cls = s.score < 0 ? 'score-under' : s.score > 0 ? 'score-over' : 'score-even';
@@ -2151,7 +2151,7 @@ export async function loadMastersPayouts() {
       }).join('')}</div>`;
     }
 
-    // Daily winner picks â€” show actual per-round scores from hardcoded round data
+    // Daily winner picks \u2014 show actual per-round scores from hardcoded round data
     function renderPicksFromRoundData(targetId, entrantName, roundData) {
       const row = document.getElementById(targetId);
       if (!row) return;
@@ -2177,7 +2177,7 @@ export async function loadMastersPayouts() {
     renderPicksFromRoundData('fp-daily-r4', 'Ron Pannullo',      MASTERS_2026_R4);
 
   } catch {
-    // Firebase unavailable â€” base cards already visible, picks rows stay empty
+    // Firebase unavailable \u2014 base cards already visible, picks rows stay empty
   }
 }
 
@@ -2188,7 +2188,7 @@ export async function loadPgaPayouts() {
 
   // Need standings data to show anything
   if (!pgaCachedResults.length) {
-    fp.innerHTML = '<div class="coming-soon">Standings are loading â€” check back shortly.</div>';
+    fp.innerHTML = '<div class="coming-soon">Standings are loading \u2014 check back shortly.</div>';
     return;
   }
 
@@ -2211,7 +2211,7 @@ export async function loadPgaPayouts() {
 
     const payoutSplit = tournament?.prizePayouts ?? DEFAULT_PAYOUT_SPLIT;
     const isFinal = pgaCurrentTournamentStatus === 'final';
-    const statusLabel = isFinal ? '' : '<span class="fp-live-badge">LIVE â€” Projected</span>';
+    const statusLabel = isFinal ? '' : '<span class="fp-live-badge">LIVE \u2014 Projected</span>';
 
     // Build place finisher cards from current standings
     // Group by rank to handle ties
@@ -2267,7 +2267,7 @@ export async function loadPgaPayouts() {
             <div class="fp-finisher-top">
               <span class="fp-rank-badge">${dispLabel}</span>
               <div class="fp-finisher-names">${nameHtml}</div>
-              <span class="fp-finisher-payout">${sharedPrize > 0 ? `$${sharedPrize}` : 'â€”'}</span>
+              <span class="fp-finisher-payout">${sharedPrize > 0 ? `$${sharedPrize}` : '\u2014'}</span>
             </div>
             <div class="fp-finisher-sub"><span class="${totalCls}">${totalDisp}</span> total</div>
             ${chipsHtml}
@@ -2286,7 +2286,7 @@ export async function loadPgaPayouts() {
     // Daily round winners
     const roundCards = [1,2,3,4].map(r => {
       const roundResults = pgaCachedRoundResults[r];
-      let winnerName = 'â€”';
+      let winnerName = '\u2014';
       let winnerTotal = null;
       if (roundResults && roundResults.length) {
         const winner = roundResults[0];
@@ -2301,13 +2301,13 @@ export async function loadPgaPayouts() {
       const scoreDisp = winnerTotal !== null ? (winnerTotal === 0 ? 'E' : winnerTotal > 0 ? `+${winnerTotal}` : `${winnerTotal}`) : '';
       const scoreCls = winnerTotal !== null ? (winnerTotal < 0 ? 'score-under' : winnerTotal > 0 ? 'score-over' : 'score-even') : '';
       const roundLabel = hasData ? `R${r} F` : `R${r}`;
-      const statusText = hasData ? '' : '<span style="color:var(--text-muted);font-size:.8rem"> â€” pending</span>';
+      const statusText = hasData ? '' : '<span style="color:var(--text-muted);font-size:.8rem"> \u2014 pending</span>';
       return `
         <div class="fp-daily-card">
           <div class="fp-daily-card-top">
             <span class="fp-round-badge fp-round-badge-pga">${roundLabel}</span>
             <span class="fp-winner-name">${winnerName}${statusText}</span>
-            <span class="fp-winner-payout">${hasData ? '$25' : 'â€”'}</span>
+            <span class="fp-winner-payout">${hasData ? '$25' : '\u2014'}</span>
           </div>
           ${hasData && winnerTotal !== null ? `<div style="padding:.25rem .75rem .5rem;font-size:.8rem;color:var(--text-muted)">Round total: <span class="${scoreCls}">${scoreDisp}</span></div>` : ''}
         </div>`;
@@ -2318,8 +2318,8 @@ export async function loadPgaPayouts() {
         <div class="fp-header-left">
           <div class="fp-trophy-icon">ðŸ†</div>
           <div>
-            <h2 class="fp-title">PGA Championship 2026${isFinal ? ' â€” Final Results' : ''}</h2>
-            <p class="fp-subtitle">${pgaVenueSubtitle || 'Aronimink Golf Club Â· Newtown Square, Pennsylvania'} Â· May 14â€“17, 2026</p>
+            <h2 class="fp-title">PGA Championship 2026${isFinal ? ' \u2014 Final Results' : ''}</h2>
+            <p class="fp-subtitle">${pgaVenueSubtitle || 'Aronimink Golf Club Â· Newtown Square, Pennsylvania'} Â· May 14\u201417, 2026</p>
           </div>
         </div>
         <div class="fp-pool-stats">
@@ -2492,7 +2492,19 @@ export async function loadSeasonLeaderboard() {
       entrantMap[name].theOpenRank = r.rank;
     }
 
-    const all = Object.values(entrantMap);
+    // Determine which majors are completed (picks locked or final)
+    const mastersCompleted = MASTERS_2026_TOTAL.length > 0;
+    const pgaCompleted     = pgaCachedResults.length > 0     && pgaCurrentTournamentStatus     !== 'open';
+    const usOpenCompleted  = usOpenCachedResults.length > 0  && usOpenCurrentTournamentStatus  !== 'open';
+    const theOpenCompleted = theOpenCachedResults.length > 0 && theOpenCurrentTournamentStatus !== 'open';
+    // Only rank participants who entered EVERY completed major
+    const eligible = Object.values(entrantMap).filter(e =>
+      (!mastersCompleted || e.mastersRank != null) &&
+      (!pgaCompleted     || e.pgaRank     != null) &&
+      (!usOpenCompleted  || e.usOpenRank  != null) &&
+      (!theOpenCompleted || e.theOpenRank != null)
+    );
+    const all = eligible;
     if (!all.length) {
       if (loadingEl) loadingEl.classList.add('hidden');
       if (noData) noData.classList.remove('hidden');
@@ -2526,10 +2538,10 @@ export async function loadSeasonLeaderboard() {
     const pgaLive    = pgaCachedResults.length > 0    && pgaCurrentTournamentStatus    === 'locked';
     const usOpenLive = usOpenCachedResults.length > 0 && usOpenCurrentTournamentStatus === 'locked';
     const theOpenLive = theOpenCachedResults.length > 0 && theOpenCurrentTournamentStatus === 'locked';
-    const liveIcon = '<span style="font-size:.7rem;color:#f59e0b;margin-left:2px" title="In progress">â–¶</span>';
+    const liveIcon = '<span style="font-size:.7rem;color:#f59e0b;margin-left:2px" title="In progress">\u25B6</span>';
 
     function majorCell(rank, isLive) {
-      if (rank == null) return '<span style="color:var(--text-muted)">â€”</span>';
+      if (rank == null) return '<span style="color:var(--text-muted)">\u2014</span>';
       const medal = rank === 1 ? '\uD83E\uDD47' : rank === 2 ? '\uD83E\uDD48' : rank === 3 ? '\uD83E\uDD49' : null;
       const display = medal ? `<strong>${medal}</strong>` : rank;
       return `${display}${isLive ? liveIcon : ''}`;
@@ -2540,7 +2552,7 @@ export async function loadSeasonLeaderboard() {
       const rankDisp = e.seasonRank <= 3 ? ['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'][e.seasonRank - 1] : e.seasonRank;
       const avgCell = e.avgFinish != null
         ? `<strong>${e.avgFinish % 1 === 0 ? e.avgFinish : e.avgFinish.toFixed(1)}</strong>`
-        : '<span style="color:var(--text-muted)">â€”</span>';
+        : '<span style="color:var(--text-muted)">\u2014</span>';
       return `
         <tr>
           <td class="col-rank ${rc}">${rankDisp}</td>
@@ -2569,7 +2581,7 @@ export async function loadBonusPool() {
 
   try {
     const mastersBonusAmt = 25; // flat fee from Masters pool
-    const pgaCount        = 41; // 41 entries Ã— $1 â€” PGA Championship 2026 (finalized)
+    const pgaCount        = 41; // 41 entries Ã— $1 \u2014 PGA Championship 2026 (finalized)
 
     // US Open and The Open: fetch live counts from Firestore when available
     const db = getDb();
@@ -2605,7 +2617,7 @@ export async function loadBonusPool() {
         </div>`;
     }
   } catch {
-    if (amountEl) amountEl.textContent = '$â€”';
+    if (amountEl) amountEl.textContent = '$\u2014';
   }
 }
 
@@ -2675,7 +2687,7 @@ export function loadRound1Standings() {
     const total = sorted[0] + sorted[1] + sorted[2] + sorted[3];
     const fifth = sorted[4];
     const sixth = sorted[5];
-    // Mark which 4 tiers count â€” lowest 4 scores; on ties, pick first in tier order
+    // Mark which 4 tiers count \u2014 lowest 4 scores; on ties, pick first in tier order
     const remaining = [...scores];
     const top4Indices = new Set();
     for (let pick = 0; pick < 4; pick++) {
@@ -2693,7 +2705,7 @@ export function loadRound1Standings() {
     a.sixth - b.sixth
   );
 
-  // Assign ranks â€” same rank only when all three tiebreakers match
+  // Assign ranks \u2014 same rank only when all three tiebreakers match
   let rank = 1;
   for (let i = 0; i < processed.length; i++) {
     if (i > 0 && (
@@ -3348,8 +3360,8 @@ function loadPga2025Payouts() {
       <div class="fp-header-left">
         <div class="fp-trophy-icon">ðŸ†</div>
         <div>
-          <h2 class="fp-title">PGA Championship 2025 â€” Final Results</h2>
-          <p class="fp-subtitle">Quail Hollow Club Â· Charlotte, NC Â· May 15â€“18, 2025</p>
+          <h2 class="fp-title">PGA Championship 2025 \u2014 Final Results</h2>
+          <p class="fp-subtitle">Quail Hollow Club Â· Charlotte, NC Â· May 15\u201418, 2025</p>
         </div>
       </div>
       <div class="fp-pool-stats">
@@ -3953,7 +3965,7 @@ export async function loadPgaScoreboard() {
   // Reset state on every call so stale data never persists across year switches
   table.classList.add('hidden');
   if (tbody) tbody.innerHTML = '';
-  if (loadingEl) { loadingEl.textContent = 'Loading official scoreboardâ€¦'; loadingEl.classList.remove('hidden'); }
+  if (loadingEl) { loadingEl.textContent = 'Loading official scoreboard\u2026'; loadingEl.classList.remove('hidden'); }
 
   let players = [];
 
@@ -4016,7 +4028,7 @@ export async function loadPgaScoreboard() {
                 statusDetail = 'Active';
               }
             }
-            // Compute total from available round scores â€” ESPN's total field shows "E" mid-round
+            // Compute total from available round scores \u2014 ESPN's total field shows "E" mid-round
             const completedRounds = rounds.filter(r => r !== null);
             const totalStr = c.score?.displayValue ?? 'E';
             const total = completedRounds.length > 0
@@ -4039,7 +4051,7 @@ export async function loadPgaScoreboard() {
           });
         }
       }
-    } catch { /* fall through â€” no hardcoded 2026 fallback yet */ }
+    } catch { /* fall through \u2014 no hardcoded 2026 fallback yet */ }
   }
 
   if (!players.length) {
@@ -4122,7 +4134,7 @@ function enrichPgaScoreboardWithPickData() {
       if (!seen.has(realName)) { seen.add(realName); names.push(realName); }
     }
     names.sort((a, b) => a.localeCompare(b));
-    sel.innerHTML = '<option value="">â€” Filter by name â€”</option>'
+    sel.innerHTML = '<option value="">\u2014 Filter by name \u2014</option>'
       + names.map(n => `<option value="${n.replace(/"/g, '&quot;')}">${n}</option>`).join('');
     sel.value = pgaSbSelectedEntry;
   }
@@ -4152,7 +4164,7 @@ function renderPgaScoreboardRows() {
       va = a.pickCount ?? 0;
       vb = b.pickCount ?? 0;
     } else {
-      // total, r1, r2, r3, r4 â€” nulls sort last regardless of direction
+      // total, r1, r2, r3, r4 \u2014 nulls sort last regardless of direction
       va = a[pgaSbSortCol] ?? (pgaSbSortAsc ? Infinity : -Infinity);
       vb = b[pgaSbSortCol] ?? (pgaSbSortAsc ? Infinity : -Infinity);
     }
@@ -4165,7 +4177,7 @@ function renderPgaScoreboardRows() {
   let selectedPickNames = null;
   let selectedPickTierMap = {};
   if (pgaSbSelectedEntry) {
-    // Match by real name â€” combine picks across all entries for this person
+    // Match by real name \u2014 combine picks across all entries for this person
     const entryResults = pgaCachedResults.filter(r => (r.pick.realName || r.pick.entrantName) === pgaSbSelectedEntry);
     if (entryResults.length) {
       selectedPickNames = new Set();
@@ -4189,10 +4201,10 @@ function renderPgaScoreboardRows() {
     const tierBadge = selectedPickNames && selectedPickTierMap[p.name]
       ? `<span class="pgasb-tier-badge">T${selectedPickTierMap[p.name]}</span>` : '';
     const ownedCell = hasPickData
-      ? `<td class="pgasb-col-owned">${p.pickCount > 0 ? `${p.pickCount} <span class="pgasb-pct">(${p.pickPct}%)</span>` : '<span style="color:var(--text-muted)">â€”</span>'}</td>`
+      ? `<td class="pgasb-col-owned">${p.pickCount > 0 ? `${p.pickCount} <span class="pgasb-pct">(${p.pickPct}%)</span>` : '<span style="color:var(--text-muted)">\u2014</span>'}</td>`
       : '';
     const tierCell = hasPickData
-      ? `<td class="pgasb-col-tier-pick">${p.tierNums?.length ? p.tierNums.join(', ') : '<span style="color:var(--text-muted)">â€”</span>'}</td>`
+      ? `<td class="pgasb-col-tier-pick">${p.tierNums?.length ? p.tierNums.join(', ') : '<span style="color:var(--text-muted)">\u2014</span>'}</td>`
       : '';
     return `
       <tr class="${rowClass.trim()}">
@@ -4634,7 +4646,7 @@ function updateUsOpenRefreshButton(tournament) {
   if (!btn) return;
   const isFinal = tournament.status === 'final';
   btn.disabled = isFinal;
-  btn.title = isFinal ? 'Tournament is final â€” live updates are disabled' : '';
+  btn.title = isFinal ? 'Tournament is final \u2014 live updates are disabled' : '';
   btn.classList.toggle('btn-disabled', isFinal);
 }
 
@@ -4656,7 +4668,7 @@ export function getUsOpenPlayerAnalysisData() {
 
   function scoreDisplay(name) {
     const s = scores[name];
-    if (!s) return { scoreStr: 'â€”', scoreCls: '' };
+    if (!s) return { scoreStr: '\u2014', scoreCls: '' };
     if (s.status === 'cut') return { scoreStr: 'MC', scoreCls: 'score-mc' };
     if (s.status === 'wd')  return { scoreStr: 'WD', scoreCls: 'score-mc' };
     const v = s.score ?? 0;
@@ -4713,7 +4725,7 @@ export async function loadUsOpenPayouts() {
   if (!fp) return;
 
   if (!usOpenCachedResults.length) {
-    fp.innerHTML = '<div class="coming-soon">Standings are loading â€” check back shortly.</div>';
+    fp.innerHTML = '<div class="coming-soon">Standings are loading \u2014 check back shortly.</div>';
     return;
   }
 
@@ -4734,7 +4746,7 @@ export async function loadUsOpenPayouts() {
 
     const payoutSplit = tournament?.prizePayouts ?? DEFAULT_PAYOUT_SPLIT;
     const isFinal = usOpenCurrentTournamentStatus === 'final';
-    const statusLabel = isFinal ? '' : '<span class="fp-live-badge">LIVE â€” Projected</span>';
+    const statusLabel = isFinal ? '' : '<span class="fp-live-badge">LIVE \u2014 Projected</span>';
 
     const byRank = {};
     for (const r of usOpenCachedResults) {
@@ -4788,7 +4800,7 @@ export async function loadUsOpenPayouts() {
             <div class="fp-finisher-top">
               <span class="fp-rank-badge">${dispLabel}</span>
               <div class="fp-finisher-names">${nameHtml}</div>
-              <span class="fp-finisher-payout">${sharedPrize > 0 ? `$${sharedPrize}` : 'â€”'}</span>
+              <span class="fp-finisher-payout">${sharedPrize > 0 ? `$${sharedPrize}` : '\u2014'}</span>
             </div>
             <div class="fp-finisher-sub"><span class="${totalCls}">${totalDisp}</span> total</div>
             ${chipsHtml}
@@ -4805,7 +4817,7 @@ export async function loadUsOpenPayouts() {
 
     const roundCards = [1,2,3,4].map(r => {
       const roundResults = usOpenCachedRoundResults[r];
-      let winnerName = 'â€”';
+      let winnerName = '\u2014';
       let winnerTotal = null;
       if (roundResults && roundResults.length) {
         const winner = roundResults[0];
@@ -4819,13 +4831,13 @@ export async function loadUsOpenPayouts() {
       const scoreDisp = winnerTotal !== null ? (winnerTotal === 0 ? 'E' : winnerTotal > 0 ? `+${winnerTotal}` : `${winnerTotal}`) : '';
       const scoreCls = winnerTotal !== null ? (winnerTotal < 0 ? 'score-under' : winnerTotal > 0 ? 'score-over' : 'score-even') : '';
       const roundLabel = hasData ? `R${r} F` : `R${r}`;
-      const statusText = hasData ? '' : '<span style="color:var(--text-muted);font-size:.8rem"> â€” pending</span>';
+      const statusText = hasData ? '' : '<span style="color:var(--text-muted);font-size:.8rem"> \u2014 pending</span>';
       return `
         <div class="fp-daily-card">
           <div class="fp-daily-card-top">
             <span class="fp-round-badge fp-round-badge-usopen">${roundLabel}</span>
             <span class="fp-winner-name">${winnerName}${statusText}</span>
-            <span class="fp-winner-payout">${hasData ? '$25' : 'â€”'}</span>
+            <span class="fp-winner-payout">${hasData ? '$25' : '\u2014'}</span>
           </div>
           ${hasData && winnerTotal !== null ? `<div style="padding:.25rem .75rem .5rem;font-size:.8rem;color:var(--text-muted)">Round total: <span class="${scoreCls}">${scoreDisp}</span></div>` : ''}
         </div>`;
@@ -4836,8 +4848,8 @@ export async function loadUsOpenPayouts() {
         <div class="fp-header-left">
           <div class="fp-trophy-icon">ðŸ†</div>
           <div>
-            <h2 class="fp-title">U.S. Open 2026${isFinal ? ' â€” Final Results' : ''}</h2>
-            <p class="fp-subtitle">${usOpenVenueSubtitle || 'Shinnecock Hills Golf Club Â· Southampton, New York'} Â· June 15â€“18, 2026</p>
+            <h2 class="fp-title">U.S. Open 2026${isFinal ? ' \u2014 Final Results' : ''}</h2>
+            <p class="fp-subtitle">${usOpenVenueSubtitle || 'Shinnecock Hills Golf Club Â· Southampton, New York'} Â· June 15\u201418, 2026</p>
           </div>
         </div>
         <div class="fp-pool-stats">
@@ -4904,7 +4916,7 @@ function enrichUsOpenScoreboardWithPickData() {
       if (!seen.has(realName)) { seen.add(realName); names.push(realName); }
     }
     names.sort((a, b) => a.localeCompare(b));
-    sel.innerHTML = '<option value="">â€” Filter by name â€”</option>'
+    sel.innerHTML = '<option value="">\u2014 Filter by name \u2014</option>'
       + names.map(n => `<option value="${n.replace(/"/g, '&quot;')}">${n}</option>`).join('');
     sel.value = usOpenSbSelectedEntry;
   }
@@ -4966,10 +4978,10 @@ function renderUsOpenScoreboardRows() {
     const tierBadge = selectedPickNames && selectedPickTierMap[p.name]
       ? `<span class="pgasb-tier-badge">T${selectedPickTierMap[p.name]}</span>` : '';
     const ownedCell = hasPickData
-      ? `<td class="pgasb-col-owned">${p.pickCount > 0 ? `${p.pickCount} <span class="pgasb-pct">(${p.pickPct}%)</span>` : '<span style="color:var(--text-muted)">â€”</span>'}</td>`
+      ? `<td class="pgasb-col-owned">${p.pickCount > 0 ? `${p.pickCount} <span class="pgasb-pct">(${p.pickPct}%)</span>` : '<span style="color:var(--text-muted)">\u2014</span>'}</td>`
       : '';
     const tierCell = hasPickData
-      ? `<td class="pgasb-col-tier-pick">${p.tierNums?.length ? p.tierNums.join(', ') : '<span style="color:var(--text-muted)">â€”</span>'}</td>`
+      ? `<td class="pgasb-col-tier-pick">${p.tierNums?.length ? p.tierNums.join(', ') : '<span style="color:var(--text-muted)">\u2014</span>'}</td>`
       : '';
     return `
       <tr class="${rowClass.trim()}">
@@ -5031,7 +5043,7 @@ function renderUsOpenRoundPanel(round, results) {
 
   panel.innerHTML = `
     <div class="search-bar">
-      <input type="text" id="usOpenRoundSearch${round}" class="standings-search" placeholder="Search entry or playerâ€¦"
+      <input type="text" id="usOpenRoundSearch${round}" class="standings-search" placeholder="Search entry or player\u2026"
         oninput="(function(q){document.querySelectorAll('#usOpenRoundBody${round} tr').forEach(row=>{const e=row.dataset.entry||'';const p=row.dataset.players||'';row.style.display=(!q||e.includes(q)||p.includes(q))?'':'none';})})(this.value.toLowerCase().trim())" />
     </div>
     <div class="table-wrapper">
@@ -5296,7 +5308,7 @@ function updateTheOpenRefreshButton(tournament) {
   if (!btn) return;
   const isFinal = tournament.status === 'final';
   btn.disabled = isFinal;
-  btn.title = isFinal ? 'Tournament is final â€” live updates are disabled' : '';
+  btn.title = isFinal ? 'Tournament is final \u2014 live updates are disabled' : '';
   btn.classList.toggle('btn-disabled', isFinal);
 }
 
@@ -5318,7 +5330,7 @@ export function getTheOpenPlayerAnalysisData() {
 
   function scoreDisplay(name) {
     const s = scores[name];
-    if (!s) return { scoreStr: 'â€”', scoreCls: '' };
+    if (!s) return { scoreStr: '\u2014', scoreCls: '' };
     if (s.status === 'cut') return { scoreStr: 'MC', scoreCls: 'score-mc' };
     if (s.status === 'wd')  return { scoreStr: 'WD', scoreCls: 'score-mc' };
     const v = s.score ?? 0;
@@ -5375,7 +5387,7 @@ export async function loadTheOpenPayouts() {
   if (!fp) return;
 
   if (!theOpenCachedResults.length) {
-    fp.innerHTML = '<div class="coming-soon">Standings are loading â€” check back shortly.</div>';
+    fp.innerHTML = '<div class="coming-soon">Standings are loading \u2014 check back shortly.</div>';
     return;
   }
 
@@ -5396,7 +5408,7 @@ export async function loadTheOpenPayouts() {
 
     const payoutSplit = tournament?.prizePayouts ?? DEFAULT_PAYOUT_SPLIT;
     const isFinal = theOpenCurrentTournamentStatus === 'final';
-    const statusLabel = isFinal ? '' : '<span class="fp-live-badge">LIVE â€” Projected</span>';
+    const statusLabel = isFinal ? '' : '<span class="fp-live-badge">LIVE \u2014 Projected</span>';
 
     const byRank = {};
     for (const r of theOpenCachedResults) {
@@ -5450,7 +5462,7 @@ export async function loadTheOpenPayouts() {
             <div class="fp-finisher-top">
               <span class="fp-rank-badge">${dispLabel}</span>
               <div class="fp-finisher-names">${nameHtml}</div>
-              <span class="fp-finisher-payout">${sharedPrize > 0 ? `$${sharedPrize}` : 'â€”'}</span>
+              <span class="fp-finisher-payout">${sharedPrize > 0 ? `$${sharedPrize}` : '\u2014'}</span>
             </div>
             <div class="fp-finisher-sub"><span class="${totalCls}">${totalDisp}</span> total</div>
             ${chipsHtml}
@@ -5467,7 +5479,7 @@ export async function loadTheOpenPayouts() {
 
     const roundCards = [1,2,3,4].map(r => {
       const roundResults = theOpenCachedRoundResults[r];
-      let winnerName = 'â€”';
+      let winnerName = '\u2014';
       let winnerTotal = null;
       if (roundResults && roundResults.length) {
         const winner = roundResults[0];
@@ -5481,13 +5493,13 @@ export async function loadTheOpenPayouts() {
       const scoreDisp = winnerTotal !== null ? (winnerTotal === 0 ? 'E' : winnerTotal > 0 ? `+${winnerTotal}` : `${winnerTotal}`) : '';
       const scoreCls = winnerTotal !== null ? (winnerTotal < 0 ? 'score-under' : winnerTotal > 0 ? 'score-over' : 'score-even') : '';
       const roundLabel = hasData ? `R${r} F` : `R${r}`;
-      const statusText = hasData ? '' : '<span style="color:var(--text-muted);font-size:.8rem"> â€” pending</span>';
+      const statusText = hasData ? '' : '<span style="color:var(--text-muted);font-size:.8rem"> \u2014 pending</span>';
       return `
         <div class="fp-daily-card">
           <div class="fp-daily-card-top">
             <span class="fp-round-badge fp-round-badge-theopen">${roundLabel}</span>
             <span class="fp-winner-name">${winnerName}${statusText}</span>
-            <span class="fp-winner-payout">${hasData ? '$25' : 'â€”'}</span>
+            <span class="fp-winner-payout">${hasData ? '$25' : '\u2014'}</span>
           </div>
           ${hasData && winnerTotal !== null ? `<div style="padding:.25rem .75rem .5rem;font-size:.8rem;color:var(--text-muted)">Round total: <span class="${scoreCls}">${scoreDisp}</span></div>` : ''}
         </div>`;
@@ -5498,8 +5510,8 @@ export async function loadTheOpenPayouts() {
         <div class="fp-header-left">
           <div class="fp-trophy-icon">ðŸ†</div>
           <div>
-            <h2 class="fp-title">The Open Championship 2026${isFinal ? ' â€” Final Results' : ''}</h2>
-            <p class="fp-subtitle">${theOpenVenueSubtitle || 'Royal Birkdale Golf Club Â· Southport, England'} Â· July 17â€“20, 2026</p>
+            <h2 class="fp-title">The Open Championship 2026${isFinal ? ' \u2014 Final Results' : ''}</h2>
+            <p class="fp-subtitle">${theOpenVenueSubtitle || 'Royal Birkdale Golf Club Â· Southport, England'} Â· July 17\u201420, 2026</p>
           </div>
         </div>
         <div class="fp-pool-stats">
@@ -5566,7 +5578,7 @@ function enrichTheOpenScoreboardWithPickData() {
       if (!seen.has(realName)) { seen.add(realName); names.push(realName); }
     }
     names.sort((a, b) => a.localeCompare(b));
-    sel.innerHTML = '<option value="">â€” Filter by name â€”</option>'
+    sel.innerHTML = '<option value="">\u2014 Filter by name \u2014</option>'
       + names.map(n => `<option value="${n.replace(/"/g, '&quot;')}">${n}</option>`).join('');
     sel.value = theOpenSbSelectedEntry;
   }
@@ -5628,10 +5640,10 @@ function renderTheOpenScoreboardRows() {
     const tierBadge = selectedPickNames && selectedPickTierMap[p.name]
       ? `<span class="pgasb-tier-badge">T${selectedPickTierMap[p.name]}</span>` : '';
     const ownedCell = hasPickData
-      ? `<td class="pgasb-col-owned">${p.pickCount > 0 ? `${p.pickCount} <span class="pgasb-pct">(${p.pickPct}%)</span>` : '<span style="color:var(--text-muted)">â€”</span>'}</td>`
+      ? `<td class="pgasb-col-owned">${p.pickCount > 0 ? `${p.pickCount} <span class="pgasb-pct">(${p.pickPct}%)</span>` : '<span style="color:var(--text-muted)">\u2014</span>'}</td>`
       : '';
     const tierCell = hasPickData
-      ? `<td class="pgasb-col-tier-pick">${p.tierNums?.length ? p.tierNums.join(', ') : '<span style="color:var(--text-muted)">â€”</span>'}</td>`
+      ? `<td class="pgasb-col-tier-pick">${p.tierNums?.length ? p.tierNums.join(', ') : '<span style="color:var(--text-muted)">\u2014</span>'}</td>`
       : '';
     return `
       <tr class="${rowClass.trim()}">
@@ -5693,7 +5705,7 @@ function renderTheOpenRoundPanel(round, results) {
 
   panel.innerHTML = `
     <div class="search-bar">
-      <input type="text" id="theOpenRoundSearch${round}" class="standings-search" placeholder="Search entry or playerâ€¦"
+      <input type="text" id="theOpenRoundSearch${round}" class="standings-search" placeholder="Search entry or player\u2026"
         oninput="(function(q){document.querySelectorAll('#theOpenRoundBody${round} tr').forEach(row=>{const e=row.dataset.entry||'';const p=row.dataset.players||'';row.style.display=(!q||e.includes(q)||p.includes(q))?'':'none';})})(this.value.toLowerCase().trim())" />
     </div>
     <div class="table-wrapper">
@@ -5727,7 +5739,7 @@ export async function loadUsOpenScoreboard() {
   // Reset state on every call so stale data never persists across year switches
   table.classList.add('hidden');
   if (tbody) tbody.innerHTML = '';
-  if (loadingEl) { loadingEl.textContent = 'Loading official scoreboardâ€¦'; loadingEl.classList.remove('hidden'); }
+  if (loadingEl) { loadingEl.textContent = 'Loading official scoreboard\u2026'; loadingEl.classList.remove('hidden'); }
 
   let players = [];
 
@@ -5774,7 +5786,7 @@ export async function loadUsOpenScoreboard() {
           });
         }
       }
-    } catch { /* fall through â€” no hardcoded 2026 fallback yet */ }
+    } catch { /* fall through \u2014 no hardcoded 2026 fallback yet */ }
   }
 
   if (!players.length) {
@@ -5961,7 +5973,7 @@ export async function loadTheOpenScoreboard() {
   // Reset state on every call so stale data never persists across year switches
   table.classList.add('hidden');
   if (tbody) tbody.innerHTML = '';
-  if (loadingEl) { loadingEl.textContent = 'Loading official scoreboardâ€¦'; loadingEl.classList.remove('hidden'); }
+  if (loadingEl) { loadingEl.textContent = 'Loading official scoreboard\u2026'; loadingEl.classList.remove('hidden'); }
 
   let players = [];
 
@@ -6008,7 +6020,7 @@ export async function loadTheOpenScoreboard() {
           });
         }
       }
-    } catch { /* fall through â€” no hardcoded 2026 fallback yet */ }
+    } catch { /* fall through \u2014 no hardcoded 2026 fallback yet */ }
   }
 
   if (!players.length) {
@@ -6025,7 +6037,7 @@ export async function loadTheOpenScoreboard() {
 
 // â”€â”€â”€ Utilities â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function shortName(fullName) {
-  if (!fullName) return 'â€”';
+  if (!fullName) return '\u2014';
   const parts = fullName.split(' ');
   if (parts.length < 2) return fullName;
   return `${parts[0][0]}. ${parts.slice(1).join(' ')}`;

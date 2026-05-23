@@ -1,8 +1,8 @@
-﻿import { getDb } from './firebase-config.js?v=20260523d';
+﻿import { getDb } from './firebase-config.js?v=20260523e';
 import {
   collection, doc, getDocs, getDoc, query, where, setDoc
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-import { calculateStandings, formatScore, scoreClass } from './scoring.js?v=20260523d';
+import { calculateStandings, formatScore, scoreClass } from './scoring.js?v=20260523e';
 
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 let currentTournamentId = null;
@@ -70,6 +70,14 @@ let usOpenActiveYear = 2026;
 let theOpenActiveYear = 2026;
 let savedMastersFpHtml = null;
 
+// Completed tournaments — hardcoded so Firestore is never needed to show past results.
+// Add an entry here (hardcoded: true) whenever a tournament is finalized.
+// Live/upcoming tournaments are still fetched from Firestore and do NOT appear here.
+const TOURNAMENT_REGISTRY = [
+  { id: 'masters-2026', major: 'masters', year: 2026, status: 'final', hardcoded: true },
+  { id: 'pga-2026',     major: 'pga',     year: 2026, status: 'final', hardcoded: true },
+];
+
 // â”€â”€â”€ Entry point â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function loadStandings() {
   try {
@@ -123,19 +131,32 @@ export async function loadStandings() {
 
 // â”€â”€â”€ Load and group all tournaments by major â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function loadAllTournaments() {
-  const db = getDb();
-  const timeout = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error('Firestore timed out')), 12000)
-  );
-  const snap = await Promise.race([getDocs(collection(db, 'tournaments')), timeout]);
-  const tournaments = [];
-  snap.forEach(d => tournaments.push({ id: d.id, ...d.data() }));
-
+  // Seed immediately from registry — no Firestore needed for hardcoded entries.
+  // Past results are always available even if Firestore is slow or offline.
   tournamentsByMajor = {};
-  for (const t of tournaments) {
+  for (const t of TOURNAMENT_REGISTRY) {
     const key = normalizeMajorKey(t.major);
     if (!tournamentsByMajor[key]) tournamentsByMajor[key] = [];
     tournamentsByMajor[key].push(t);
+  }
+
+  // Fetch live/upcoming tournaments from Firestore, skipping any already in registry.
+  try {
+    const db = getDb();
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Firestore timed out')), 12000)
+    );
+    const snap = await Promise.race([getDocs(collection(db, 'tournaments')), timeout]);
+    const registryIds = new Set(TOURNAMENT_REGISTRY.map(t => t.id));
+    snap.forEach(d => {
+      if (registryIds.has(d.id)) return; // registry entry takes precedence
+      const t = { id: d.id, ...d.data() };
+      const key = normalizeMajorKey(t.major);
+      if (!tournamentsByMajor[key]) tournamentsByMajor[key] = [];
+      tournamentsByMajor[key].push(t);
+    });
+  } catch (err) {
+    console.warn('Firestore unavailable — showing hardcoded results only:', err.message);
   }
 
   const order = { open: 0, locked: 1, final: 2 };
@@ -419,10 +440,16 @@ async function loadTournamentData(tournamentId) {
   clearInterval(refreshTimer);
 
   try {
-    const db = getDb();
-    const tSnap = await getDoc(doc(db, 'tournaments', tournamentId));
-    if (!tSnap.exists()) { showLoading(false); return; }
-    const tournament = { id: tSnap.id, ...tSnap.data() };
+    const registryEntry = TOURNAMENT_REGISTRY.find(t => t.id === tournamentId && t.hardcoded);
+    let tournament;
+    if (registryEntry) {
+      tournament = registryEntry;
+    } else {
+      const db = getDb();
+      const tSnap = await getDoc(doc(db, 'tournaments', tournamentId));
+      if (!tSnap.exists()) { showLoading(false); return; }
+      tournament = { id: tSnap.id, ...tSnap.data() };
+    }
     currentTournamentStatus = tournament.status;
 
     renderStatusLabel(tournament);
@@ -969,6 +996,22 @@ async function loadPgaTournamentData(tournamentId) {
   if (noDataEl)  { noDataEl.classList.add('hidden'); }
 
   try {
+    const registryEntry = TOURNAMENT_REGISTRY.find(t => t.id === tournamentId && t.hardcoded);
+    let tournament;
+    if (registryEntry) {
+      tournament = registryEntry;
+      pgaCurrentTournamentStatus = tournament.status;
+      updatePgaRefreshButton(tournament);
+      if (loadingEl) loadingEl.classList.add('hidden');
+      if (PGA_2026_TOTAL.length === 0) {
+        if (noDataEl) { noDataEl.textContent = 'PGA Championship 2026 final standings coming soon.'; noDataEl.classList.remove('hidden'); }
+      } else {
+        renderPgaTable(PGA_2026_TOTAL, {});
+      }
+      loadSeasonLeaderboard();
+      return;
+    }
+
     const db = getDb();
     const tSnap = await getDoc(doc(db, 'tournaments', tournamentId));
     if (!tSnap.exists()) {
@@ -976,7 +1019,7 @@ async function loadPgaTournamentData(tournamentId) {
       if (noDataEl)  noDataEl.classList.remove('hidden');
       return;
     }
-    const tournament = { id: tSnap.id, ...tSnap.data() };
+    tournament = { id: tSnap.id, ...tSnap.data() };
     pgaCurrentTournamentStatus = tournament.status;
     updatePgaRefreshButton(tournament);
 
@@ -2402,6 +2445,14 @@ function buildFinisherChips(result) {
 }
 
 // â”€â”€â”€ Season Leaderboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€â”€ PGA Championship 2026 Total Standings (finalized, hardcoded) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Fill these in once results are entered. renderPgaTable() will display them automatically.
+const PGA_2026_TOTAL = [];
+const PGA_2026_R1    = [];
+const PGA_2026_R2    = [];
+const PGA_2026_R3    = [];
+const PGA_2026_R4    = [];
+
 // â”€â”€â”€ Masters 2026 Total Standings (finalized, hardcoded) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Total = best 4 of 6 tier scores (lowest = best). isTop4 flags the 4 counting scores.
 const MASTERS_2026_TOTAL = [

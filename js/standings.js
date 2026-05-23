@@ -1,8 +1,8 @@
-﻿import { getDb } from './firebase-config.js?v=20260523c';
+﻿import { getDb } from './firebase-config.js?v=20260523d';
 import {
   collection, doc, getDocs, getDoc, query, where, setDoc
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-import { calculateStandings, formatScore, scoreClass } from './scoring.js?v=20260523c';
+import { calculateStandings, formatScore, scoreClass } from './scoring.js?v=20260523d';
 
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 let currentTournamentId = null;
@@ -124,7 +124,10 @@ export async function loadStandings() {
 // â”€â”€â”€ Load and group all tournaments by major â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function loadAllTournaments() {
   const db = getDb();
-  const snap = await getDocs(collection(db, 'tournaments'));
+  const timeout = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('Firestore timed out')), 12000)
+  );
+  const snap = await Promise.race([getDocs(collection(db, 'tournaments')), timeout]);
   const tournaments = [];
   snap.forEach(d => tournaments.push({ id: d.id, ...d.data() }));
 

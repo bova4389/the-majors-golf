@@ -1,8 +1,8 @@
-﻿import { getDb } from './firebase-config.js?v=20260523a';
+﻿import { getDb } from './firebase-config.js?v=20260523b';
 import {
   collection, doc, getDocs, getDoc, query, where, setDoc
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-import { calculateStandings, formatScore, scoreClass } from './scoring.js?v=20260523a';
+import { calculateStandings, formatScore, scoreClass } from './scoring.js?v=20260523b';
 
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 let currentTournamentId = null;
@@ -72,7 +72,18 @@ let savedMastersFpHtml = null;
 
 // â”€â”€â”€ Entry point â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function loadStandings() {
-  await loadAllTournaments();
+  try {
+    await loadAllTournaments();
+  } catch (err) {
+    console.error('Failed to load tournament list:', err);
+    showLoading(false);
+    const noData = document.getElementById('noDataMsg');
+    if (noData) {
+      noData.textContent = 'Unable to load standings — please refresh the page.';
+      noData.classList.remove('hidden');
+    }
+    return;
+  }
 
   // Auto-load best Masters tournament (open > locked > final, newest year)
   const mastersList = tournamentsByMajor['masters'] || [];
@@ -494,6 +505,12 @@ async function fetchOrRefreshScores(tournament) {
   const freshScores = await fetchEspnScores(tournament.espnEventId);
   if (Object.keys(freshScores).length) {
     await setDoc(scoreDoc, { ...freshScores, _lastUpdated: new Date() });
+    return freshScores;
+  }
+  // ESPN returned empty — fall back to stale Firestore cache rather than returning {}
+  if (scoreSnap.exists()) {
+    const { _lastUpdated, ...staleScores } = scoreSnap.data();
+    if (Object.keys(staleScores).length) return staleScores;
   }
   return freshScores;
 }

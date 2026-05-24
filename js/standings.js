@@ -1076,6 +1076,7 @@ async function loadPgaTournamentData(tournamentId) {
         if (noDataEl) { noDataEl.textContent = 'PGA Championship 2026 final standings coming soon.'; noDataEl.classList.remove('hidden'); }
       } else {
         renderPgaTable(PGA_2026_TOTAL, {});
+        loadPgaPayouts();
       }
       loadSeasonLeaderboard();
       return;

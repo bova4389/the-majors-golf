@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Basic Bros — Majors Pick'em</title>
-  <link rel="stylesheet" href="css/styles.css?v=20260523e" />
+  <link rel="stylesheet" href="css/styles.css?v=20260524f" />
 </head>
 <body>
 
@@ -140,8 +140,8 @@
 
         <!-- Year selector tabs (above inner day tabs) -->
         <div class="year-tab-bar" id="masters-year-tabs">
-          <button class="year-tab active" data-year="2026" onclick="switchMajorYear('masters', 2026)">2026</button>
-          <button class="year-tab" data-year="2025" onclick="switchMajorYear('masters', 2025)">2025</button>
+          <button class="year-tab active" data-year="2026">2026</button>
+          <button class="year-tab" data-year="2025">2025</button>
           <button id="refreshBtn" class="btn btn-sm" onclick="manualRefresh()">Refresh</button>
         </div>
 
@@ -364,8 +364,8 @@
 
       <div class="container">
         <div class="year-tab-bar" id="pga-year-tabs">
-          <button class="year-tab active" data-year="2026" onclick="switchMajorYear('pga', 2026)">2026</button>
-          <button class="year-tab" data-year="2025" onclick="switchMajorYear('pga', 2025)">2025</button>
+          <button class="year-tab active" data-year="2026">2026</button>
+          <button class="year-tab" data-year="2025">2025</button>
           <button id="pgaRefreshBtn" class="btn btn-sm" onclick="pgaManualRefresh()">Refresh</button>
           <span id="pgaLastUpdated" class="last-updated" style="font-size:.8rem;color:var(--text-muted);margin-left:.5rem;"></span>
         </div>
@@ -473,8 +473,8 @@
 
       <div class="container">
         <div class="year-tab-bar" id="usopen-year-tabs">
-          <button class="year-tab active" data-year="2026" onclick="switchMajorYear('usopen', 2026)">2026</button>
-          <button class="year-tab" data-year="2025" onclick="switchMajorYear('usopen', 2025)">2025</button>
+          <button class="year-tab active" data-year="2026">2026</button>
+          <button class="year-tab" data-year="2025">2025</button>
           <button id="usOpenRefreshBtn" class="btn btn-sm" onclick="usOpenManualRefresh()">Refresh</button>
           <span id="usOpenLastUpdated" class="last-updated" style="font-size:.8rem;color:var(--text-muted);margin-left:.5rem;"></span>
         </div>
@@ -484,7 +484,7 @@
           <button class="inner-tab"        data-inner="day2"         onclick="switchInnerTab('usopen','day2')">Round 2</button>
           <button class="inner-tab"        data-inner="day3"         onclick="switchInnerTab('usopen','day3')">Round 3</button>
           <button class="inner-tab"        data-inner="day4"         onclick="switchInnerTab('usopen','day4')">Round 4</button>
-          <button class="inner-tab"        data-inner="scoreboard"   onclick="switchInnerTab('usopen','scoreboard')">PGA Scoreboard</button>
+          <button class="inner-tab"        data-inner="scoreboard"   onclick="switchInnerTab('usopen','scoreboard')">Scoreboard</button>
           <button class="inner-tab tab-payouts" data-inner="finalpayouts" onclick="switchInnerTab('usopen','finalpayouts')">Final Payouts</button>
         </div>
         <div id="usopen-total" class="inner-panel inner-panel-active">
@@ -582,8 +582,8 @@
 
       <div class="container">
         <div class="year-tab-bar" id="theopen-year-tabs">
-          <button class="year-tab active" data-year="2026" onclick="switchMajorYear('theopen', 2026)">2026</button>
-          <button class="year-tab" data-year="2025" onclick="switchMajorYear('theopen', 2025)">2025</button>
+          <button class="year-tab active" data-year="2026">2026</button>
+          <button class="year-tab" data-year="2025">2025</button>
           <button id="theOpenRefreshBtn" class="btn btn-sm" onclick="theOpenManualRefresh()">Refresh</button>
           <span id="theOpenLastUpdated" class="last-updated" style="font-size:.8rem;color:var(--text-muted);margin-left:.5rem;"></span>
         </div>
@@ -593,7 +593,7 @@
           <button class="inner-tab"        data-inner="day2"         onclick="switchInnerTab('theopen','day2')">Round 2</button>
           <button class="inner-tab"        data-inner="day3"         onclick="switchInnerTab('theopen','day3')">Round 3</button>
           <button class="inner-tab"        data-inner="day4"         onclick="switchInnerTab('theopen','day4')">Round 4</button>
-          <button class="inner-tab"        data-inner="scoreboard"   onclick="switchInnerTab('theopen','scoreboard')">PGA Scoreboard</button>
+          <button class="inner-tab"        data-inner="scoreboard"   onclick="switchInnerTab('theopen','scoreboard')">Scoreboard</button>
           <button class="inner-tab tab-payouts" data-inner="finalpayouts" onclick="switchInnerTab('theopen','finalpayouts')">Final Payouts</button>
         </div>
         <div id="theopen-total" class="inner-panel inner-panel-active">
@@ -817,8 +817,8 @@
 
   <!-- ===== FIREBASE + APP SCRIPTS ===== -->
   <script type="module">
-    import { initFirebase } from './js/firebase-config.js?v=20260523e';
-    import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings, pgaSbSort, pgaPoolSort, pgaSbEntryFilter, usOpenPoolSort, usOpenSbSort, usOpenSbEntryFilter, usOpenManualRefresh, loadUsOpenPayouts, theOpenPoolSort, theOpenSbSort, theOpenSbEntryFilter, theOpenManualRefresh, loadTheOpenPayouts } from './js/standings.js?v=20260523e';
+    import { initFirebase } from './js/firebase-config.js?v=20260524f';
+    import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings, pgaSbSort, pgaPoolSort, pgaSbEntryFilter, usOpenPoolSort, usOpenSbSort, usOpenSbEntryFilter, usOpenManualRefresh, loadUsOpenPayouts, theOpenPoolSort, theOpenSbSort, theOpenSbEntryFilter, theOpenManualRefresh, loadTheOpenPayouts } from './js/standings.js?v=20260524f';
 
     initFirebase();
     window.sortBy = sortBy;
@@ -838,6 +838,16 @@
     window.switchMajorYear = switchMajorYear;
     const footerYearEl = document.getElementById('footerYear');
     if (footerYearEl) footerYearEl.textContent = new Date().getFullYear();
+
+    // Wire year-tab buttons via addEventListener — more reliable than onclick attributes
+    // which depend on window.switchMajorYear being set and can fail if module loading is slow
+    document.querySelectorAll('.year-tab[data-year]').forEach(btn => {
+      const bar = btn.closest('[id$="-year-tabs"]');
+      if (!bar) return;
+      const major = bar.id.replace('-year-tabs', '');
+      const year = parseInt(btn.dataset.year);
+      if (major && !isNaN(year)) btn.addEventListener('click', () => switchMajorYear(major, year));
+    });
 
     loadStandings();
 
@@ -902,7 +912,7 @@
       const container = document.getElementById('playerAnalysisContent');
       if (!container) return;
       try {
-        const { getPlayerAnalysisData } = await import('./js/standings.js?v=20260523e');
+        const { getPlayerAnalysisData } = await import('./js/standings.js?v=20260524');
         const data = await getPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {
@@ -995,7 +1005,7 @@
       const container = document.getElementById('pgaPlayerAnalysisContent');
       if (!container) return;
       try {
-        const { getPgaPlayerAnalysisData } = await import('./js/standings.js?v=20260523e');
+        const { getPgaPlayerAnalysisData } = await import('./js/standings.js?v=20260524');
         const data = getPgaPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {
@@ -1027,7 +1037,7 @@
       const container = document.getElementById('usOpenPlayerAnalysisContent');
       if (!container) return;
       try {
-        const { getUsOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260523e');
+        const { getUsOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260524');
         const data = getUsOpenPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {
@@ -1059,7 +1069,7 @@
       const container = document.getElementById('theOpenPlayerAnalysisContent');
       if (!container) return;
       try {
-        const { getTheOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260523e');
+        const { getTheOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260524');
         const data = getTheOpenPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Basic Bros — Majors Pick'em · Admin</title>
-  <link rel="stylesheet" href="css/styles.css?v=20260522" />
+  <link rel="stylesheet" href="css/styles.css?v=20260524f" />
 </head>
 <body>
 
@@ -58,6 +58,7 @@
         <button class="tab-btn" onclick="showTab('scores')">Score Overrides</button>
         <button class="tab-btn" onclick="showTab('prizes')">Prize Calculator</button>
         <button class="tab-btn" onclick="showTab('payments')">Payments</button>
+        <button class="tab-btn" onclick="showTab('finalize')">Finalize</button>
       </div>
 
       <!-- TOURNAMENTS TAB -->
@@ -142,6 +143,38 @@
         </div>
         <div id="paymentsAdminTable" class="table-wrapper">
           <p class="muted">Select a tournament to view payments.</p>
+        </div>
+      </div>
+
+      <!-- FINALIZE TAB -->
+      <div id="tab-finalize" class="tab-panel hidden">
+        <div class="panel-header">
+          <h2>Finalize Tournament</h2>
+          <select id="finalizeTournamentSelect" class="tournament-select" onchange="onFinalizeSelectChange()">
+            <option value="">Select a tournament...</option>
+          </select>
+          <button class="btn btn-primary" onclick="generateHardcodedStandings()">Generate Export</button>
+        </div>
+        <p class="muted" style="margin:.5rem 0 .75rem">
+          Run this <strong>while scores are still live in Firestore</strong> (within a week of the tournament ending).
+          It calculates final standings and outputs JavaScript you can paste directly into <code>standings.js</code>.
+        </p>
+        <p id="finalizeStatus" class="muted" style="margin-bottom:.75rem"></p>
+        <div style="position:relative">
+          <textarea id="finalizeOutput" readonly rows="20"
+            style="width:100%;font-family:monospace;font-size:.78rem;background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border);border-radius:6px;padding:.75rem;box-sizing:border-box;resize:vertical"
+            placeholder="Output will appear here after clicking Generate Export..."></textarea>
+          <button id="finalizeCopyBtn" class="btn btn-sm" onclick="copyFinalizeOutput()" style="position:absolute;top:.5rem;right:.5rem">Copy</button>
+        </div>
+        <div style="margin-top:1rem;padding:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;font-size:.85rem;line-height:1.6">
+          <strong>How to hardcode (do this right after a tournament ends):</strong>
+          <ol style="margin:.5rem 0 0 1.2rem;padding:0">
+            <li>Select the completed tournament and click <em>Generate Export</em></li>
+            <li>Copy the output and paste it into <code>standings.js</code>, replacing the empty <code>MAJOR_YYYY_TOTAL = []</code> lines</li>
+            <li>Add the tournament to <code>TOURNAMENT_REGISTRY</code> at the top of <code>standings.js</code> with <code>hardcoded: true</code></li>
+            <li>Bump the <code>?v=YYYYMMDD</code> version strings in <code>index.html</code></li>
+            <li>Commit and push — the site will use the hardcoded data forever and never hit ESPN again</li>
+          </ol>
         </div>
       </div>
 
@@ -279,6 +312,7 @@
       loadScoresForAdmin,
       loadPrizesForAdmin,
       loadPaymentsForAdmin,
+      onFinalizeSelectChange, generateHardcodedStandings, copyFinalizeOutput,
       closeAllModals
     } from './js/admin.js';
 
@@ -301,6 +335,9 @@
     window.loadScoresForAdmin = loadScoresForAdmin;
     window.loadPrizesForAdmin = loadPrizesForAdmin;
     window.loadPaymentsForAdmin = loadPaymentsForAdmin;
+    window.onFinalizeSelectChange = onFinalizeSelectChange;
+    window.generateHardcodedStandings = generateHardcodedStandings;
+    window.copyFinalizeOutput = copyFinalizeOutput;
     window.closeAllModals = closeAllModals;
     document.getElementById('footerYear').textContent = new Date().getFullYear();
 

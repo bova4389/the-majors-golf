@@ -55,7 +55,7 @@ export function showTab(name) {
     el.classList.toggle('hidden', el.id !== `tab-${name}`);
   });
   document.querySelectorAll('.tab-btn').forEach((btn, i) => {
-    const tabs = ['tournaments','tiers','picks','scores','prizes','payments'];
+    const tabs = ['tournaments','tiers','picks','scores','prizes','payments','finalize'];
     btn.classList.toggle('active', tabs[i] === name);
   });
 }
@@ -72,7 +72,7 @@ async function loadAllTournamentSelects() {
     `<option value="${t.id}">${t.name} (${t.year})</option>`
   ).join('');
 
-  ['tierTournamentSelect','picksTournamentSelect','scoresTournamentSelect','prizeTournamentSelect','paymentsTournamentSelect']
+  ['tierTournamentSelect','picksTournamentSelect','scoresTournamentSelect','prizeTournamentSelect','paymentsTournamentSelect','finalizeTournamentSelect']
     .forEach(id => {
       const el = document.getElementById(id);
       if (el) el.innerHTML = '<option value="">Select a tournament...</option>' + optionHtml;
@@ -927,6 +927,79 @@ window.savePaymentComment = async function(realName, comments) {
   if (entry) entry.comments = comments;
   await setDoc(doc(getDb(), 'payments', _paymentsTournamentId), _paymentsData);
 };
+
+// ─── FINALIZE TAB ─────────────────────────────────────────────────────────────
+function normalizeMajorForVar(major) {
+  return { masters: 'MASTERS', pga: 'PGA', 'us-open': 'US_OPEN', 'the-open': 'THE_OPEN' }[major]
+    ?? major.toUpperCase().replace(/-/g, '_');
+}
+
+export function onFinalizeSelectChange() {
+  // placeholder — could show tournament metadata when selected
+}
+
+export function copyFinalizeOutput() {
+  const ta = document.getElementById('finalizeOutput');
+  if (!ta.value) { alert('Nothing to copy yet.'); return; }
+  navigator.clipboard.writeText(ta.value).then(() => {
+    const btn = document.getElementById('finalizeCopyBtn');
+    if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy'; }, 1500); }
+  });
+}
+
+export async function generateHardcodedStandings() {
+  const tournamentId = document.getElementById('finalizeTournamentSelect').value;
+  const statusEl = document.getElementById('finalizeStatus');
+  const outputEl = document.getElementById('finalizeOutput');
+
+  if (!tournamentId) { alert('Select a tournament first.'); return; }
+
+  statusEl.textContent = 'Loading tournament data…';
+  outputEl.value = '';
+
+  const db = getDb();
+  const [tSnap, picksSnap, scoreSnap] = await Promise.all([
+    getDoc(doc(db, 'tournaments', tournamentId)),
+    getDocs(query(collection(db, 'picks'), where('tournamentId', '==', tournamentId))),
+    getDoc(doc(db, 'scores', tournamentId))
+  ]);
+
+  if (!tSnap.exists()) { statusEl.textContent = 'Error: tournament not found.'; return; }
+  const tournament = tSnap.data();
+
+  const picks = [];
+  picksSnap.forEach(d => picks.push({ id: d.id, ...d.data() }));
+  if (!picks.length) { statusEl.textContent = 'Error: no picks found for this tournament.'; return; }
+
+  const rawScores = scoreSnap.exists() ? scoreSnap.data() : {};
+  const { _lastUpdated, ...scoresMap } = rawScores;
+
+  statusEl.textContent = `Loaded ${picks.length} picks. Calculating standings…`;
+
+  const mcPenalty = tournament.mcPenalty ?? 20;
+  const standings = calculateStandings(picks, scoresMap, mcPenalty);
+  const prefix = `${normalizeMajorForVar(tournament.major)}_${tournament.year}`;
+
+  const q = s => `'${String(s ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+
+  const entries = standings.map(r => {
+    const tierStr = [1,2,3,4,5,6].map(i => {
+      const t = r.tierScores[`t${i}`];
+      if (!t) return `t${i}: { score: 0, status: null, golfer: '', isTop4: false }`;
+      return `t${i}: { score: ${t.score}, status: ${t.status ? q(t.status) : 'null'}, golfer: ${q(t.golfer)}, isTop4: ${t.isTop4} }`;
+    }).join(', ');
+    const realName = r.pick.realName || r.pick.entrantName || '';
+    const picksName = r.pick.entrantName || '';
+    return `  { rank: ${r.rank}, total: ${r.total}, pick: { entrantName: ${q(realName)}, picksName: ${q(picksName)} }, tierScores: { ${tierStr} } }`;
+  });
+
+  const totalConst = `const ${prefix}_TOTAL = [\n${entries.join(',\n')}\n];`;
+  const roundConsts = ['R1','R2','R3','R4'].map(r => `const ${prefix}_${r} = [];`).join('\n');
+  const generated = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+  outputEl.value = `// ${tournament.name} — generated ${generated}\n${totalConst}\n${roundConsts}`;
+  statusEl.textContent = `Done — ${standings.length} entries exported. Copy and paste into standings.js.`;
+}
 
 // ─── Modals ───────────────────────────────────────────────────────────────────
 export function closeAllModals() {

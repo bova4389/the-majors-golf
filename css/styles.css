@@ -1525,6 +1525,16 @@ td.top-4-pick {
   color: #fff;
   box-shadow: 0 4px 16px rgba(0,48,135,.25);
 }
+.fp-header-usopen {
+  background: linear-gradient(135deg, #1a3a6b 0%, #2e5fa3 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(26,58,107,.25);
+}
+.fp-header-theopen {
+  background: linear-gradient(135deg, #1a1a1a 0%, #3a3a3a 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(0,0,0,.35);
+}
 .fp-header-left { display: flex; align-items: center; gap: 1rem; }
 .fp-trophy-icon { font-size: 2.5rem; line-height: 1; }
 .fp-title    { font-size: 1.2rem; font-weight: 800; color: #fff; margin-bottom: .2rem; }
@@ -1570,8 +1580,12 @@ td.top-4-pick {
   padding-bottom: .5rem;
   border-bottom: 2px solid var(--border);
 }
-.fp-section-title-masters { border-bottom-color: #1a6b3c; color: #1a6b3c; }
-.fp-section-title-pga     { border-bottom-color: #003087; color: #003087; }
+.fp-section-title-masters  { border-bottom-color: #1a6b3c; color: #1a6b3c; }
+.fp-section-title-pga      { border-bottom-color: #003087; color: #003087; }
+.fp-section-title-usopen   { border-bottom-color: #1a3a6b; color: #1a3a6b; }
+.fp-section-title-theopen  { border-bottom-color: #2c2c2c; color: #2c2c2c; }
+[data-theme="dark"] .fp-section-title-usopen  { color: #6fa3e0; border-bottom-color: #6fa3e0; }
+[data-theme="dark"] .fp-section-title-theopen { color: #b0b0b0; border-bottom-color: #b0b0b0; }
 
 /* Place finisher cards */
 .fp-finisher-card {

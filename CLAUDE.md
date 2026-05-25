@@ -327,11 +327,14 @@ PGA has its own independent state to avoid conflicts with the Masters live syste
 - Pool winner: **Sarah Crowell** (-33); Payouts: Sarah Crowell 1st $520, Mitch Pletcher 2nd $285, Erik Vermilyea T-3rd $142.50, Ron Pannullo T-3rd $142.50, Jeff Mersch 5th $60
 - Daily winners: Nick Bova 2 (R1), Brandon Sullivan (R2), Sarah Crowell (R3), Ron Pannullo (R4)
 
-**U.S. Open 2025** (J.J. Spaun -1, Oakmont) — Scoreboard ✅ | Pool standings ❌ not yet hardcoded
+**PGA Championship 2026** — All rounds + payouts + scoreboard ✅ — `PGA_2026_TOTAL`, `PGA_2026_R1`–`R4` all hardcoded
 
-**The Open Championship 2025** (Scheffler -17, Royal Portrush) — Scoreboard ✅ | Pool standings ❌ not yet hardcoded
+**U.S. Open 2025** (J.J. Spaun -1, Oakmont) — All rounds + payouts + scoreboard ✅ — `USOPEN_2025_TOTAL`, `USOPEN_2025_R1`–`R4` all hardcoded
 
-**PGA Championship 2026** — 🔴 Live starting May 14, 2026 (ESPN event ID `401811947`)
+**The Open Championship 2025** (Scheffler -17, Royal Portrush) — Scoreboard ✅ | Pool standings ❌ not yet hardcoded (`THEOPEN_2025_TOTAL` and rounds still needed)
+
+**U.S. Open 2026** — Next upcoming tournament (ESPN event ID `401811952`)
+**The Open Championship 2026** — Future (ESPN event ID `401811957`)
 
 ## CSS Gotchas
 
@@ -353,41 +356,43 @@ Wide banner logos can push `.major-banner` past viewport on mobile. Fix: `overfl
 - ESPN API calls skipped for non-`locked` tournaments ✓
 - Masters 2026 skips ESPN fetch entirely — `MASTERS_2026_TOTAL` served directly ✓
 
-## PGA Championship 2026 — Live Tournament Guide
+## Live Tournament Runbook (reuse for each new major)
 
 ### Admin Tasks (before picks open)
 1. **Finalize tiers in admin.html** — Bulk-add all 6 tiers with the confirmed field
 2. **Confirm tournament record in Firestore has:**
-   - `espnEventId: "401811947"` ← critical for live scores
+   - `espnEventId` set to the correct event ID (see ESPN event IDs above)
    - `pickDeadline` set correctly (before Thursday tee times)
    - `mcPenalty: 20`
    - `status: "open"`
 
 ### Right Before the Tournament (at pick deadline)
-3. **Manually flip status to `locked`** in admin.html — starts the 5-min auto-refresh timer on the PGA standings page
+3. **Manually flip status to `locked`** in admin.html — starts the 5-min auto-refresh timer
 
 ### Testing Checklist
-4. **Test standings blind** — With status `open` and a future `pickDeadline`, the PGA Total tab should show *"Standings are hidden while picks are open..."* rather than the table or an infinite spinner
-5. **Test Refresh button end-to-end** — Flip status to `locked`, click Refresh on PGA tab; should hit ESPN, cache scores in Firestore `scores/{tournamentId}`, and render the table (all entries at `mcPenalty` before play starts — expected)
+4. **Test standings blind** — With status `open` and a future `pickDeadline`, the standings tab should show *"Standings are hidden while picks are open..."*
+5. **Test Refresh button end-to-end** — Flip status to `locked`, click Refresh; should hit ESPN, cache scores in Firestore, and render the table
 6. **Verify ESPN event ID is active** — Run in browser console:
    ```
-   fetch('https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?event=401811947').then(r=>r.json()).then(d=>console.log(d?.events?.[0]?.name, d?.events?.[0]?.competitions?.[0]?.competitors?.length))
+   fetch('https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?event=XXXXXXX').then(r=>r.json()).then(d=>console.log(d?.events?.[0]?.name, d?.events?.[0]?.competitions?.[0]?.competitors?.length))
    ```
-   Should return event name + player count.
-7. **Test search on PGA tab** — Confirm entry/player name filtering works
+7. **Test search** — Confirm entry/player name filtering works
 8. **Check mobile layout** — Refresh button + timestamp in year tab bar can overflow on small screens
 
 ### During the Tournament
 - Scores auto-refresh every 5 min when status is `locked` — no manual action needed
-- Manual Refresh button (`pgaRefreshBtn`) available for immediate update
-- Use admin → score override for any ESPN data that looks wrong for an individual player
+- Manual Refresh button available for immediate update
+- Use admin → score override for any ESPN data that looks wrong
 
 ### After the Tournament
-- Flip status to `final` in admin
-- Hardcode R1–R4 round standings (like Masters 2026 pattern) as `PGA_2026_R1` … `R4` constants
-- Hardcode total standings as `PGA_2026_TOTAL` and add shortcut in `loadPgaTournamentData()`
-- Update `loadSeasonLeaderboard()` to include PGA 2026 column
-- U.S. Open 2025 and The Open 2025 pool standings still need to be hardcoded (scoreboards already done)
+1. Flip status to `final` in admin
+2. Hardcode R1–R4 round standings as `[MAJOR]_[YEAR]_R1` … `R4` constants in standings.js
+3. Hardcode total standings as `[MAJOR]_[YEAR]_TOTAL` and add shortcut in the major's load function
+4. Update `loadSeasonLeaderboard()` to include the new column if needed
+5. Update tournament completion status in this CLAUDE.md
+
+### Still needs pool standings hardcoded
+- **The Open Championship 2025** — `THEOPEN_2025_TOTAL` and `THEOPEN_2025_R1`–`R4` not yet added
 
 ## Prize Payout Logic
 - Prize pool = $23.50 × entries (see Entry Fee Breakdown above)

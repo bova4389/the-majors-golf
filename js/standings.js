@@ -5294,7 +5294,7 @@ export async function loadUsOpenPayouts() {
 }
 
 function enrichUsOpenScoreboardWithPickData() {
-  if (!usOpenCachedResults.length || !usOpenScoreboardPlayers.length) return;
+  if (!usOpenScoreboardPlayers.length) return;
 
   const pickInfoMap = {};
   for (const r of usOpenCachedResults) {
@@ -5956,7 +5956,7 @@ export async function loadTheOpenPayouts() {
 }
 
 function enrichTheOpenScoreboardWithPickData() {
-  if (!theOpenCachedResults.length || !theOpenScoreboardPlayers.length) return;
+  if (!theOpenScoreboardPlayers.length) return;
 
   const pickInfoMap = {};
   for (const r of theOpenCachedResults) {

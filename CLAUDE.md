@@ -94,7 +94,15 @@ Any code change to `picks.js` during an active submission window risks breaking 
 Safari on mobile caches pages aggressively. To prevent users from seeing stale versions after a deployment:
 
 1. **`.htaccess`** (already in this repo) — sends `no-cache` headers for all HTML/JS/CSS files. Never delete it.
-2. **`?v=YYYYMMDD` on CSS links** — all three HTML files reference `css/styles.css?v=YYYYMMDD`. **Update this date whenever you change `styles.css`.**
+2. **`?v=` query string on every local JS/CSS `<script src>` and `<link rel="stylesheet">` tag** — must be bumped on every change to that file.
+
+### Version string rule (critical — follow exactly)
+
+**Format:** `?v=YYYYMMDD` — bump to today's date whenever you edit the file.
+
+**Same-day collision rule:** If the version string already shows today's date, append or increment a letter suffix: `20260618` → `20260618b` → `20260618c` etc. Never leave the version unchanged after editing a file — a collision means users keep the old cached version even after a deploy.
+
+**How to check before editing:** Always grep for the current `?v=` value in `index.html` for the file you are about to change. If it already equals today's date, use the next available suffix.
 
 If you add any new local `<script src>` or `<link rel="stylesheet">` tags, include `?v=YYYYMMDD` on those too.
 
@@ -408,6 +416,76 @@ The site never automatically changes status in Firestore. The `pickDeadline` sil
 
 **5. Picks submission "Missing or insufficient permissions"**
 The `picks` collection must have `allow write: if true`. If rules are ever re-published without this, submissions will fail for all users.
+
+---
+
+### Live Scoreboard Tab — Known Pitfalls (learned from US Open 2026)
+
+These apply to any major's ESPN live scoreboard tab (`loadXxxScoreboard()`).
+
+**1. Scoreboard never loads — function is never called**
+`setYearTabActive()` only updates CSS tab button styles. It does NOT trigger `switchMajorYear()` or call the scoreboard loader. Two call sites are required:
+- In `loadStandings()` preload block — so scoreboard fires on initial page load
+- In `switchMajor()` in `index.html` — using a `xxxTabLoaded` boolean flag so the scoreboard fires on first tab click if the user skips the default tab
+
+If either call site is missing, the scoreboard will never load. Replicate the `usOpenTabLoaded` pattern exactly for any future major.
+
+**2. Scoreboard function not reachable from `switchMajor()`**
+`switchMajor()` is a non-module `<script>` that runs before the ES module loads. It can only call `window.loadXxxScoreboard`. The function must be:
+1. `export`ed from `standings.js`
+2. Imported in the module `<script>` in `index.html`
+3. Assigned to `window.loadXxxScoreboard` in that same module script
+
+Missing any one of these three steps breaks the tab-click path silently.
+
+**3. Total score shows "E" for all active players mid-round**
+ESPN's top-level `c.score.displayValue` field shows `"E"` for all active players during a round — it does not update mid-round. Always compute the total by summing completed `linescores` entries:
+```js
+const completedRounds = rounds.filter(r => r !== null);
+const total = completedRounds.length > 0
+  ? completedRounds.reduce((sum, r) => sum + r, 0)
+  : (totalStr === 'E' ? 0 : (parseFloat(totalStr) || 0));
+```
+`rounds` is built from `c.linescores` filtered by `period` (1–4), converting `"E"` → 0 and `"--"` → null.
+
+**4. Status column shows no detail**
+The `statusDetail` field must be explicitly computed per-player — ESPN does not provide a ready-made display string. Use `c.status.thru`, `c.status.period`, `c.teeTime`, and `c.status.type.name`:
+- `thru === 18` or `statusTypeName.includes('PLAY_COMPLETE')` → `"R{period} F"`
+- `thru > 0` → `"Hole {thru}"`
+- `teeTime` exists → format to `"10:30 AM ET"`
+- `statusTypeName.includes('SCHEDULED')` → `"Scheduled"`
+
+See `loadPgaScoreboard()` for the reference implementation — copy it verbatim.
+
+**5. Not-yet-started players sort to the top instead of the bottom**
+Players who haven't teed off have `total = 0`, which sorts them above players at +1, +2, etc. Add a `notStarted` flag and secondary sort:
+```js
+const notStarted = dispStatus === 'Active' && completedRounds.length === 0;
+// In sort:
+if (a.notStarted !== b.notStarted) return a.notStarted ? 1 : -1;
+```
+Also add the same secondary sort in `renderXxxScoreboardRows()` so re-sorts after column header clicks respect it.
+
+**6. Enrichment crash permanently freezes the loading spinner**
+If `enrichXxxScoreboardWithPickData()` throws an error and the loading spinner was already hidden, the user sees a blank table with no error message and no way to know what happened. Fix: run enrichment **before** hiding the loading element, and wrap it in `try/catch`:
+```js
+try {
+  enrichXxxScoreboardWithPickData();
+  updateXxxSbSortHeaders();
+} catch (e) { /* show raw table anyway */ }
+if (loadingEl) loadingEl.classList.add('hidden');
+table.classList.remove('hidden');
+```
+
+**7. Official scoreboard link**
+`usopen.com/scoring/` returns 404. Use the ESPN leaderboard URL for the event:
+`https://www.espn.com/golf/leaderboard/_/tournamentId/{espnEventId}`
+
+**8. Diagnosing a blank scoreboard tab**
+If the scoreboard sits on "Loading..." indefinitely with no errors in the console:
+1. Run the ESPN fetch test in the browser console to confirm the API is responding (see Pre-Tournament Checklist Step 5)
+2. Add a single `console.log('called')` at the very top of `loadXxxScoreboard()` — if it never prints, the function is never being called (go to pitfall #1)
+3. If it prints but never renders, add a log after the fetch — the problem is in parsing or enrichment
 
 ---
 

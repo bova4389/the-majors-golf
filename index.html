@@ -461,7 +461,7 @@
           <span class="major-detail">June 15–21, 2026</span>
           <span class="major-detail">Shinnecock Hills Golf Club · Southampton, New York</span>
         </div>
-        <a href="https://www.usopen.com/scoring/" target="_blank" rel="noopener" class="major-official-link">Official Scoreboard ↗</a>
+        <a href="https://www.espn.com/golf/leaderboard/_/tournamentId/401811952" target="_blank" rel="noopener" class="major-official-link">Official Scoreboard ↗</a>
       </div>
       <div class="tournament-pot-strip">
         <span class="pot-strip-label">Pool Payouts</span>
@@ -759,6 +759,7 @@
   <!-- ===== NAVIGATION + THEME (plain script — runs unconditionally, no module dependency) ===== -->
   <script>
     var pgaTabLoaded = false;
+    var usOpenTabLoaded = false;
 
     window.switchMajor = function(major) {
       document.querySelectorAll('.major-panel').forEach(function(p) {
@@ -781,6 +782,10 @@
       if (major === 'pga' && !pgaTabLoaded) {
         pgaTabLoaded = true;
         if (window.switchMajorYear) window.switchMajorYear('pga', 2026);
+      }
+      if (major === 'usopen' && !usOpenTabLoaded) {
+        usOpenTabLoaded = true;
+        if (window.loadUsOpenScoreboard) window.loadUsOpenScoreboard();
       }
     };
 
@@ -821,7 +826,7 @@
   <!-- ===== FIREBASE + APP SCRIPTS ===== -->
   <script type="module">
     import { initFirebase } from './js/firebase-config.js?v=20260528';
-    import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings, pgaSbSort, pgaPoolSort, pgaSbEntryFilter, usOpenPoolSort, usOpenSbSort, usOpenSbEntryFilter, usOpenManualRefresh, loadUsOpenPayouts, theOpenPoolSort, theOpenSbSort, theOpenSbEntryFilter, theOpenManualRefresh, loadTheOpenPayouts } from './js/standings.js?v=20260618';
+    import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings, pgaSbSort, pgaPoolSort, pgaSbEntryFilter, usOpenPoolSort, usOpenSbSort, usOpenSbEntryFilter, usOpenManualRefresh, loadUsOpenScoreboard, loadUsOpenPayouts, theOpenPoolSort, theOpenSbSort, theOpenSbEntryFilter, theOpenManualRefresh, loadTheOpenPayouts } from './js/standings.js?v=20260618f';
 
     initFirebase();
     window.sortBy = sortBy;
@@ -830,6 +835,7 @@
     window.pgaSbSort = pgaSbSort;
     window.pgaPoolSort = pgaPoolSort;
     window.pgaSbEntryFilter = pgaSbEntryFilter;
+    window.loadUsOpenScoreboard = loadUsOpenScoreboard;
     window.usOpenManualRefresh = usOpenManualRefresh;
     window.usOpenSbSort = usOpenSbSort;
     window.usOpenPoolSort = usOpenPoolSort;
@@ -915,7 +921,7 @@
       const container = document.getElementById('playerAnalysisContent');
       if (!container) return;
       try {
-        const { getPlayerAnalysisData } = await import('./js/standings.js?v=20260618');
+        const { getPlayerAnalysisData } = await import('./js/standings.js?v=20260618f');
         const data = await getPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {
@@ -1008,7 +1014,7 @@
       const container = document.getElementById('pgaPlayerAnalysisContent');
       if (!container) return;
       try {
-        const { getPgaPlayerAnalysisData } = await import('./js/standings.js?v=20260618');
+        const { getPgaPlayerAnalysisData } = await import('./js/standings.js?v=20260618f');
         const data = getPgaPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {
@@ -1040,7 +1046,7 @@
       const container = document.getElementById('usOpenPlayerAnalysisContent');
       if (!container) return;
       try {
-        const { getUsOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260618');
+        const { getUsOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260618f');
         const data = getUsOpenPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {
@@ -1072,7 +1078,7 @@
       const container = document.getElementById('theOpenPlayerAnalysisContent');
       if (!container) return;
       try {
-        const { getTheOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260618');
+        const { getTheOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260618f');
         const data = getTheOpenPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {

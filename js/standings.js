@@ -1,4 +1,4 @@
-﻿import { getDb } from './firebase-config.js?v=20260524b';
+﻿import { getDb } from './firebase-config.js?v=20260528';
 import {
   collection, doc, getDocs, getDoc, query, where, setDoc
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';

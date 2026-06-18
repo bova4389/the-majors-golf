@@ -141,6 +141,22 @@ The prize calculator in admin uses this formula automatically. Admin only stores
 | `js/standings.js` | Leaderboard page: ESPN API fetch, Firestore cache, render table, all hardcoded past data |
 | `js/picks.js` | Pick form: tournament selection grid, tier loading, form validation, Firestore submit |
 | `js/admin.js` | Admin panel: Firebase Auth + all CRUD for tournaments/tiers/picks/scores/prizes |
+| `archive-scripts/` | Python scripts for exporting all tournament data to CSV (see Data Archive section) |
+| `data-archive/` | CSV backups organized as `{year}/{major}/scoreboard.csv`, `picks.csv`, `standings_*.csv` |
+| `Picks/` | Manual admin CSV exports (one subfolder per tournament) |
+
+## Firestore Data Lifecycle — Critical
+
+**Firestore only holds data for the CURRENT active season.** Once a tournament is fully finalized and its standings are hardcoded into `standings.js`, the Firestore records for that tournament (tournaments doc, picks, tiers, scores) are cleaned up and deleted. This is intentional — the hardcoded JS constants become the permanent record.
+
+**As of May 2026:**
+- Only the two 2026 tournaments exist in Firestore (`masters-2026` and `AMcWqXqIGQN605XypuDI` for PGA)
+- All 2025 tournament records, picks, tiers, and scores have been removed from Firestore
+- The 2025 pool data lives **only** in the hardcoded constants in `standings.js`
+
+**Implication:** For any past tournament (2025 and earlier), the picks/golfer selections for each entrant only survive as the `golfer` fields embedded in the `tierScores` of the hardcoded standings constants. There is no separate picks backup for 2025.
+
+**Scripting against Firestore:** The web API key in `firebase-config.js` can be used directly with the Firestore REST API — no service account key required. The `picks` and `tournaments` collections have `allow read: if true` in the security rules, so they are publicly readable. See `archive-scripts/archive_picks.py` for the REST API pattern.
 
 ## Firestore Data Model
 
@@ -286,6 +302,10 @@ PGA has its own independent state to avoid conflicts with the Masters live syste
 `clearPgaPoolPanels()` **rebuilds the entire live standings HTML template** inside `#pga-total` — this is required when switching away from the hardcoded 2025 view back to 2026.
 
 ### Data shape for pool standings constants (TOTAL and rounds)
+
+Two distinct formats exist in standings.js — do not confuse them:
+
+**Format A — Standard (used by all TOTAL constants + all R1-R4 except Masters 2026 rounds):**
 ```javascript
 {
   rank: number,
@@ -297,6 +317,14 @@ PGA has its own independent state to avoid conflicts with the Masters live syste
   }
 }
 ```
+Note: `PGA_2025_R1`–`R4` only have `entrantName` in `pick` (no `picksName`).
+
+**Format B — Masters 2026 rounds only (`MASTERS_2026_R1`–`R4`):**
+```javascript
+{ team: string, tiers: [{ player: string, score: number }, ...] }
+```
+No rank, no total, no isTop4 — just team name and 6 player/score pairs.
+
 `isTop4` comes from the user's spreadsheet — **do not recalculate**. `status: null` for hardcoded data (MC penalty already baked into score). In live Firestore data, `pick.realName` holds the real name and `pick.entrantName` holds the picks name.
 
 `renderTable()` in standings.js handles both cases: `rawName = r.pick.realName || r.pick.entrantName` (strips trailing number suffix), `picksName = r.pick.picksName || r.pick.entrantName`.
@@ -358,41 +386,144 @@ Wide banner logos can push `.major-banner` past viewport on mobile. Fix: `overfl
 
 ## Live Tournament Runbook (reuse for each new major)
 
-### Admin Tasks (before picks open)
-1. **Finalize tiers in admin.html** — Bulk-add all 6 tiers with the confirmed field
-2. **Confirm tournament record in Firestore has:**
-   - `espnEventId` set to the correct event ID (see ESPN event IDs above)
-   - `pickDeadline` set correctly (before Thursday tee times)
-   - `mcPenalty: 20`
-   - `status: "open"`
+### Known Failure Modes (learned from US Open 2026 launch)
 
-### Right Before the Tournament (at pick deadline)
-3. **Manually flip status to `locked`** in admin.html — starts the 5-min auto-refresh timer
+**1. Firestore security rules block scores write → standings won't load**
+The public page writes ESPN scores to Firestore to cache them. If the `scores` collection requires auth to write, the entire standings load silently fails (the catch block hides everything). The `scores` rule MUST be `allow write: if true`.
+- Symptom: page stuck on "Loading standings..." forever
+- Check: Firebase Console → Firestore → Rules — confirm `match /scores/{id} { allow write: if true; }`
+- Full required rules are in the "Firestore security rules" section below
 
-### Testing Checklist
-4. **Test standings blind** — With status `open` and a future `pickDeadline`, the standings tab should show *"Standings are hidden while picks are open..."*
-5. **Test Refresh button end-to-end** — Flip status to `locked`, click Refresh; should hit ESPN, cache scores in Firestore, and render the table
-6. **Verify ESPN event ID is active** — Run in browser console:
-   ```
-   fetch('https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?event=XXXXXXX').then(r=>r.json()).then(d=>console.log(d?.events?.[0]?.name, d?.events?.[0]?.competitions?.[0]?.competitors?.length))
-   ```
-7. **Test search** — Confirm entry/player name filtering works
-8. **Check mobile layout** — Refresh button + timestamp in year tab bar can overflow on small screens
+**2. firebase-config.js version mismatch → getDb() returns null**
+`index.html` and `standings.js` must import `firebase-config.js` with the SAME `?v=` query string. Different strings = different module instances = `db` is never set in the instance that standings.js uses.
+- Symptom: "Firestore unavailable — Expected first argument to collection() to be a CollectionReference" in browser console; page stuck on "Loading standings..."
+- Fix: whenever `firebase-config.js?v=` is bumped in `index.html`, update the same string in line 1 of `standings.js` to match
+
+**3. Wrong tournament status → nothing works**
+Valid statuses are ONLY `"open"`, `"locked"`, `"final"`. Any other value (e.g. `"in-progress"`) is not recognized — auto-refresh won't start, ESPN won't be fetched on schedule.
+- At tournament start: set status to `"locked"` — not anything else
+
+**4. Status never auto-flips**
+The site never automatically changes status in Firestore. The `pickDeadline` silently stops new pick submissions and lifts the standings blind, but the Firestore status field must always be flipped manually in admin.html. Build this into your pre-tournament checklist.
+
+**5. Picks submission "Missing or insufficient permissions"**
+The `picks` collection must have `allow write: if true`. If rules are ever re-published without this, submissions will fail for all users.
+
+---
+
+### Pre-Tournament Checklist (day before or morning of)
+
+**Step 1 — Verify Firestore security rules (most common failure)**
+Go to Firebase Console → `basic-bros-majors-golf` → Firestore → Rules. Confirm these exact rules are published:
+```js
+match /picks/{id}       { allow read: if true; allow write: if true; }
+match /scores/{id}      { allow read: if true; allow write: if true; }
+match /tournaments/{id} { allow read: if true; allow write: if request.auth != null; }
+match /tiers/{id}       { allow read: if true; allow write: if request.auth != null; }
+```
+
+**Step 2 — Verify firebase-config version strings match**
+Open `js/standings.js` line 1. The `?v=` date on `firebase-config.js` must match what `index.html` line ~823 has. If they differ, update standings.js and push.
+
+**Step 3 — Verify tournament record**
+In admin.html or Firestore Console, confirm the tournament has:
+- `espnEventId` — correct event ID (not blank)
+- `pickDeadline` — set to correct date/time
+- `mcPenalty: 20`
+- `status: "open"`
+
+**Step 4 — Test picks submission**
+Submit a test pick on picks.html. If you get "Missing or insufficient permissions", the security rules are wrong — go back to Step 1.
+
+**Step 5 — Verify ESPN event ID is active**
+Run in browser console on the live site:
+```js
+fetch('https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?event=XXXXXXX').then(r=>r.json()).then(d=>console.log(d?.events?.[0]?.name, d?.events?.[0]?.competitions?.[0]?.competitors?.length))
+```
+Should return the tournament name and a player count > 0.
+
+**Step 6 — Test standings blind**
+With status `open` and a future `pickDeadline`, navigating to the major's tab should show "Standings are hidden while picks are open..." — not the standings table.
+
+---
+
+### At Pick Deadline (morning of tournament)
+- **Manually flip status to `"locked"`** in admin.html — this is required, it never happens automatically
+- Click the **Refresh** button on the major's tab immediately after — forces ESPN data to load
+- Verify the Total tab shows all submitted picks within a few seconds
 
 ### During the Tournament
 - Scores auto-refresh every 5 min when status is `locked` — no manual action needed
 - Manual Refresh button available for immediate update
 - Use admin → score override for any ESPN data that looks wrong
+- Watch for players showing +20 who haven't missed the cut — that's a name mismatch. Check browser console for `PGA name auto-reconciled:` entries. Fix via admin score override while you investigate the correct ESPN name.
 
 ### After the Tournament
 1. Flip status to `final` in admin
 2. Hardcode R1–R4 round standings as `[MAJOR]_[YEAR]_R1` … `R4` constants in standings.js
 3. Hardcode total standings as `[MAJOR]_[YEAR]_TOTAL` and add shortcut in the major's load function
 4. Update `loadSeasonLeaderboard()` to include the new column if needed
-5. Update tournament completion status in this CLAUDE.md
+5. **Run the data archive scripts** (before cleaning up Firestore):
+   ```
+   cd archive-scripts
+   python archive_all.py
+   ```
+   This saves scoreboard CSVs (ESPN), picks CSVs (Firestore), and standings CSVs (standings.js) to `data-archive/`.
+6. Update tournament completion status in this CLAUDE.md
+7. Clean up old Firestore records if desired (tournament, picks, tiers, scores for that tournament)
 
 ### Still needs pool standings hardcoded
 - **The Open Championship 2025** — `THEOPEN_2025_TOTAL` and `THEOPEN_2025_R1`–`R4` not yet added
+
+## Data Archive System
+
+All tournament data is backed up to `data-archive/` using Python scripts in `archive-scripts/`. This is the security backup in case Firestore is lost or the repo is corrupted.
+
+### What gets archived
+
+| File | Source | Auth needed |
+|------|--------|-------------|
+| `scoreboard.csv` | ESPN public API | None |
+| `picks.csv` | Firestore REST API | None (public collections) |
+| `standings_total.csv`, `standings_r1.csv` … `standings_r4.csv` | Hardcoded constants in `standings.js` | None |
+
+### Folder structure
+```
+data-archive/
+  {year}/{major}/
+    scoreboard.csv        — all golfers, R1-R4 scores, position, status
+    picks.csv             — entrant name, picks name, email, phone, T1-T6 golfer, submitted date
+    standings_total.csv   — pool standings (full tournament)
+    standings_r1.csv … standings_r4.csv — single-day pool standings
+```
+
+### Running the scripts
+```
+cd archive-scripts
+python archive_all.py              # everything
+python archive_all.py --no-picks   # scoreboard + standings only (no Firestore)
+python archive_scoreboard.py       # ESPN scoreboards only
+python archive_picks.py            # Firestore picks only
+python archive_standings.py        # parse standings.js constants only
+```
+
+No dependencies beyond the standard library — `requirements.txt` only lists `requests` (optional convenience). The scripts use `urllib` directly and read `firebase-config.js` for credentials.
+
+### 2025 archive state
+- **Pool standings**: fully saved (all 5 constants × 5 rounds each = 25 CSV files) ✅
+- **Picks**: not recoverable — 2025 Firestore picks were deleted after finalization. The T1–T6 golfer columns in the standings CSVs are the only surviving record of what each entrant picked. ⚠️
+- **Scoreboards**: need 2025 ESPN event IDs added to `tournaments_config.json` ❌
+
+### 2026 archive state
+- **Masters 2026**: scoreboard ✅, picks ✅ (51 entries), standings ✅
+- **PGA 2026**: scoreboard ✅, picks ✅ (41 entries), standings ✅
+
+### Firebase credentials for scripting
+The web API key in `js/firebase-config.js` works directly with the Firestore REST API:
+```
+https://firestore.googleapis.com/v1/projects/basic-bros-majors-golf/databases/(default)/documents/{collection}?key={apiKey}
+```
+No service account key required. `picks` and `tournaments` have `allow read: if true` in security rules.
 
 ## Prize Payout Logic
 - Prize pool = $23.50 × entries (see Entry Fee Breakdown above)

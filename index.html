@@ -821,7 +821,7 @@
   <!-- ===== FIREBASE + APP SCRIPTS ===== -->
   <script type="module">
     import { initFirebase } from './js/firebase-config.js?v=20260528';
-    import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings, pgaSbSort, pgaPoolSort, pgaSbEntryFilter, usOpenPoolSort, usOpenSbSort, usOpenSbEntryFilter, usOpenManualRefresh, loadUsOpenPayouts, theOpenPoolSort, theOpenSbSort, theOpenSbEntryFilter, theOpenManualRefresh, loadTheOpenPayouts } from './js/standings.js?v=20260524';
+    import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings, pgaSbSort, pgaPoolSort, pgaSbEntryFilter, usOpenPoolSort, usOpenSbSort, usOpenSbEntryFilter, usOpenManualRefresh, loadUsOpenPayouts, theOpenPoolSort, theOpenSbSort, theOpenSbEntryFilter, theOpenManualRefresh, loadTheOpenPayouts } from './js/standings.js?v=20260618';
 
     initFirebase();
     window.sortBy = sortBy;
@@ -915,7 +915,7 @@
       const container = document.getElementById('playerAnalysisContent');
       if (!container) return;
       try {
-        const { getPlayerAnalysisData } = await import('./js/standings.js?v=20260528');
+        const { getPlayerAnalysisData } = await import('./js/standings.js?v=20260618');
         const data = await getPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {
@@ -1008,7 +1008,7 @@
       const container = document.getElementById('pgaPlayerAnalysisContent');
       if (!container) return;
       try {
-        const { getPgaPlayerAnalysisData } = await import('./js/standings.js?v=20260528');
+        const { getPgaPlayerAnalysisData } = await import('./js/standings.js?v=20260618');
         const data = getPgaPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {
@@ -1040,7 +1040,7 @@
       const container = document.getElementById('usOpenPlayerAnalysisContent');
       if (!container) return;
       try {
-        const { getUsOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260528');
+        const { getUsOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260618');
         const data = getUsOpenPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {
@@ -1072,7 +1072,7 @@
       const container = document.getElementById('theOpenPlayerAnalysisContent');
       if (!container) return;
       try {
-        const { getTheOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260528');
+        const { getTheOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260618');
         const data = getTheOpenPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {

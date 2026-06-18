@@ -323,7 +323,21 @@ export function switchMajorYear(major, year) {
     theOpenActiveYear = year;
     loadTheOpenScoreboard();
     if (year === 2025) {
-      // 2025 is scoreboard-only \u2014 nothing more to do
+      loadTheOpen2025TotalStandings();
+      loadTheOpen2025Round1Standings();
+      loadTheOpen2025Round2Standings();
+      loadTheOpen2025Round3Standings();
+      loadTheOpen2025Round4Standings();
+      loadTheOpen2025Payouts();
+      const theOpenPanel2025 = document.getElementById('panel-theopen');
+      if (theOpenPanel2025) {
+        theOpenPanel2025.querySelectorAll('.inner-panel').forEach(p => { p.classList.remove('inner-panel-active'); p.classList.add('hidden'); });
+        theOpenPanel2025.querySelectorAll('.inner-tab').forEach(btn => btn.classList.remove('active'));
+        const totalPanel = document.getElementById('theopen-total');
+        if (totalPanel) { totalPanel.classList.remove('hidden'); totalPanel.classList.add('inner-panel-active'); }
+        const totalBtn = theOpenPanel2025.querySelector('.inner-tab[data-inner="total"]');
+        if (totalBtn) totalBtn.classList.add('active');
+      }
     } else {
       const theOpenPanel = document.getElementById('panel-theopen');
       if (theOpenPanel) {
@@ -603,7 +617,7 @@ async function fetchOrRefreshScores(tournament) {
   }
   const freshScores = await fetchEspnScores(tournament.espnEventId);
   if (Object.keys(freshScores).length) {
-    await setDoc(scoreDoc, { ...freshScores, _lastUpdated: new Date() });
+    try { await setDoc(scoreDoc, { ...freshScores, _lastUpdated: new Date() }); } catch (e) { console.warn('Score cache write failed:', e.message); }
     return freshScores;
   }
   // ESPN returned empty — fall back to stale Firestore cache rather than returning {}
@@ -1160,7 +1174,7 @@ async function refreshPgaScores(tournament) {
   try {
     const fresh = await fetchEspnScores(tournament.espnEventId);
     if (Object.keys(fresh).length) {
-      await setDoc(doc(getDb(), 'scores', tournament.id), { ...fresh, _lastUpdated: new Date() });
+      try { await setDoc(doc(getDb(), 'scores', tournament.id), { ...fresh, _lastUpdated: new Date() }); } catch (e) { console.warn('Score cache write failed:', e.message); }
       pgaCachedScoresMap = fresh;
       const reconciledPicks = reconcilePickNames(pgaCachedResults.map(r => r.pick), fresh);
       const mcPenalty = tournament.mcPenalty ?? 20;
@@ -1227,7 +1241,7 @@ async function loadActiveSeasonTournamentData(major, tournamentId) {
         try {
           const fresh = await fetchEspnScores(tournament.espnEventId);
           if (!Object.keys(fresh).length) return;
-          await setDoc(doc(getDb(), 'scores', tournament.id), { ...fresh, _lastUpdated: new Date() });
+          try { await setDoc(doc(getDb(), 'scores', tournament.id), { ...fresh, _lastUpdated: new Date() }); } catch (e) { console.warn('Score cache write failed:', e.message); }
           const reconciledPicks = reconcilePickNames(results.map(r => r.pick), fresh);
           const updated = calculateStandings(reconciledPicks, fresh, mcPenalty);
           if (major === 'usopen') usOpenCachedResults = updated;
@@ -4898,7 +4912,7 @@ async function refreshUsOpenScores(tournament) {
   try {
     const fresh = await fetchEspnScores(tournament.espnEventId);
     if (Object.keys(fresh).length) {
-      await setDoc(doc(getDb(), 'scores', tournament.id), { ...fresh, _lastUpdated: new Date() });
+      try { await setDoc(doc(getDb(), 'scores', tournament.id), { ...fresh, _lastUpdated: new Date() }); } catch (e) { console.warn('Score cache write failed:', e.message); }
       usOpenCachedScoresMap = fresh;
       const reconciledPicks = reconcilePickNames(usOpenCachedResults.map(r => r.pick), fresh);
       const mcPenalty = tournament.mcPenalty ?? 20;
@@ -5560,7 +5574,7 @@ async function refreshTheOpenScores(tournament) {
   try {
     const fresh = await fetchEspnScores(tournament.espnEventId);
     if (Object.keys(fresh).length) {
-      await setDoc(doc(getDb(), 'scores', tournament.id), { ...fresh, _lastUpdated: new Date() });
+      try { await setDoc(doc(getDb(), 'scores', tournament.id), { ...fresh, _lastUpdated: new Date() }); } catch (e) { console.warn('Score cache write failed:', e.message); }
       theOpenCachedScoresMap = fresh;
       const reconciledPicks = reconcilePickNames(theOpenCachedResults.map(r => r.pick), fresh);
       const mcPenalty = tournament.mcPenalty ?? 20;
@@ -6785,6 +6799,574 @@ function loadUsOpen2025Payouts() {
 }
 
 // â”€â”€â”€ The Open Championship 2025 Scoreboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const THEOPEN_2025_TOTAL = [
+  { rank: 1, total: -39, pick: { entrantName: 'Erik Vermilyea', picksName: 'Erik Vermilyea' }, tierScores: { t1: { score: -17, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -9, status: null, golfer: 'Russell Henley', isTop4: true }, t3: { score: -9, status: null, golfer: 'Brian Harman', isTop4: true }, t4: { score: -4, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 24, status: null, golfer: 'Nico Echavarria', isTop4: false }, t6: { score: 4, status: null, golfer: 'Ryggs Johnston', isTop4: false } } },
+  { rank: 2, total: -31, pick: { entrantName: 'Bob Cross', picksName: 'Bob Cross' }, tierScores: { t1: { score: -17, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: 25, status: null, golfer: 'Patrick Reed', isTop4: false }, t3: { score: -11, status: null, golfer: 'Wyndham Clark', isTop4: true }, t4: { score: -4, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 1, status: null, golfer: 'Jhonattan Vegas', isTop4: true }, t6: { score: 22, status: null, golfer: 'Rikuya Hoshino', isTop4: false } } },
+  { rank: 3, total: -29, pick: { entrantName: 'Cassady Glenn', picksName: 'Cassady Glenn' }, tierScores: { t1: { score: -17, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -2, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: -6, status: null, golfer: 'Maverick McNealy', isTop4: true }, t4: { score: 24, status: null, golfer: 'Marco Penge', isTop4: false }, t5: { score: -4, status: null, golfer: 'Kristoffer Reitan', isTop4: true }, t6: { score: 11, status: null, golfer: 'Sebastian Soderberg', isTop4: false } } },
+  { rank: 4, total: -25, pick: { entrantName: 'Nathan Wood', picksName: 'Nathan Wood' }, tierScores: { t1: { score: -17, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -9, status: null, golfer: 'Russell Henley', isTop4: true }, t3: { score: 0, status: null, golfer: 'Sungjae Im', isTop4: true }, t4: { score: 27, status: null, golfer: 'J.T. Poston', isTop4: false }, t5: { score: 1, status: null, golfer: 'Jhonattan Vegas', isTop4: true }, t6: { score: 25, status: null, golfer: 'Shaun Norris', isTop4: false } } },
+  { rank: 4, total: -25, pick: { entrantName: 'Ron Pannullo', picksName: 'Ron Pannullo' }, tierScores: { t1: { score: -9, status: null, golfer: 'Bryson DeChambeau', isTop4: true }, t2: { score: -7, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: -6, status: null, golfer: 'Maverick McNealy', isTop4: true }, t4: { score: -3, status: null, golfer: 'Sergio Garcia', isTop4: true }, t5: { score: 27, status: null, golfer: 'Mackenzie Hughes', isTop4: false }, t6: { score: 4, status: null, golfer: 'Francesco Molinari', isTop4: false } } },
+  { rank: 6, total: -21, pick: { entrantName: 'Mike Davis', picksName: 'Mike Davis' }, tierScores: { t1: { score: -6, status: null, golfer: 'Ludvig Aberg', isTop4: true }, t2: { score: -7, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: 1, status: null, golfer: 'Tony Finau', isTop4: false }, t4: { score: -4, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: -4, status: null, golfer: 'Kristoffer Reitan', isTop4: true }, t6: { score: 23, status: null, golfer: 'Ethan Fang (a)', isTop4: false } } },
+  { rank: 7, total: -20, pick: { entrantName: 'Ryne Stone', picksName: 'Ryne Stone' }, tierScores: { t1: { score: -17, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -2, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: 23, status: null, golfer: 'Si Woo Kim', isTop4: false }, t4: { score: 3, status: null, golfer: 'Dean Burmester', isTop4: true }, t5: { score: -4, status: null, golfer: 'Kristoffer Reitan', isTop4: true }, t6: { score: 11, status: null, golfer: 'Sebastian Soderberg', isTop4: false } } },
+  { rank: 7, total: -20, pick: { entrantName: 'Jake Bogardus', picksName: 'Jake Bogardus' }, tierScores: { t1: { score: -10, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: -7, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: -7, status: null, golfer: 'Rasmus Hojgaard', isTop4: true }, t4: { score: 24, status: null, golfer: 'Thorbjorn Olesen', isTop4: false }, t5: { score: 8, status: null, golfer: 'Matthias Schmid', isTop4: false }, t6: { score: 4, status: null, golfer: 'Francesco Molinari', isTop4: true } } },
+  { rank: 9, total: -19, pick: { entrantName: 'Paul Raymond', picksName: 'Paul Raymond' }, tierScores: { t1: { score: -17, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -7, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: 1, status: null, golfer: 'Tony Finau', isTop4: true }, t4: { score: 24, status: null, golfer: 'Thorbjorn Olesen', isTop4: false }, t5: { score: 29, status: null, golfer: 'Padraig Harrington', isTop4: false }, t6: { score: 4, status: null, golfer: 'Francesco Molinari', isTop4: true } } },
+  { rank: 10, total: -17, pick: { entrantName: 'Sean Susa', picksName: 'Sean Susa 2' }, tierScores: { t1: { score: -10, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: -12, status: null, golfer: 'Chris Gotterup', isTop4: true }, t3: { score: 23, status: null, golfer: 'Taylor Pendrith', isTop4: false }, t4: { score: -1, status: null, golfer: 'Thriston Lawrence', isTop4: true }, t5: { score: 27, status: null, golfer: 'Sahith Theegala', isTop4: false }, t6: { score: 6, status: null, golfer: 'Jacob Skov Olesen', isTop4: true } } },
+  { rank: 11, total: -14, pick: { entrantName: 'Nick Bova', picksName: 'Nick Bova' }, tierScores: { t1: { score: -3, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: 27, status: null, golfer: 'Brooks Koepka', isTop4: false }, t3: { score: -8, status: null, golfer: 'Nicolai Hojgaard', isTop4: true }, t4: { score: -4, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 1, status: null, golfer: 'Jhonattan Vegas', isTop4: true }, t6: { score: 25, status: null, golfer: 'Shaun Norris', isTop4: false } } },
+  { rank: 12, total: -9, pick: { entrantName: 'Ryne Stone', picksName: 'Ryne Stone 2' }, tierScores: { t1: { score: -3, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: -9, status: null, golfer: 'Russell Henley', isTop4: true }, t3: { score: -8, status: null, golfer: 'Nicolai Hojgaard', isTop4: true }, t4: { score: 24, status: null, golfer: 'Marco Penge', isTop4: false }, t5: { score: 22, status: null, golfer: 'Matteo Manassero', isTop4: false }, t6: { score: 11, status: null, golfer: 'Sebastian Soderberg', isTop4: true } } },
+  { rank: 13, total: -8, pick: { entrantName: 'Luke S', picksName: 'Luke S' }, tierScores: { t1: { score: -7, status: null, golfer: 'Tommy Fleetwood', isTop4: true }, t2: { score: 24, status: null, golfer: 'Cameron Young', isTop4: false }, t3: { score: -1, status: null, golfer: 'Jordan Smith', isTop4: true }, t4: { score: -4, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 24, status: null, golfer: 'Nico Echavarria', isTop4: false }, t6: { score: 4, status: null, golfer: 'Francesco Molinari', isTop4: true } } },
+  { rank: 14, total: -7, pick: { entrantName: 'Gregory J Smith', picksName: 'Gregory J Smith' }, tierScores: { t1: { score: -3, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: 22, status: null, golfer: 'Ben Griffin', isTop4: false }, t3: { score: -6, status: null, golfer: 'J.J. Spaun', isTop4: true }, t4: { score: -4, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 29, status: null, golfer: 'Padraig Harrington', isTop4: false }, t6: { score: 6, status: null, golfer: 'Jacob Skov Olesen', isTop4: true } } },
+  { rank: 14, total: -7, pick: { entrantName: 'Jeff Bagnasco', picksName: 'Jeff Bagnasco' }, tierScores: { t1: { score: -7, status: null, golfer: 'Tommy Fleetwood', isTop4: true }, t2: { score: 22, status: null, golfer: 'Jason Day', isTop4: false }, t3: { score: -6, status: null, golfer: 'J.J. Spaun', isTop4: true }, t4: { score: 4, status: null, golfer: 'Andrew Novak', isTop4: true }, t5: { score: 2, status: null, golfer: 'Antoine Rozner', isTop4: true }, t6: { score: 26, status: null, golfer: 'Justin Hastings (a)', isTop4: false } } },
+  { rank: 14, total: -7, pick: { entrantName: 'Morgan Coleman', picksName: 'Morgan Coleman' }, tierScores: { t1: { score: -17, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -9, status: null, golfer: 'Russell Henley', isTop4: true }, t3: { score: -4, status: null, golfer: 'Daniel Berger', isTop4: true }, t4: { score: 23, status: null, golfer: 'Denny McCarthy', isTop4: true }, t5: { score: 23, status: null, golfer: 'Matt McCarty', isTop4: false }, t6: { score: 25, status: null, golfer: 'Shaun Norris', isTop4: false } } },
+  { rank: 17, total: -3, pick: { entrantName: 'Ethan DelGandio', picksName: 'Ethan DelGandio' }, tierScores: { t1: { score: -10, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: 22, status: null, golfer: 'Joaquin Niemann', isTop4: true }, t3: { score: -11, status: null, golfer: 'Wyndham Clark', isTop4: true }, t4: { score: -4, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 29, status: null, golfer: 'Padraig Harrington', isTop4: false }, t6: { score: 33, status: null, golfer: 'K.J. Choi', isTop4: false } } },
+  { rank: 18, total: -2, pick: { entrantName: 'Chris Schumann', picksName: 'Chris Schumann' }, tierScores: { t1: { score: -17, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -7, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: 28, status: null, golfer: 'Cameron Smith', isTop4: false }, t4: { score: 24, status: null, golfer: 'Thorbjorn Olesen', isTop4: true }, t5: { score: 27, status: null, golfer: 'Sahith Theegala', isTop4: false }, t6: { score: -2, status: null, golfer: 'Takumi Kanaya', isTop4: true } } },
+  { rank: 19, total: 0, pick: { entrantName: 'Jacob D Hammer', picksName: 'Jacob D Hammer' }, tierScores: { t1: { score: -10, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: 27, status: null, golfer: 'Brooks Koepka', isTop4: true }, t3: { score: -11, status: null, golfer: 'Wyndham Clark', isTop4: true }, t4: { score: -6, status: null, golfer: 'Lucas Glover', isTop4: true }, t5: { score: 27, status: null, golfer: 'Sahith Theegala', isTop4: false }, t6: { score: 30, status: null, golfer: 'Connor Graham (a)', isTop4: false } } },
+  { rank: 20, total: 1, pick: { entrantName: 'Cody Esbrandt', picksName: 'Cody Esbrandt' }, tierScores: { t1: { score: 4, status: null, golfer: 'Viktor Hovland', isTop4: true }, t2: { score: 22, status: null, golfer: 'Joaquin Niemann', isTop4: false }, t3: { score: -9, status: null, golfer: 'Brian Harman', isTop4: true }, t4: { score: 25, status: null, golfer: 'Byeong Hun An', isTop4: false }, t5: { score: 0, status: null, golfer: 'Marc Leishman', isTop4: true }, t6: { score: 6, status: null, golfer: 'Jacob Skov Olesen', isTop4: true } } },
+  { rank: 21, total: 3, pick: { entrantName: 'Kyle Sheldon', picksName: 'Kyle Sheldon' }, tierScores: { t1: { score: -10, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: -2, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: -8, status: null, golfer: 'Rickie Fowler', isTop4: true }, t4: { score: 24, status: null, golfer: 'Michael Kim', isTop4: false }, t5: { score: 23, status: null, golfer: 'Zach Johnson', isTop4: true }, t6: { score: 26, status: null, golfer: 'Darren Clarke', isTop4: false } } },
+  { rank: 22, total: 4, pick: { entrantName: 'Robert Stephenson', picksName: 'Robert Stephenson 2' }, tierScores: { t1: { score: 4, status: null, golfer: 'Viktor Hovland', isTop4: true }, t2: { score: -2, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: -9, status: null, golfer: 'Brian Harman', isTop4: true }, t4: { score: 24, status: null, golfer: 'Thorbjorn Olesen', isTop4: false }, t5: { score: 23, status: null, golfer: 'Brian Campbell', isTop4: false }, t6: { score: 11, status: null, golfer: 'Sebastian Soderberg', isTop4: true } } },
+  { rank: 22, total: 4, pick: { entrantName: 'Zach DelGandio', picksName: 'Zach DelGandio' }, tierScores: { t1: { score: -10, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: -2, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: -6, status: null, golfer: 'Maverick McNealy', isTop4: true }, t4: { score: 24, status: null, golfer: 'Marco Penge', isTop4: false }, t5: { score: 29, status: null, golfer: 'Padraig Harrington', isTop4: false }, t6: { score: 22, status: null, golfer: 'Rikuya Hoshino', isTop4: true } } },
+  { rank: 24, total: 6, pick: { entrantName: 'Jacob D Hammer', picksName: 'Jake Hammer 2' }, tierScores: { t1: { score: -9, status: null, golfer: 'Bryson DeChambeau', isTop4: true }, t2: { score: -2, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: 28, status: null, golfer: 'Cameron Smith', isTop4: false }, t4: { score: -6, status: null, golfer: 'Lucas Glover', isTop4: true }, t5: { score: 23, status: null, golfer: 'Brian Campbell', isTop4: true }, t6: { score: 24, status: null, golfer: 'Young-han Song', isTop4: false } } },
+  { rank: 24, total: 6, pick: { entrantName: 'Matt Bova', picksName: 'Matt Bova 2' }, tierScores: { t1: { score: -10, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: 23, status: null, golfer: 'Patrick Cantlay', isTop4: true }, t3: { score: -11, status: null, golfer: 'Wyndham Clark', isTop4: true }, t4: { score: 24, status: null, golfer: 'Michael Kim', isTop4: false }, t5: { score: 27, status: null, golfer: 'Mackenzie Hughes', isTop4: false }, t6: { score: 4, status: null, golfer: 'Francesco Molinari', isTop4: true } } },
+  { rank: 26, total: 8, pick: { entrantName: 'Sean Susa', picksName: 'Sean Susa' }, tierScores: { t1: { score: -10, status: null, golfer: 'Robert MacIntyre', isTop4: true }, t2: { score: -4, status: null, golfer: 'Keegan Bradley', isTop4: true }, t3: { score: 23, status: null, golfer: 'Si Woo Kim', isTop4: true }, t4: { score: 23, status: null, golfer: 'Denny McCarthy', isTop4: false }, t5: { score: -1, status: null, golfer: 'Matthew Jordan', isTop4: true }, t6: { score: 23, status: null, golfer: 'Ethan Fang (a)', isTop4: false } } },
+  { rank: 27, total: 13, pick: { entrantName: 'Keith Waters', picksName: 'Keith Waters' }, tierScores: { t1: { score: -3, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: -1, status: null, golfer: 'Sam Burns', isTop4: true }, t3: { score: -6, status: null, golfer: 'J.J. Spaun', isTop4: true }, t4: { score: 23, status: null, golfer: 'Max Greyserman', isTop4: true }, t5: { score: 25, status: null, golfer: 'Matthieu Pavon', isTop4: false }, t6: { score: 26, status: null, golfer: 'Justin Hastings (a)', isTop4: false } } },
+  { rank: 28, total: 17, pick: { entrantName: 'Bob Cross', picksName: 'Bob Cross 2' }, tierScores: { t1: { score: 4, status: null, golfer: 'Viktor Hovland', isTop4: true }, t2: { score: 27, status: null, golfer: 'Brooks Koepka', isTop4: false }, t3: { score: -6, status: null, golfer: 'J.J. Spaun', isTop4: true }, t4: { score: 25, status: null, golfer: 'Chris Kirk', isTop4: false }, t5: { score: 24, status: null, golfer: 'Nico Echavarria', isTop4: true }, t6: { score: -5, status: null, golfer: 'Oliver Lindell', isTop4: true } } },
+  { rank: 29, total: 29, pick: { entrantName: 'Matthew Tuckfield', picksName: 'Matthew Tuckfield' }, tierScores: { t1: { score: -17, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -1, status: null, golfer: 'Sam Burns', isTop4: true }, t3: { score: 23, status: null, golfer: 'Tom McKibbin', isTop4: true }, t4: { score: 24, status: null, golfer: 'Marco Penge', isTop4: true }, t5: { score: 24, status: null, golfer: 'John Catlin', isTop4: false }, t6: { score: 28, status: null, golfer: 'Curtis Luck', isTop4: false } } },
+  { rank: 30, total: 30, pick: { entrantName: 'Jeffrey Mersch', picksName: 'Jeffrey Mersch' }, tierScores: { t1: { score: -17, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: 22, status: null, golfer: 'Ben Griffin', isTop4: true }, t3: { score: 23, status: null, golfer: 'Tom McKibbin', isTop4: true }, t4: { score: 23, status: null, golfer: 'Max Greyserman', isTop4: false }, t5: { score: 2, status: null, golfer: 'Antoine Rozner', isTop4: true }, t6: { score: 25, status: null, golfer: 'Shaun Norris', isTop4: false } } },
+  { rank: 31, total: 33, pick: { entrantName: 'Mitch Pletcher', picksName: 'Mitch Pletcher' }, tierScores: { t1: { score: -17, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: 25, status: null, golfer: 'Patrick Reed', isTop4: true }, t3: { score: 28, status: null, golfer: 'Cameron Smith', isTop4: false }, t4: { score: 24, status: null, golfer: 'Michael Kim', isTop4: true }, t5: { score: 1, status: null, golfer: 'Phil Mickelson', isTop4: true }, t6: { score: 28, status: null, golfer: 'Ryan Peake', isTop4: false } } },
+  { rank: 32, total: 35, pick: { entrantName: 'Robert Stephenson', picksName: 'Robert Stephenson' }, tierScores: { t1: { score: -2, status: null, golfer: 'Shane Lowry', isTop4: true }, t2: { score: 27, status: null, golfer: 'Brooks Koepka', isTop4: false }, t3: { score: -11, status: null, golfer: 'Wyndham Clark', isTop4: true }, t4: { score: 27, status: null, golfer: 'J.T. Poston', isTop4: false }, t5: { score: 25, status: null, golfer: 'Matthieu Pavon', isTop4: true }, t6: { score: 23, status: null, golfer: 'Julien Guerrier', isTop4: true } } },
+  { rank: 33, total: 39, pick: { entrantName: 'Myron Mayo', picksName: 'Myron Mayo' }, tierScores: { t1: { score: -3, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: 27, status: null, golfer: 'Brooks Koepka', isTop4: false }, t3: { score: -8, status: null, golfer: 'Rickie Fowler', isTop4: true }, t4: { score: 24, status: null, golfer: 'Thorbjorn Olesen', isTop4: true }, t5: { score: 27, status: null, golfer: 'Sahith Theegala', isTop4: false }, t6: { score: 26, status: null, golfer: 'Darren Clarke', isTop4: true } } },
+  { rank: 34, total: 65, pick: { entrantName: 'Matt Bova', picksName: 'Matt Bova' }, tierScores: { t1: { score: -3, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: 22, status: null, golfer: 'Joaquin Niemann', isTop4: true }, t3: { score: 23, status: null, golfer: 'Si Woo Kim', isTop4: true }, t4: { score: 23, status: null, golfer: 'Carlos Ortiz', isTop4: true }, t5: { score: 23, status: null, golfer: 'Matt McCarty', isTop4: false }, t6: { score: 25, status: null, golfer: 'Shaun Norris', isTop4: false } } },
+];
+
+const THEOPEN_2025_R1 = [
+  { rank: 1, total: -5, pick: { entrantName: 'Cody Esbrandt', picksName: 'Cody Esbrandt' }, tierScores: { t1: { score: 2, status: null, golfer: 'Viktor Hovland', isTop4: true }, t2: { score: -1, status: null, golfer: 'Joaquin Niemann', isTop4: true }, t3: { score: -2, status: null, golfer: 'Brian Harman', isTop4: true }, t4: { score: 5, status: null, golfer: 'Byeong Hun An', isTop4: false }, t5: { score: 2, status: null, golfer: 'Marc Leishman', isTop4: false }, t6: { score: -4, status: null, golfer: 'Jacob Skov Olesen', isTop4: true } } },
+  { rank: 1, total: -5, pick: { entrantName: 'Paul Raymond', picksName: 'Paul Raymond' }, tierScores: { t1: { score: -3, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -2, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: -1, status: null, golfer: 'Tony Finau', isTop4: true }, t4: { score: 1, status: null, golfer: 'Thorbjorn Olesen', isTop4: true }, t5: { score: 4, status: null, golfer: 'Padraig Harrington', isTop4: false }, t6: { score: 1, status: null, golfer: 'Francesco Molinari', isTop4: false } } },
+  { rank: 3, total: -4, pick: { entrantName: 'Chris Schumann', picksName: 'Chris Schumann' }, tierScores: { t1: { score: -3, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -2, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: 1, status: null, golfer: 'Cameron Smith', isTop4: true }, t4: { score: 1, status: null, golfer: 'Thorbjorn Olesen', isTop4: false }, t5: { score: 4, status: null, golfer: 'Sahith Theegala', isTop4: false }, t6: { score: 0, status: null, golfer: 'Takumi Kanaya', isTop4: true } } },
+  { rank: 3, total: -4, pick: { entrantName: 'Ron Pannullo', picksName: 'Ron Pannullo' }, tierScores: { t1: { score: 7, status: null, golfer: 'Bryson DeChambeau', isTop4: false }, t2: { score: -2, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: -2, status: null, golfer: 'Maverick McNealy', isTop4: true }, t4: { score: -1, status: null, golfer: 'Sergio Garcia', isTop4: true }, t5: { score: 8, status: null, golfer: 'Mackenzie Hughes', isTop4: false }, t6: { score: 1, status: null, golfer: 'Francesco Molinari', isTop4: true } } },
+  { rank: 3, total: -4, pick: { entrantName: 'Jake Bogardus', picksName: 'Jake Bogardus' }, tierScores: { t1: { score: -1, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: -2, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: -2, status: null, golfer: 'Rasmus Hojgaard', isTop4: true }, t4: { score: 1, status: null, golfer: 'Thorbjorn Olesen', isTop4: true }, t5: { score: 2, status: null, golfer: 'Matthias Schmid', isTop4: false }, t6: { score: 1, status: null, golfer: 'Francesco Molinari', isTop4: false } } },
+  { rank: 6, total: -3, pick: { entrantName: 'Erik Vermilyea', picksName: 'Erik Vermilyea' }, tierScores: { t1: { score: -3, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: 1, status: null, golfer: 'Russell Henley', isTop4: true }, t3: { score: -2, status: null, golfer: 'Brian Harman', isTop4: true }, t4: { score: 2, status: null, golfer: 'Akshay Bhatia', isTop4: false }, t5: { score: 1, status: null, golfer: 'Nico Echavarria', isTop4: true }, t6: { score: 3, status: null, golfer: 'Ryggs Johnston', isTop4: false } } },
+  { rank: 7, total: -2, pick: { entrantName: 'Kyle Sheldon', picksName: 'Kyle Sheldon' }, tierScores: { t1: { score: -1, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: 2, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: -2, status: null, golfer: 'Rickie Fowler', isTop4: true }, t4: { score: 3, status: null, golfer: 'Michael Kim', isTop4: false }, t5: { score: -1, status: null, golfer: 'Zach Johnson', isTop4: true }, t6: { score: 4, status: null, golfer: 'Darren Clarke', isTop4: false } } },
+  { rank: 7, total: -2, pick: { entrantName: 'Cassady Glenn', picksName: 'Cassady Glenn' }, tierScores: { t1: { score: -3, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: 2, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: -2, status: null, golfer: 'Maverick McNealy', isTop4: true }, t4: { score: 3, status: null, golfer: 'Marco Penge', isTop4: false }, t5: { score: 1, status: null, golfer: 'Kristoffer Reitan', isTop4: true }, t6: { score: 2, status: null, golfer: 'Sebastian Soderberg', isTop4: false } } },
+  { rank: 7, total: -2, pick: { entrantName: 'Sean Susa', picksName: 'Sean Susa 2' }, tierScores: { t1: { score: -1, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: 1, status: null, golfer: 'Chris Gotterup', isTop4: true }, t3: { score: 4, status: null, golfer: 'Taylor Pendrith', isTop4: false }, t4: { score: 2, status: null, golfer: 'Thriston Lawrence', isTop4: true }, t5: { score: 4, status: null, golfer: 'Sahith Theegala', isTop4: false }, t6: { score: -4, status: null, golfer: 'Jacob Skov Olesen', isTop4: true } } },
+  { rank: 10, total: -1, pick: { entrantName: 'Nathan Wood', picksName: 'Nathan Wood' }, tierScores: { t1: { score: -3, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: 1, status: null, golfer: 'Russell Henley', isTop4: true }, t3: { score: 0, status: null, golfer: 'Sungjae Im', isTop4: true }, t4: { score: 1, status: null, golfer: 'J.T. Poston', isTop4: true }, t5: { score: 1, status: null, golfer: 'Jhonattan Vegas', isTop4: false }, t6: { score: 1, status: null, golfer: 'Shaun Norris', isTop4: false } } },
+  { rank: 10, total: -1, pick: { entrantName: 'Gregory J Smith', picksName: 'Gregory J Smith' }, tierScores: { t1: { score: -1, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: 3, status: null, golfer: 'Ben Griffin', isTop4: false }, t3: { score: 2, status: null, golfer: 'J.J. Spaun', isTop4: true }, t4: { score: 2, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 4, status: null, golfer: 'Padraig Harrington', isTop4: false }, t6: { score: -4, status: null, golfer: 'Jacob Skov Olesen', isTop4: true } } },
+  { rank: 10, total: -1, pick: { entrantName: 'Nick Bova', picksName: 'Nick Bova' }, tierScores: { t1: { score: -1, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: 4, status: null, golfer: 'Brooks Koepka', isTop4: false }, t3: { score: -2, status: null, golfer: 'Nicolai Hojgaard', isTop4: true }, t4: { score: 2, status: null, golfer: 'Akshay Bhatia', isTop4: false }, t5: { score: 1, status: null, golfer: 'Jhonattan Vegas', isTop4: true }, t6: { score: 1, status: null, golfer: 'Shaun Norris', isTop4: true } } },
+  { rank: 10, total: -1, pick: { entrantName: 'Morgan Coleman', picksName: 'Morgan Coleman' }, tierScores: { t1: { score: -3, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: 1, status: null, golfer: 'Russell Henley', isTop4: true }, t3: { score: 1, status: null, golfer: 'Daniel Berger', isTop4: true }, t4: { score: 3, status: null, golfer: 'Denny McCarthy', isTop4: false }, t5: { score: 0, status: null, golfer: 'Matt McCarty', isTop4: true }, t6: { score: 1, status: null, golfer: 'Shaun Norris', isTop4: false } } },
+  { rank: 10, total: -1, pick: { entrantName: 'Matt Bova', picksName: 'Matt Bova' }, tierScores: { t1: { score: -1, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: -1, status: null, golfer: 'Joaquin Niemann', isTop4: true }, t3: { score: 3, status: null, golfer: 'Si Woo Kim', isTop4: false }, t4: { score: 4, status: null, golfer: 'Carlos Ortiz', isTop4: false }, t5: { score: 0, status: null, golfer: 'Matt McCarty', isTop4: true }, t6: { score: 1, status: null, golfer: 'Shaun Norris', isTop4: true } } },
+  { rank: 15, total: 0, pick: { entrantName: 'Ryne Stone', picksName: 'Ryne Stone' }, tierScores: { t1: { score: -3, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: 2, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: 3, status: null, golfer: 'Si Woo Kim', isTop4: false }, t4: { score: 0, status: null, golfer: 'Dean Burmester', isTop4: true }, t5: { score: 1, status: null, golfer: 'Kristoffer Reitan', isTop4: true }, t6: { score: 2, status: null, golfer: 'Sebastian Soderberg', isTop4: false } } },
+  { rank: 15, total: 0, pick: { entrantName: 'Matthew Tuckfield', picksName: 'Matthew Tuckfield' }, tierScores: { t1: { score: -3, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -1, status: null, golfer: 'Sam Burns', isTop4: true }, t3: { score: 1, status: null, golfer: 'Tom McKibbin', isTop4: true }, t4: { score: 3, status: null, golfer: 'Marco Penge', isTop4: true }, t5: { score: 7, status: null, golfer: 'John Catlin', isTop4: false }, t6: { score: 9, status: null, golfer: 'Curtis Luck', isTop4: false } } },
+  { rank: 15, total: 0, pick: { entrantName: 'Mitch Pletcher', picksName: 'Mitch Pletcher' }, tierScores: { t1: { score: -3, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: 6, status: null, golfer: 'Patrick Reed', isTop4: false }, t3: { score: 1, status: null, golfer: 'Cameron Smith', isTop4: true }, t4: { score: 3, status: null, golfer: 'Michael Kim', isTop4: true }, t5: { score: -1, status: null, golfer: 'Phil Mickelson', isTop4: true }, t6: { score: 6, status: null, golfer: 'Ryan Peake', isTop4: false } } },
+  { rank: 15, total: 0, pick: { entrantName: 'Ryne Stone', picksName: 'Ryne Stone 2' }, tierScores: { t1: { score: -1, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: 1, status: null, golfer: 'Russell Henley', isTop4: true }, t3: { score: -2, status: null, golfer: 'Nicolai Hojgaard', isTop4: true }, t4: { score: 3, status: null, golfer: 'Marco Penge', isTop4: false }, t5: { score: 2, status: null, golfer: 'Matteo Manassero', isTop4: true }, t6: { score: 2, status: null, golfer: 'Sebastian Soderberg', isTop4: false } } },
+  { rank: 15, total: 0, pick: { entrantName: 'Jeffrey Mersch', picksName: 'Jeffrey Mersch' }, tierScores: { t1: { score: -3, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: 3, status: null, golfer: 'Ben Griffin', isTop4: false }, t3: { score: 1, status: null, golfer: 'Tom McKibbin', isTop4: true }, t4: { score: 7, status: null, golfer: 'Max Greyserman', isTop4: false }, t5: { score: 1, status: null, golfer: 'Antoine Rozner', isTop4: true }, t6: { score: 1, status: null, golfer: 'Shaun Norris', isTop4: true } } },
+  { rank: 15, total: 0, pick: { entrantName: 'Mike Davis', picksName: 'Mike Davis' }, tierScores: { t1: { score: 2, status: null, golfer: 'Ludvig Aberg', isTop4: true }, t2: { score: -2, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: -1, status: null, golfer: 'Tony Finau', isTop4: true }, t4: { score: 2, status: null, golfer: 'Akshay Bhatia', isTop4: false }, t5: { score: 1, status: null, golfer: 'Kristoffer Reitan', isTop4: true }, t6: { score: 4, status: null, golfer: 'Ethan Fang (a)', isTop4: false } } },
+  { rank: 21, total: 1, pick: { entrantName: 'Sean Susa', picksName: 'Sean Susa' }, tierScores: { t1: { score: 0, status: null, golfer: 'Robert MacIntyre', isTop4: true }, t2: { score: 1, status: null, golfer: 'Keegan Bradley', isTop4: true }, t3: { score: 3, status: null, golfer: 'Si Woo Kim', isTop4: true }, t4: { score: 3, status: null, golfer: 'Denny McCarthy', isTop4: false }, t5: { score: -3, status: null, golfer: 'Matthew Jordan', isTop4: true }, t6: { score: 4, status: null, golfer: 'Ethan Fang (a)', isTop4: false } } },
+  { rank: 22, total: 2, pick: { entrantName: 'Myron Mayo', picksName: 'Myron Mayo' }, tierScores: { t1: { score: -1, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: 4, status: null, golfer: 'Brooks Koepka', isTop4: true }, t3: { score: -2, status: null, golfer: 'Rickie Fowler', isTop4: true }, t4: { score: 1, status: null, golfer: 'Thorbjorn Olesen', isTop4: true }, t5: { score: 4, status: null, golfer: 'Sahith Theegala', isTop4: false }, t6: { score: 4, status: null, golfer: 'Darren Clarke', isTop4: false } } },
+  { rank: 22, total: 2, pick: { entrantName: 'Zach DelGandio', picksName: 'Zach DelGandio' }, tierScores: { t1: { score: -1, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: 2, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: -2, status: null, golfer: 'Maverick McNealy', isTop4: true }, t4: { score: 3, status: null, golfer: 'Marco Penge', isTop4: true }, t5: { score: 4, status: null, golfer: 'Padraig Harrington', isTop4: false }, t6: { score: 3, status: null, golfer: 'Rikuya Hoshino', isTop4: false } } },
+  { rank: 24, total: 3, pick: { entrantName: 'Jacob D Hammer', picksName: 'Jacob D Hammer' }, tierScores: { t1: { score: -1, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: 4, status: null, golfer: 'Brooks Koepka', isTop4: true }, t3: { score: 5, status: null, golfer: 'Wyndham Clark', isTop4: false }, t4: { score: -2, status: null, golfer: 'Lucas Glover', isTop4: true }, t5: { score: 4, status: null, golfer: 'Sahith Theegala', isTop4: false }, t6: { score: 2, status: null, golfer: 'Connor Graham (a)', isTop4: true } } },
+  { rank: 24, total: 3, pick: { entrantName: 'Robert Stephenson', picksName: 'Robert Stephenson 2' }, tierScores: { t1: { score: 2, status: null, golfer: 'Viktor Hovland', isTop4: true }, t2: { score: 2, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: -2, status: null, golfer: 'Brian Harman', isTop4: true }, t4: { score: 1, status: null, golfer: 'Thorbjorn Olesen', isTop4: true }, t5: { score: 2, status: null, golfer: 'Brian Campbell', isTop4: false }, t6: { score: 2, status: null, golfer: 'Sebastian Soderberg', isTop4: false } } },
+  { rank: 24, total: 3, pick: { entrantName: 'Bob Cross', picksName: 'Bob Cross' }, tierScores: { t1: { score: -3, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: 6, status: null, golfer: 'Patrick Reed', isTop4: false }, t3: { score: 5, status: null, golfer: 'Wyndham Clark', isTop4: false }, t4: { score: 2, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 1, status: null, golfer: 'Jhonattan Vegas', isTop4: true }, t6: { score: 3, status: null, golfer: 'Rikuya Hoshino', isTop4: true } } },
+  { rank: 24, total: 3, pick: { entrantName: 'Jacob D Hammer', picksName: 'Jake Hammer 2' }, tierScores: { t1: { score: 7, status: null, golfer: 'Bryson DeChambeau', isTop4: false }, t2: { score: 2, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: 1, status: null, golfer: 'Cameron Smith', isTop4: true }, t4: { score: -2, status: null, golfer: 'Lucas Glover', isTop4: true }, t5: { score: 2, status: null, golfer: 'Brian Campbell', isTop4: true }, t6: { score: 2, status: null, golfer: 'Young-han Song', isTop4: false } } },
+  { rank: 24, total: 3, pick: { entrantName: 'Keith Waters', picksName: 'Keith Waters' }, tierScores: { t1: { score: -1, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: -1, status: null, golfer: 'Sam Burns', isTop4: true }, t3: { score: 2, status: null, golfer: 'J.J. Spaun', isTop4: true }, t4: { score: 7, status: null, golfer: 'Max Greyserman', isTop4: false }, t5: { score: 5, status: null, golfer: 'Matthieu Pavon', isTop4: false }, t6: { score: 3, status: null, golfer: 'Justin Hastings (a)', isTop4: true } } },
+  { rank: 29, total: 4, pick: { entrantName: 'Ethan DelGandio', picksName: 'Ethan DelGandio' }, tierScores: { t1: { score: -1, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: -1, status: null, golfer: 'Joaquin Niemann', isTop4: true }, t3: { score: 5, status: null, golfer: 'Wyndham Clark', isTop4: false }, t4: { score: 2, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 4, status: null, golfer: 'Padraig Harrington', isTop4: true }, t6: { score: 10, status: null, golfer: 'K.J. Choi', isTop4: false } } },
+  { rank: 29, total: 4, pick: { entrantName: 'Luke S', picksName: 'Luke S' }, tierScores: { t1: { score: 2, status: null, golfer: 'Tommy Fleetwood', isTop4: true }, t2: { score: 3, status: null, golfer: 'Cameron Young', isTop4: false }, t3: { score: 0, status: null, golfer: 'Jordan Smith', isTop4: true }, t4: { score: 2, status: null, golfer: 'Akshay Bhatia', isTop4: false }, t5: { score: 1, status: null, golfer: 'Nico Echavarria', isTop4: true }, t6: { score: 1, status: null, golfer: 'Francesco Molinari', isTop4: true } } },
+  { rank: 31, total: 5, pick: { entrantName: 'Jeff Bagnasco', picksName: 'Jeff Bagnasco' }, tierScores: { t1: { score: 2, status: null, golfer: 'Tommy Fleetwood', isTop4: true }, t2: { score: 2, status: null, golfer: 'Jason Day', isTop4: true }, t3: { score: 2, status: null, golfer: 'J.J. Spaun', isTop4: false }, t4: { score: 0, status: null, golfer: 'Andrew Novak', isTop4: true }, t5: { score: 1, status: null, golfer: 'Antoine Rozner', isTop4: true }, t6: { score: 3, status: null, golfer: 'Justin Hastings (a)', isTop4: false } } },
+  { rank: 31, total: 5, pick: { entrantName: 'Matt Bova', picksName: 'Matt Bova 2' }, tierScores: { t1: { score: -1, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: 2, status: null, golfer: 'Patrick Cantlay', isTop4: true }, t3: { score: 5, status: null, golfer: 'Wyndham Clark', isTop4: false }, t4: { score: 3, status: null, golfer: 'Michael Kim', isTop4: true }, t5: { score: 8, status: null, golfer: 'Mackenzie Hughes', isTop4: false }, t6: { score: 1, status: null, golfer: 'Francesco Molinari', isTop4: true } } },
+  { rank: 33, total: 6, pick: { entrantName: 'Robert Stephenson', picksName: 'Robert Stephenson' }, tierScores: { t1: { score: -1, status: null, golfer: 'Shane Lowry', isTop4: true }, t2: { score: 4, status: null, golfer: 'Brooks Koepka', isTop4: true }, t3: { score: 5, status: null, golfer: 'Wyndham Clark', isTop4: false }, t4: { score: 1, status: null, golfer: 'J.T. Poston', isTop4: true }, t5: { score: 5, status: null, golfer: 'Matthieu Pavon', isTop4: false }, t6: { score: 2, status: null, golfer: 'Julien Guerrier', isTop4: true } } },
+  { rank: 33, total: 6, pick: { entrantName: 'Bob Cross', picksName: 'Bob Cross 2' }, tierScores: { t1: { score: 2, status: null, golfer: 'Viktor Hovland', isTop4: true }, t2: { score: 4, status: null, golfer: 'Brooks Koepka', isTop4: false }, t3: { score: 2, status: null, golfer: 'J.J. Spaun', isTop4: true }, t4: { score: 2, status: null, golfer: 'Chris Kirk', isTop4: false }, t5: { score: 1, status: null, golfer: 'Nico Echavarria', isTop4: true }, t6: { score: 1, status: null, golfer: 'Oliver Lindell', isTop4: true } } },
+];
+
+const THEOPEN_2025_R2 = [
+  { rank: 1, total: -21, pick: { entrantName: 'Erik Vermilyea', picksName: 'Erik Vermilyea' }, tierScores: { t1: { score: -7, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -1, status: null, golfer: 'Russell Henley', isTop4: false }, t3: { score: -6, status: null, golfer: 'Brian Harman', isTop4: true }, t4: { score: -3, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 3, status: null, golfer: 'Nico Echavarria', isTop4: false }, t6: { score: -5, status: null, golfer: 'Ryggs Johnston', isTop4: true } } },
+  { rank: 2, total: -16, pick: { entrantName: 'Bob Cross', picksName: 'Bob Cross' }, tierScores: { t1: { score: -7, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -1, status: null, golfer: 'Patrick Reed', isTop4: true }, t3: { score: -5, status: null, golfer: 'Wyndham Clark', isTop4: true }, t4: { score: -3, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: -1, status: null, golfer: 'Jhonattan Vegas', isTop4: false }, t6: { score: -1, status: null, golfer: 'Rikuya Hoshino', isTop4: false } } },
+  { rank: 3, total: -13, pick: { entrantName: 'Ryne Stone', picksName: 'Ryne Stone' }, tierScores: { t1: { score: -7, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -2, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: 0, status: null, golfer: 'Si Woo Kim', isTop4: false }, t4: { score: 0, status: null, golfer: 'Dean Burmester', isTop4: false }, t5: { score: -3, status: null, golfer: 'Kristoffer Reitan', isTop4: true }, t6: { score: -1, status: null, golfer: 'Sebastian Soderberg', isTop4: true } } },
+  { rank: 3, total: -13, pick: { entrantName: 'Cassady Glenn', picksName: 'Cassady Glenn' }, tierScores: { t1: { score: -7, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -2, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: 3, status: null, golfer: 'Maverick McNealy', isTop4: false }, t4: { score: 1, status: null, golfer: 'Marco Penge', isTop4: false }, t5: { score: -3, status: null, golfer: 'Kristoffer Reitan', isTop4: true }, t6: { score: -1, status: null, golfer: 'Sebastian Soderberg', isTop4: true } } },
+  { rank: 3, total: -13, pick: { entrantName: 'Matthew Tuckfield', picksName: 'Matthew Tuckfield' }, tierScores: { t1: { score: -7, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -2, status: null, golfer: 'Sam Burns', isTop4: true }, t3: { score: 2, status: null, golfer: 'Tom McKibbin', isTop4: false }, t4: { score: 1, status: null, golfer: 'Marco Penge', isTop4: false }, t5: { score: -3, status: null, golfer: 'John Catlin', isTop4: true }, t6: { score: -1, status: null, golfer: 'Curtis Luck', isTop4: true } } },
+  { rank: 3, total: -13, pick: { entrantName: 'Jeffrey Mersch', picksName: 'Jeffrey Mersch' }, tierScores: { t1: { score: -7, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -1, status: null, golfer: 'Ben Griffin', isTop4: true }, t3: { score: 2, status: null, golfer: 'Tom McKibbin', isTop4: false }, t4: { score: -4, status: null, golfer: 'Max Greyserman', isTop4: true }, t5: { score: -1, status: null, golfer: 'Antoine Rozner', isTop4: true }, t6: { score: 4, status: null, golfer: 'Shaun Norris', isTop4: false } } },
+  { rank: 3, total: -13, pick: { entrantName: 'Mike Davis', picksName: 'Mike Davis' }, tierScores: { t1: { score: -4, status: null, golfer: 'Ludvig Aberg', isTop4: true }, t2: { score: 0, status: null, golfer: 'Justin Rose', isTop4: false }, t3: { score: -3, status: null, golfer: 'Tony Finau', isTop4: true }, t4: { score: -3, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: -3, status: null, golfer: 'Kristoffer Reitan', isTop4: true }, t6: { score: -1, status: null, golfer: 'Ethan Fang (a)', isTop4: false } } },
+  { rank: 8, total: -11, pick: { entrantName: 'Robert Stephenson', picksName: 'Robert Stephenson 2' }, tierScores: { t1: { score: -2, status: null, golfer: 'Viktor Hovland', isTop4: true }, t2: { score: -2, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: -6, status: null, golfer: 'Brian Harman', isTop4: true }, t4: { score: 3, status: null, golfer: 'Thorbjorn Olesen', isTop4: false }, t5: { score: 1, status: null, golfer: 'Brian Campbell', isTop4: false }, t6: { score: -1, status: null, golfer: 'Sebastian Soderberg', isTop4: true } } },
+  { rank: 8, total: -11, pick: { entrantName: 'Cody Esbrandt', picksName: 'Cody Esbrandt' }, tierScores: { t1: { score: -2, status: null, golfer: 'Viktor Hovland', isTop4: true }, t2: { score: 3, status: null, golfer: 'Joaquin Niemann', isTop4: false }, t3: { score: -6, status: null, golfer: 'Brian Harman', isTop4: true }, t4: { score: 0, status: null, golfer: 'Byeong Hun An', isTop4: true }, t5: { score: -3, status: null, golfer: 'Marc Leishman', isTop4: true }, t6: { score: 5, status: null, golfer: 'Jacob Skov Olesen', isTop4: false } } },
+  { rank: 10, total: -10, pick: { entrantName: 'Paul Raymond', picksName: 'Paul Raymond' }, tierScores: { t1: { score: -7, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: 0, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: -3, status: null, golfer: 'Tony Finau', isTop4: true }, t4: { score: 3, status: null, golfer: 'Thorbjorn Olesen', isTop4: false }, t5: { score: 5, status: null, golfer: 'Padraig Harrington', isTop4: false }, t6: { score: 0, status: null, golfer: 'Francesco Molinari', isTop4: true } } },
+  { rank: 10, total: -10, pick: { entrantName: 'Sean Susa', picksName: 'Sean Susa' }, tierScores: { t1: { score: -5, status: null, golfer: 'Robert MacIntyre', isTop4: true }, t2: { score: -4, status: null, golfer: 'Keegan Bradley', isTop4: true }, t3: { score: 0, status: null, golfer: 'Si Woo Kim', isTop4: true }, t4: { score: 0, status: null, golfer: 'Denny McCarthy', isTop4: false }, t5: { score: 1, status: null, golfer: 'Matthew Jordan', isTop4: false }, t6: { score: -1, status: null, golfer: 'Ethan Fang (a)', isTop4: true } } },
+  { rank: 10, total: -10, pick: { entrantName: 'Sean Susa', picksName: 'Sean Susa 2' }, tierScores: { t1: { score: -2, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: -6, status: null, golfer: 'Chris Gotterup', isTop4: true }, t3: { score: -1, status: null, golfer: 'Taylor Pendrith', isTop4: true }, t4: { score: -1, status: null, golfer: 'Thriston Lawrence', isTop4: true }, t5: { score: 3, status: null, golfer: 'Sahith Theegala', isTop4: false }, t6: { score: 5, status: null, golfer: 'Jacob Skov Olesen', isTop4: false } } },
+  { rank: 13, total: -9, pick: { entrantName: 'Nathan Wood', picksName: 'Nathan Wood' }, tierScores: { t1: { score: -7, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -1, status: null, golfer: 'Russell Henley', isTop4: true }, t3: { score: 0, status: null, golfer: 'Sungjae Im', isTop4: true }, t4: { score: 6, status: null, golfer: 'J.T. Poston', isTop4: false }, t5: { score: -1, status: null, golfer: 'Jhonattan Vegas', isTop4: true }, t6: { score: 4, status: null, golfer: 'Shaun Norris', isTop4: false } } },
+  { rank: 13, total: -9, pick: { entrantName: 'Morgan Coleman', picksName: 'Morgan Coleman' }, tierScores: { t1: { score: -7, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -1, status: null, golfer: 'Russell Henley', isTop4: true }, t3: { score: -1, status: null, golfer: 'Daniel Berger', isTop4: true }, t4: { score: 0, status: null, golfer: 'Denny McCarthy', isTop4: true }, t5: { score: 3, status: null, golfer: 'Matt McCarty', isTop4: false }, t6: { score: 4, status: null, golfer: 'Shaun Norris', isTop4: false } } },
+  { rank: 13, total: -9, pick: { entrantName: 'Luke S', picksName: 'Luke S' }, tierScores: { t1: { score: -3, status: null, golfer: 'Tommy Fleetwood', isTop4: true }, t2: { score: 1, status: null, golfer: 'Cameron Young', isTop4: false }, t3: { score: -3, status: null, golfer: 'Jordan Smith', isTop4: true }, t4: { score: -3, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 3, status: null, golfer: 'Nico Echavarria', isTop4: false }, t6: { score: 0, status: null, golfer: 'Francesco Molinari', isTop4: true } } },
+  { rank: 16, total: -8, pick: { entrantName: 'Matt Bova', picksName: 'Matt Bova 2' }, tierScores: { t1: { score: -2, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: 1, status: null, golfer: 'Patrick Cantlay', isTop4: false }, t3: { score: -5, status: null, golfer: 'Wyndham Clark', isTop4: true }, t4: { score: 1, status: null, golfer: 'Michael Kim', isTop4: false }, t5: { score: -1, status: null, golfer: 'Mackenzie Hughes', isTop4: true }, t6: { score: 0, status: null, golfer: 'Francesco Molinari', isTop4: true } } },
+  { rank: 16, total: -8, pick: { entrantName: 'Keith Waters', picksName: 'Keith Waters' }, tierScores: { t1: { score: 1, status: null, golfer: 'Jon Rahm', isTop4: false }, t2: { score: -2, status: null, golfer: 'Sam Burns', isTop4: true }, t3: { score: -2, status: null, golfer: 'J.J. Spaun', isTop4: true }, t4: { score: -4, status: null, golfer: 'Max Greyserman', isTop4: true }, t5: { score: 0, status: null, golfer: 'Matthieu Pavon', isTop4: true }, t6: { score: 3, status: null, golfer: 'Justin Hastings (a)', isTop4: false } } },
+  { rank: 18, total: -7, pick: { entrantName: 'Ron Pannullo', picksName: 'Ron Pannullo' }, tierScores: { t1: { score: -6, status: null, golfer: 'Bryson DeChambeau', isTop4: true }, t2: { score: 0, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: 3, status: null, golfer: 'Maverick McNealy', isTop4: false }, t4: { score: 2, status: null, golfer: 'Sergio Garcia', isTop4: false }, t5: { score: -1, status: null, golfer: 'Mackenzie Hughes', isTop4: true }, t6: { score: 0, status: null, golfer: 'Francesco Molinari', isTop4: true } } },
+  { rank: 18, total: -7, pick: { entrantName: 'Ethan DelGandio', picksName: 'Ethan DelGandio' }, tierScores: { t1: { score: -2, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: 3, status: null, golfer: 'Joaquin Niemann', isTop4: true }, t3: { score: -5, status: null, golfer: 'Wyndham Clark', isTop4: true }, t4: { score: -3, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 5, status: null, golfer: 'Padraig Harrington', isTop4: false }, t6: { score: 3, status: null, golfer: 'K.J. Choi', isTop4: false } } },
+  { rank: 20, total: -6, pick: { entrantName: 'Jeff Bagnasco', picksName: 'Jeff Bagnasco' }, tierScores: { t1: { score: -3, status: null, golfer: 'Tommy Fleetwood', isTop4: true }, t2: { score: 0, status: null, golfer: 'Jason Day', isTop4: true }, t3: { score: -2, status: null, golfer: 'J.J. Spaun', isTop4: true }, t4: { score: 1, status: null, golfer: 'Andrew Novak', isTop4: false }, t5: { score: -1, status: null, golfer: 'Antoine Rozner', isTop4: true }, t6: { score: 3, status: null, golfer: 'Justin Hastings (a)', isTop4: false } } },
+  { rank: 20, total: -6, pick: { entrantName: 'Mitch Pletcher', picksName: 'Mitch Pletcher' }, tierScores: { t1: { score: -7, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -1, status: null, golfer: 'Patrick Reed', isTop4: true }, t3: { score: 7, status: null, golfer: 'Cameron Smith', isTop4: false }, t4: { score: 1, status: null, golfer: 'Michael Kim', isTop4: true }, t5: { score: 1, status: null, golfer: 'Phil Mickelson', isTop4: true }, t6: { score: 2, status: null, golfer: 'Ryan Peake', isTop4: false } } },
+  { rank: 20, total: -6, pick: { entrantName: 'Jake Bogardus', picksName: 'Jake Bogardus' }, tierScores: { t1: { score: -2, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: 0, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: -3, status: null, golfer: 'Rasmus Hojgaard', isTop4: true }, t4: { score: 3, status: null, golfer: 'Thorbjorn Olesen', isTop4: false }, t5: { score: -1, status: null, golfer: 'Matthias Schmid', isTop4: true }, t6: { score: 0, status: null, golfer: 'Francesco Molinari', isTop4: false } } },
+  { rank: 20, total: -6, pick: { entrantName: 'Jacob D Hammer', picksName: 'Jake Hammer 2' }, tierScores: { t1: { score: -6, status: null, golfer: 'Bryson DeChambeau', isTop4: true }, t2: { score: -2, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: 7, status: null, golfer: 'Cameron Smith', isTop4: false }, t4: { score: 1, status: null, golfer: 'Lucas Glover', isTop4: true }, t5: { score: 1, status: null, golfer: 'Brian Campbell', isTop4: true }, t6: { score: 2, status: null, golfer: 'Young-han Song', isTop4: false } } },
+  { rank: 24, total: -5, pick: { entrantName: 'Gregory J Smith', picksName: 'Gregory J Smith' }, tierScores: { t1: { score: 1, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: -1, status: null, golfer: 'Ben Griffin', isTop4: true }, t3: { score: -2, status: null, golfer: 'J.J. Spaun', isTop4: true }, t4: { score: -3, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 5, status: null, golfer: 'Padraig Harrington', isTop4: false }, t6: { score: 5, status: null, golfer: 'Jacob Skov Olesen', isTop4: false } } },
+  { rank: 24, total: -5, pick: { entrantName: 'Nick Bova', picksName: 'Nick Bova' }, tierScores: { t1: { score: 1, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: 3, status: null, golfer: 'Brooks Koepka', isTop4: false }, t3: { score: -2, status: null, golfer: 'Nicolai Hojgaard', isTop4: true }, t4: { score: -3, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: -1, status: null, golfer: 'Jhonattan Vegas', isTop4: true }, t6: { score: 4, status: null, golfer: 'Shaun Norris', isTop4: false } } },
+  { rank: 26, total: -4, pick: { entrantName: 'Bob Cross', picksName: 'Bob Cross 2' }, tierScores: { t1: { score: -2, status: null, golfer: 'Viktor Hovland', isTop4: true }, t2: { score: 3, status: null, golfer: 'Brooks Koepka', isTop4: true }, t3: { score: -2, status: null, golfer: 'J.J. Spaun', isTop4: true }, t4: { score: 3, status: null, golfer: 'Chris Kirk', isTop4: false }, t5: { score: 3, status: null, golfer: 'Nico Echavarria', isTop4: false }, t6: { score: -3, status: null, golfer: 'Oliver Lindell', isTop4: true } } },
+  { rank: 26, total: -4, pick: { entrantName: 'Zach DelGandio', picksName: 'Zach DelGandio' }, tierScores: { t1: { score: -2, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: -2, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: 3, status: null, golfer: 'Maverick McNealy', isTop4: false }, t4: { score: 1, status: null, golfer: 'Marco Penge', isTop4: true }, t5: { score: 5, status: null, golfer: 'Padraig Harrington', isTop4: false }, t6: { score: -1, status: null, golfer: 'Rikuya Hoshino', isTop4: true } } },
+  { rank: 26, total: -4, pick: { entrantName: 'Ryne Stone', picksName: 'Ryne Stone 2' }, tierScores: { t1: { score: 1, status: null, golfer: 'Jon Rahm', isTop4: false }, t2: { score: -1, status: null, golfer: 'Russell Henley', isTop4: true }, t3: { score: -2, status: null, golfer: 'Nicolai Hojgaard', isTop4: true }, t4: { score: 1, status: null, golfer: 'Marco Penge', isTop4: false }, t5: { score: 0, status: null, golfer: 'Matteo Manassero', isTop4: true }, t6: { score: -1, status: null, golfer: 'Sebastian Soderberg', isTop4: true } } },
+  { rank: 29, total: -3, pick: { entrantName: 'Jacob D Hammer', picksName: 'Jacob D Hammer' }, tierScores: { t1: { score: -2, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: 3, status: null, golfer: 'Brooks Koepka', isTop4: true }, t3: { score: -5, status: null, golfer: 'Wyndham Clark', isTop4: true }, t4: { score: 1, status: null, golfer: 'Lucas Glover', isTop4: true }, t5: { score: 3, status: null, golfer: 'Sahith Theegala', isTop4: false }, t6: { score: 8, status: null, golfer: 'Connor Graham (a)', isTop4: false } } },
+  { rank: 29, total: -3, pick: { entrantName: 'Robert Stephenson', picksName: 'Robert Stephenson' }, tierScores: { t1: { score: 1, status: null, golfer: 'Shane Lowry', isTop4: true }, t2: { score: 3, status: null, golfer: 'Brooks Koepka', isTop4: false }, t3: { score: -5, status: null, golfer: 'Wyndham Clark', isTop4: true }, t4: { score: 6, status: null, golfer: 'J.T. Poston', isTop4: false }, t5: { score: 0, status: null, golfer: 'Matthieu Pavon', isTop4: true }, t6: { score: 1, status: null, golfer: 'Julien Guerrier', isTop4: true } } },
+  { rank: 29, total: -3, pick: { entrantName: 'Chris Schumann', picksName: 'Chris Schumann' }, tierScores: { t1: { score: -7, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: 0, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: 7, status: null, golfer: 'Cameron Smith', isTop4: false }, t4: { score: 3, status: null, golfer: 'Thorbjorn Olesen', isTop4: true }, t5: { score: 3, status: null, golfer: 'Sahith Theegala', isTop4: false }, t6: { score: 1, status: null, golfer: 'Takumi Kanaya', isTop4: true } } },
+  { rank: 32, total: -2, pick: { entrantName: 'Kyle Sheldon', picksName: 'Kyle Sheldon' }, tierScores: { t1: { score: -2, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: -2, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: 1, status: null, golfer: 'Rickie Fowler', isTop4: true }, t4: { score: 1, status: null, golfer: 'Michael Kim', isTop4: true }, t5: { score: 4, status: null, golfer: 'Zach Johnson', isTop4: false }, t6: { score: 2, status: null, golfer: 'Darren Clarke', isTop4: false } } },
+  { rank: 33, total: 3, pick: { entrantName: 'Matt Bova', picksName: 'Matt Bova' }, tierScores: { t1: { score: 1, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: 3, status: null, golfer: 'Joaquin Niemann', isTop4: true }, t3: { score: 0, status: null, golfer: 'Si Woo Kim', isTop4: true }, t4: { score: -1, status: null, golfer: 'Carlos Ortiz', isTop4: true }, t5: { score: 3, status: null, golfer: 'Matt McCarty', isTop4: false }, t6: { score: 4, status: null, golfer: 'Shaun Norris', isTop4: false } } },
+  { rank: 34, total: 7, pick: { entrantName: 'Myron Mayo', picksName: 'Myron Mayo' }, tierScores: { t1: { score: 1, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: 3, status: null, golfer: 'Brooks Koepka', isTop4: true }, t3: { score: 1, status: null, golfer: 'Rickie Fowler', isTop4: true }, t4: { score: 3, status: null, golfer: 'Thorbjorn Olesen', isTop4: false }, t5: { score: 3, status: null, golfer: 'Sahith Theegala', isTop4: false }, t6: { score: 2, status: null, golfer: 'Darren Clarke', isTop4: true } } },
+];
+
+const THEOPEN_2025_R3 = [
+  { rank: 1, total: -15, pick: { entrantName: 'Nathan Wood', picksName: 'Nathan Wood' }, tierScores: { t1: { score: -4, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -6, status: null, golfer: 'Russell Henley', isTop4: true }, t3: { score: -4, status: null, golfer: 'Sungjae Im', isTop4: true }, t4: { score: 10, status: null, golfer: 'J.T. Poston', isTop4: false }, t5: { score: -1, status: null, golfer: 'Jhonattan Vegas', isTop4: true }, t6: { score: 10, status: null, golfer: 'Shaun Norris', isTop4: false } } },
+  { rank: 2, total: -11, pick: { entrantName: 'Bob Cross', picksName: 'Bob Cross' }, tierScores: { t1: { score: -4, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: 10, status: null, golfer: 'Patrick Reed', isTop4: false }, t3: { score: -5, status: null, golfer: 'Wyndham Clark', isTop4: true }, t4: { score: -1, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: -1, status: null, golfer: 'Jhonattan Vegas', isTop4: true }, t6: { score: 10, status: null, golfer: 'Rikuya Hoshino', isTop4: false } } },
+  { rank: 3, total: -10, pick: { entrantName: 'Mike Davis', picksName: 'Mike Davis' }, tierScores: { t1: { score: -3, status: null, golfer: 'Ludvig Aberg', isTop4: true }, t2: { score: -3, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: 1, status: null, golfer: 'Tony Finau', isTop4: false }, t4: { score: -1, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: -3, status: null, golfer: 'Kristoffer Reitan', isTop4: true }, t6: { score: 10, status: null, golfer: 'Ethan Fang (a)', isTop4: false } } },
+  { rank: 4, total: -9, pick: { entrantName: 'Erik Vermilyea', picksName: 'Erik Vermilyea' }, tierScores: { t1: { score: -4, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -6, status: null, golfer: 'Russell Henley', isTop4: true }, t3: { score: 2, status: null, golfer: 'Brian Harman', isTop4: true }, t4: { score: -1, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 10, status: null, golfer: 'Nico Echavarria', isTop4: false }, t6: { score: 3, status: null, golfer: 'Ryggs Johnston', isTop4: false } } },
+  { rank: 4, total: -9, pick: { entrantName: 'Ron Pannullo', picksName: 'Ron Pannullo' }, tierScores: { t1: { score: -3, status: null, golfer: 'Bryson DeChambeau', isTop4: true }, t2: { score: -3, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: -2, status: null, golfer: 'Maverick McNealy', isTop4: true }, t4: { score: -1, status: null, golfer: 'Sergio Garcia', isTop4: true }, t5: { score: 10, status: null, golfer: 'Mackenzie Hughes', isTop4: false }, t6: { score: 0, status: null, golfer: 'Francesco Molinari', isTop4: false } } },
+  { rank: 4, total: -9, pick: { entrantName: 'Jake Bogardus', picksName: 'Jake Bogardus' }, tierScores: { t1: { score: -5, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: -3, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: -1, status: null, golfer: 'Rasmus Hojgaard', isTop4: true }, t4: { score: 10, status: null, golfer: 'Thorbjorn Olesen', isTop4: false }, t5: { score: 8, status: null, golfer: 'Matthias Schmid', isTop4: false }, t6: { score: 0, status: null, golfer: 'Francesco Molinari', isTop4: true } } },
+  { rank: 4, total: -9, pick: { entrantName: 'Sean Susa', picksName: 'Sean Susa 2' }, tierScores: { t1: { score: -5, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: -3, status: null, golfer: 'Chris Gotterup', isTop4: true }, t3: { score: 10, status: null, golfer: 'Taylor Pendrith', isTop4: false }, t4: { score: -3, status: null, golfer: 'Thriston Lawrence', isTop4: true }, t5: { score: 10, status: null, golfer: 'Sahith Theegala', isTop4: false }, t6: { score: 2, status: null, golfer: 'Jacob Skov Olesen', isTop4: true } } },
+  { rank: 8, total: -8, pick: { entrantName: 'Cassady Glenn', picksName: 'Cassady Glenn' }, tierScores: { t1: { score: -4, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: 1, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: -2, status: null, golfer: 'Maverick McNealy', isTop4: true }, t4: { score: 10, status: null, golfer: 'Marco Penge', isTop4: false }, t5: { score: -3, status: null, golfer: 'Kristoffer Reitan', isTop4: true }, t6: { score: 4, status: null, golfer: 'Sebastian Soderberg', isTop4: false } } },
+  { rank: 9, total: -6, pick: { entrantName: 'Nick Bova', picksName: 'Nick Bova' }, tierScores: { t1: { score: -2, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: 10, status: null, golfer: 'Brooks Koepka', isTop4: false }, t3: { score: -2, status: null, golfer: 'Nicolai Hojgaard', isTop4: true }, t4: { score: -1, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: -1, status: null, golfer: 'Jhonattan Vegas', isTop4: true }, t6: { score: 10, status: null, golfer: 'Shaun Norris', isTop4: false } } },
+  { rank: 9, total: -6, pick: { entrantName: 'Paul Raymond', picksName: 'Paul Raymond' }, tierScores: { t1: { score: -4, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -3, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: 1, status: null, golfer: 'Tony Finau', isTop4: true }, t4: { score: 10, status: null, golfer: 'Thorbjorn Olesen', isTop4: false }, t5: { score: 10, status: null, golfer: 'Padraig Harrington', isTop4: false }, t6: { score: 0, status: null, golfer: 'Francesco Molinari', isTop4: true } } },
+  { rank: 9, total: -6, pick: { entrantName: 'Ryne Stone', picksName: 'Ryne Stone 2' }, tierScores: { t1: { score: -2, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: -6, status: null, golfer: 'Russell Henley', isTop4: true }, t3: { score: -2, status: null, golfer: 'Nicolai Hojgaard', isTop4: true }, t4: { score: 10, status: null, golfer: 'Marco Penge', isTop4: false }, t5: { score: 10, status: null, golfer: 'Matteo Manassero', isTop4: false }, t6: { score: 4, status: null, golfer: 'Sebastian Soderberg', isTop4: true } } },
+  { rank: 12, total: -4, pick: { entrantName: 'Gregory J Smith', picksName: 'Gregory J Smith' }, tierScores: { t1: { score: -2, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: 10, status: null, golfer: 'Ben Griffin', isTop4: false }, t3: { score: -3, status: null, golfer: 'J.J. Spaun', isTop4: true }, t4: { score: -1, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 10, status: null, golfer: 'Padraig Harrington', isTop4: false }, t6: { score: 2, status: null, golfer: 'Jacob Skov Olesen', isTop4: true } } },
+  { rank: 13, total: -3, pick: { entrantName: 'Jacob D Hammer', picksName: 'Jacob D Hammer' }, tierScores: { t1: { score: -5, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: 10, status: null, golfer: 'Brooks Koepka', isTop4: true }, t3: { score: -5, status: null, golfer: 'Wyndham Clark', isTop4: true }, t4: { score: -3, status: null, golfer: 'Lucas Glover', isTop4: true }, t5: { score: 10, status: null, golfer: 'Sahith Theegala', isTop4: false }, t6: { score: 10, status: null, golfer: 'Connor Graham (a)', isTop4: false } } },
+  { rank: 14, total: -2, pick: { entrantName: 'Ryne Stone', picksName: 'Ryne Stone' }, tierScores: { t1: { score: -4, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: 1, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: 10, status: null, golfer: 'Si Woo Kim', isTop4: false }, t4: { score: 5, status: null, golfer: 'Dean Burmester', isTop4: false }, t5: { score: -3, status: null, golfer: 'Kristoffer Reitan', isTop4: true }, t6: { score: 4, status: null, golfer: 'Sebastian Soderberg', isTop4: true } } },
+  { rank: 14, total: -2, pick: { entrantName: 'Luke S', picksName: 'Luke S' }, tierScores: { t1: { score: -2, status: null, golfer: 'Tommy Fleetwood', isTop4: true }, t2: { score: 10, status: null, golfer: 'Cameron Young', isTop4: false }, t3: { score: 1, status: null, golfer: 'Jordan Smith', isTop4: true }, t4: { score: -1, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 10, status: null, golfer: 'Nico Echavarria', isTop4: false }, t6: { score: 0, status: null, golfer: 'Francesco Molinari', isTop4: true } } },
+  { rank: 16, total: -1, pick: { entrantName: 'Ethan DelGandio', picksName: 'Ethan DelGandio' }, tierScores: { t1: { score: -5, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: 10, status: null, golfer: 'Joaquin Niemann', isTop4: true }, t3: { score: -5, status: null, golfer: 'Wyndham Clark', isTop4: true }, t4: { score: -1, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 10, status: null, golfer: 'Padraig Harrington', isTop4: false }, t6: { score: 10, status: null, golfer: 'K.J. Choi', isTop4: false } } },
+  { rank: 16, total: -1, pick: { entrantName: 'Morgan Coleman', picksName: 'Morgan Coleman' }, tierScores: { t1: { score: -4, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -6, status: null, golfer: 'Russell Henley', isTop4: true }, t3: { score: -1, status: null, golfer: 'Daniel Berger', isTop4: true }, t4: { score: 10, status: null, golfer: 'Denny McCarthy', isTop4: true }, t5: { score: 10, status: null, golfer: 'Matt McCarty', isTop4: false }, t6: { score: 10, status: null, golfer: 'Shaun Norris', isTop4: false } } },
+  { rank: 18, total: 0, pick: { entrantName: 'Jeff Bagnasco', picksName: 'Jeff Bagnasco' }, tierScores: { t1: { score: -2, status: null, golfer: 'Tommy Fleetwood', isTop4: true }, t2: { score: 10, status: null, golfer: 'Jason Day', isTop4: false }, t3: { score: -3, status: null, golfer: 'J.J. Spaun', isTop4: true }, t4: { score: 3, status: null, golfer: 'Andrew Novak', isTop4: true }, t5: { score: 2, status: null, golfer: 'Antoine Rozner', isTop4: true }, t6: { score: 10, status: null, golfer: 'Justin Hastings (a)', isTop4: false } } },
+  { rank: 18, total: 0, pick: { entrantName: 'Matt Bova', picksName: 'Matt Bova 2' }, tierScores: { t1: { score: -5, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: 10, status: null, golfer: 'Patrick Cantlay', isTop4: true }, t3: { score: -5, status: null, golfer: 'Wyndham Clark', isTop4: true }, t4: { score: 10, status: null, golfer: 'Michael Kim', isTop4: false }, t5: { score: 10, status: null, golfer: 'Mackenzie Hughes', isTop4: false }, t6: { score: 0, status: null, golfer: 'Francesco Molinari', isTop4: true } } },
+  { rank: 20, total: 1, pick: { entrantName: 'Chris Schumann', picksName: 'Chris Schumann' }, tierScores: { t1: { score: -4, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -3, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: 10, status: null, golfer: 'Cameron Smith', isTop4: true }, t4: { score: 10, status: null, golfer: 'Thorbjorn Olesen', isTop4: false }, t5: { score: 10, status: null, golfer: 'Sahith Theegala', isTop4: false }, t6: { score: -2, status: null, golfer: 'Takumi Kanaya', isTop4: true } } },
+  { rank: 21, total: 3, pick: { entrantName: 'Cody Esbrandt', picksName: 'Cody Esbrandt' }, tierScores: { t1: { score: 2, status: null, golfer: 'Viktor Hovland', isTop4: true }, t2: { score: 10, status: null, golfer: 'Joaquin Niemann', isTop4: false }, t3: { score: 2, status: null, golfer: 'Brian Harman', isTop4: true }, t4: { score: 10, status: null, golfer: 'Byeong Hun An', isTop4: false }, t5: { score: -3, status: null, golfer: 'Marc Leishman', isTop4: true }, t6: { score: 2, status: null, golfer: 'Jacob Skov Olesen', isTop4: true } } },
+  { rank: 22, total: 4, pick: { entrantName: 'Zach DelGandio', picksName: 'Zach DelGandio' }, tierScores: { t1: { score: -5, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: 1, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: -2, status: null, golfer: 'Maverick McNealy', isTop4: true }, t4: { score: 10, status: null, golfer: 'Marco Penge', isTop4: true }, t5: { score: 10, status: null, golfer: 'Padraig Harrington', isTop4: false }, t6: { score: 10, status: null, golfer: 'Rikuya Hoshino', isTop4: false } } },
+  { rank: 23, total: 5, pick: { entrantName: 'Kyle Sheldon', picksName: 'Kyle Sheldon' }, tierScores: { t1: { score: -5, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: 1, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: -1, status: null, golfer: 'Rickie Fowler', isTop4: true }, t4: { score: 10, status: null, golfer: 'Michael Kim', isTop4: true }, t5: { score: 10, status: null, golfer: 'Zach Johnson', isTop4: false }, t6: { score: 10, status: null, golfer: 'Darren Clarke', isTop4: false } } },
+  { rank: 23, total: 5, pick: { entrantName: 'Jacob D Hammer', picksName: 'Jake Hammer 2' }, tierScores: { t1: { score: -3, status: null, golfer: 'Bryson DeChambeau', isTop4: true }, t2: { score: 1, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: 10, status: null, golfer: 'Cameron Smith', isTop4: true }, t4: { score: -3, status: null, golfer: 'Lucas Glover', isTop4: true }, t5: { score: 10, status: null, golfer: 'Brian Campbell', isTop4: false }, t6: { score: 10, status: null, golfer: 'Young-han Song', isTop4: false } } },
+  { rank: 25, total: 6, pick: { entrantName: 'Bob Cross', picksName: 'Bob Cross 2' }, tierScores: { t1: { score: 2, status: null, golfer: 'Viktor Hovland', isTop4: true }, t2: { score: 10, status: null, golfer: 'Brooks Koepka', isTop4: true }, t3: { score: -3, status: null, golfer: 'J.J. Spaun', isTop4: true }, t4: { score: 10, status: null, golfer: 'Chris Kirk', isTop4: false }, t5: { score: 10, status: null, golfer: 'Nico Echavarria', isTop4: false }, t6: { score: -3, status: null, golfer: 'Oliver Lindell', isTop4: true } } },
+  { rank: 25, total: 6, pick: { entrantName: 'Keith Waters', picksName: 'Keith Waters' }, tierScores: { t1: { score: -2, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: 1, status: null, golfer: 'Sam Burns', isTop4: true }, t3: { score: -3, status: null, golfer: 'J.J. Spaun', isTop4: true }, t4: { score: 10, status: null, golfer: 'Max Greyserman', isTop4: true }, t5: { score: 10, status: null, golfer: 'Matthieu Pavon', isTop4: false }, t6: { score: 10, status: null, golfer: 'Justin Hastings (a)', isTop4: false } } },
+  { rank: 27, total: 9, pick: { entrantName: 'Robert Stephenson', picksName: 'Robert Stephenson 2' }, tierScores: { t1: { score: 2, status: null, golfer: 'Viktor Hovland', isTop4: true }, t2: { score: 1, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: 2, status: null, golfer: 'Brian Harman', isTop4: true }, t4: { score: 10, status: null, golfer: 'Thorbjorn Olesen', isTop4: false }, t5: { score: 10, status: null, golfer: 'Brian Campbell', isTop4: false }, t6: { score: 4, status: null, golfer: 'Sebastian Soderberg', isTop4: true } } },
+  { rank: 28, total: 10, pick: { entrantName: 'Sean Susa', picksName: 'Sean Susa' }, tierScores: { t1: { score: -1, status: null, golfer: 'Robert MacIntyre', isTop4: true }, t2: { score: -1, status: null, golfer: 'Keegan Bradley', isTop4: true }, t3: { score: 10, status: null, golfer: 'Si Woo Kim', isTop4: true }, t4: { score: 10, status: null, golfer: 'Denny McCarthy', isTop4: false }, t5: { score: 2, status: null, golfer: 'Matthew Jordan', isTop4: true }, t6: { score: 10, status: null, golfer: 'Ethan Fang (a)', isTop4: false } } },
+  { rank: 29, total: 17, pick: { entrantName: 'Myron Mayo', picksName: 'Myron Mayo' }, tierScores: { t1: { score: -2, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: 10, status: null, golfer: 'Brooks Koepka', isTop4: true }, t3: { score: -1, status: null, golfer: 'Rickie Fowler', isTop4: true }, t4: { score: 10, status: null, golfer: 'Thorbjorn Olesen', isTop4: true }, t5: { score: 10, status: null, golfer: 'Sahith Theegala', isTop4: false }, t6: { score: 10, status: null, golfer: 'Darren Clarke', isTop4: false } } },
+  { rank: 29, total: 17, pick: { entrantName: 'Matthew Tuckfield', picksName: 'Matthew Tuckfield' }, tierScores: { t1: { score: -4, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: 1, status: null, golfer: 'Sam Burns', isTop4: true }, t3: { score: 10, status: null, golfer: 'Tom McKibbin', isTop4: true }, t4: { score: 10, status: null, golfer: 'Marco Penge', isTop4: true }, t5: { score: 10, status: null, golfer: 'John Catlin', isTop4: false }, t6: { score: 10, status: null, golfer: 'Curtis Luck', isTop4: false } } },
+  { rank: 31, total: 18, pick: { entrantName: 'Robert Stephenson', picksName: 'Robert Stephenson' }, tierScores: { t1: { score: 3, status: null, golfer: 'Shane Lowry', isTop4: true }, t2: { score: 10, status: null, golfer: 'Brooks Koepka', isTop4: true }, t3: { score: -5, status: null, golfer: 'Wyndham Clark', isTop4: true }, t4: { score: 10, status: null, golfer: 'J.T. Poston', isTop4: true }, t5: { score: 10, status: null, golfer: 'Matthieu Pavon', isTop4: false }, t6: { score: 10, status: null, golfer: 'Julien Guerrier', isTop4: false } } },
+  { rank: 31, total: 18, pick: { entrantName: 'Jeffrey Mersch', picksName: 'Jeffrey Mersch' }, tierScores: { t1: { score: -4, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: 10, status: null, golfer: 'Ben Griffin', isTop4: true }, t3: { score: 10, status: null, golfer: 'Tom McKibbin', isTop4: true }, t4: { score: 10, status: null, golfer: 'Max Greyserman', isTop4: false }, t5: { score: 2, status: null, golfer: 'Antoine Rozner', isTop4: true }, t6: { score: 10, status: null, golfer: 'Shaun Norris', isTop4: false } } },
+  { rank: 33, total: 21, pick: { entrantName: 'Mitch Pletcher', picksName: 'Mitch Pletcher' }, tierScores: { t1: { score: -4, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: 10, status: null, golfer: 'Patrick Reed', isTop4: true }, t3: { score: 10, status: null, golfer: 'Cameron Smith', isTop4: true }, t4: { score: 10, status: null, golfer: 'Michael Kim', isTop4: false }, t5: { score: 5, status: null, golfer: 'Phil Mickelson', isTop4: true }, t6: { score: 10, status: null, golfer: 'Ryan Peake', isTop4: false } } },
+  { rank: 34, total: 28, pick: { entrantName: 'Matt Bova', picksName: 'Matt Bova' }, tierScores: { t1: { score: -2, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: 10, status: null, golfer: 'Joaquin Niemann', isTop4: true }, t3: { score: 10, status: null, golfer: 'Si Woo Kim', isTop4: true }, t4: { score: 10, status: null, golfer: 'Carlos Ortiz', isTop4: true }, t5: { score: 10, status: null, golfer: 'Matt McCarty', isTop4: false }, t6: { score: 10, status: null, golfer: 'Shaun Norris', isTop4: false } } },
+];
+
+const THEOPEN_2025_R4 = [
+  { rank: 1, total: -17, pick: { entrantName: 'Ron Pannullo', picksName: 'Ron Pannullo' }, tierScores: { t1: { score: -7, status: null, golfer: 'Bryson DeChambeau', isTop4: true }, t2: { score: -2, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: -5, status: null, golfer: 'Maverick McNealy', isTop4: true }, t4: { score: -3, status: null, golfer: 'Sergio Garcia', isTop4: true }, t5: { score: 10, status: null, golfer: 'Mackenzie Hughes', isTop4: false }, t6: { score: 3, status: null, golfer: 'Francesco Molinari', isTop4: false } } },
+  { rank: 2, total: -11, pick: { entrantName: 'Erik Vermilyea', picksName: 'Erik Vermilyea' }, tierScores: { t1: { score: -3, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -3, status: null, golfer: 'Russell Henley', isTop4: true }, t3: { score: -3, status: null, golfer: 'Brian Harman', isTop4: true }, t4: { score: -2, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 10, status: null, golfer: 'Nico Echavarria', isTop4: false }, t6: { score: 3, status: null, golfer: 'Ryggs Johnston', isTop4: false } } },
+  { rank: 3, total: -10, pick: { entrantName: 'Cassady Glenn', picksName: 'Cassady Glenn' }, tierScores: { t1: { score: -3, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -3, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: -5, status: null, golfer: 'Maverick McNealy', isTop4: true }, t4: { score: 10, status: null, golfer: 'Marco Penge', isTop4: false }, t5: { score: 1, status: null, golfer: 'Kristoffer Reitan', isTop4: true }, t6: { score: 6, status: null, golfer: 'Sebastian Soderberg', isTop4: false } } },
+  { rank: 4, total: -9, pick: { entrantName: 'Bob Cross', picksName: 'Bob Cross' }, tierScores: { t1: { score: -3, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: 10, status: null, golfer: 'Patrick Reed', isTop4: false }, t3: { score: -6, status: null, golfer: 'Wyndham Clark', isTop4: true }, t4: { score: -2, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 2, status: null, golfer: 'Jhonattan Vegas', isTop4: true }, t6: { score: 10, status: null, golfer: 'Rikuya Hoshino', isTop4: false } } },
+  { rank: 5, total: -7, pick: { entrantName: 'Ryne Stone', picksName: 'Ryne Stone' }, tierScores: { t1: { score: -3, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -3, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: 10, status: null, golfer: 'Si Woo Kim', isTop4: false }, t4: { score: -2, status: null, golfer: 'Dean Burmester', isTop4: true }, t5: { score: 1, status: null, golfer: 'Kristoffer Reitan', isTop4: true }, t6: { score: 6, status: null, golfer: 'Sebastian Soderberg', isTop4: false } } },
+  { rank: 5, total: -7, pick: { entrantName: 'Jeff Bagnasco', picksName: 'Jeff Bagnasco' }, tierScores: { t1: { score: -4, status: null, golfer: 'Tommy Fleetwood', isTop4: true }, t2: { score: 10, status: null, golfer: 'Jason Day', isTop4: false }, t3: { score: -3, status: null, golfer: 'J.J. Spaun', isTop4: true }, t4: { score: 0, status: null, golfer: 'Andrew Novak', isTop4: true }, t5: { score: 0, status: null, golfer: 'Antoine Rozner', isTop4: true }, t6: { score: 10, status: null, golfer: 'Justin Hastings (a)', isTop4: false } } },
+  { rank: 7, total: -6, pick: { entrantName: 'Jake Bogardus', picksName: 'Jake Bogardus' }, tierScores: { t1: { score: -2, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: -2, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: -1, status: null, golfer: 'Rasmus Hojgaard', isTop4: true }, t4: { score: 10, status: null, golfer: 'Thorbjorn Olesen', isTop4: false }, t5: { score: -1, status: null, golfer: 'Matthias Schmid', isTop4: true }, t6: { score: 3, status: null, golfer: 'Francesco Molinari', isTop4: false } } },
+  { rank: 8, total: -4, pick: { entrantName: 'Mike Davis', picksName: 'Mike Davis' }, tierScores: { t1: { score: -1, status: null, golfer: 'Ludvig Aberg', isTop4: true }, t2: { score: -2, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: 4, status: null, golfer: 'Tony Finau', isTop4: false }, t4: { score: -2, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 1, status: null, golfer: 'Kristoffer Reitan', isTop4: true }, t6: { score: 10, status: null, golfer: 'Ethan Fang (a)', isTop4: false } } },
+  { rank: 9, total: -3, pick: { entrantName: 'Gregory J Smith', picksName: 'Gregory J Smith' }, tierScores: { t1: { score: -1, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: 10, status: null, golfer: 'Ben Griffin', isTop4: false }, t3: { score: -3, status: null, golfer: 'J.J. Spaun', isTop4: true }, t4: { score: -2, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 10, status: null, golfer: 'Padraig Harrington', isTop4: false }, t6: { score: 3, status: null, golfer: 'Jacob Skov Olesen', isTop4: true } } },
+  { rank: 9, total: -3, pick: { entrantName: 'Nick Bova', picksName: 'Nick Bova' }, tierScores: { t1: { score: -1, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: 10, status: null, golfer: 'Brooks Koepka', isTop4: false }, t3: { score: -2, status: null, golfer: 'Nicolai Hojgaard', isTop4: true }, t4: { score: -2, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 2, status: null, golfer: 'Jhonattan Vegas', isTop4: true }, t6: { score: 10, status: null, golfer: 'Shaun Norris', isTop4: false } } },
+  { rank: 11, total: -2, pick: { entrantName: 'Luke S', picksName: 'Luke S' }, tierScores: { t1: { score: -4, status: null, golfer: 'Tommy Fleetwood', isTop4: true }, t2: { score: 10, status: null, golfer: 'Cameron Young', isTop4: false }, t3: { score: 1, status: null, golfer: 'Jordan Smith', isTop4: true }, t4: { score: -2, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 10, status: null, golfer: 'Nico Echavarria', isTop4: false }, t6: { score: 3, status: null, golfer: 'Francesco Molinari', isTop4: true } } },
+  { rank: 11, total: -2, pick: { entrantName: 'Jacob D Hammer', picksName: 'Jake Hammer 2' }, tierScores: { t1: { score: -7, status: null, golfer: 'Bryson DeChambeau', isTop4: true }, t2: { score: -3, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: 10, status: null, golfer: 'Cameron Smith', isTop4: true }, t4: { score: -2, status: null, golfer: 'Lucas Glover', isTop4: true }, t5: { score: 10, status: null, golfer: 'Brian Campbell', isTop4: false }, t6: { score: 10, status: null, golfer: 'Young-han Song', isTop4: false } } },
+  { rank: 11, total: -2, pick: { entrantName: 'Sean Susa', picksName: 'Sean Susa 2' }, tierScores: { t1: { score: -2, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: -4, status: null, golfer: 'Chris Gotterup', isTop4: true }, t3: { score: 10, status: null, golfer: 'Taylor Pendrith', isTop4: false }, t4: { score: 1, status: null, golfer: 'Thriston Lawrence', isTop4: true }, t5: { score: 10, status: null, golfer: 'Sahith Theegala', isTop4: false }, t6: { score: 3, status: null, golfer: 'Jacob Skov Olesen', isTop4: true } } },
+  { rank: 14, total: -1, pick: { entrantName: 'Kyle Sheldon', picksName: 'Kyle Sheldon' }, tierScores: { t1: { score: -2, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: -3, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: -6, status: null, golfer: 'Rickie Fowler', isTop4: true }, t4: { score: 10, status: null, golfer: 'Michael Kim', isTop4: true }, t5: { score: 10, status: null, golfer: 'Zach Johnson', isTop4: false }, t6: { score: 10, status: null, golfer: 'Darren Clarke', isTop4: false } } },
+  { rank: 15, total: 0, pick: { entrantName: 'Jacob D Hammer', picksName: 'Jacob D Hammer' }, tierScores: { t1: { score: -2, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: 10, status: null, golfer: 'Brooks Koepka', isTop4: true }, t3: { score: -6, status: null, golfer: 'Wyndham Clark', isTop4: true }, t4: { score: -2, status: null, golfer: 'Lucas Glover', isTop4: true }, t5: { score: 10, status: null, golfer: 'Sahith Theegala', isTop4: false }, t6: { score: 10, status: null, golfer: 'Connor Graham (a)', isTop4: false } } },
+  { rank: 15, total: 0, pick: { entrantName: 'Nathan Wood', picksName: 'Nathan Wood' }, tierScores: { t1: { score: -3, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -3, status: null, golfer: 'Russell Henley', isTop4: true }, t3: { score: 4, status: null, golfer: 'Sungjae Im', isTop4: true }, t4: { score: 10, status: null, golfer: 'J.T. Poston', isTop4: false }, t5: { score: 2, status: null, golfer: 'Jhonattan Vegas', isTop4: true }, t6: { score: 10, status: null, golfer: 'Shaun Norris', isTop4: false } } },
+  { rank: 15, total: 0, pick: { entrantName: 'Zach DelGandio', picksName: 'Zach DelGandio' }, tierScores: { t1: { score: -2, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: -3, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: -5, status: null, golfer: 'Maverick McNealy', isTop4: true }, t4: { score: 10, status: null, golfer: 'Marco Penge', isTop4: true }, t5: { score: 10, status: null, golfer: 'Padraig Harrington', isTop4: false }, t6: { score: 10, status: null, golfer: 'Rikuya Hoshino', isTop4: false } } },
+  { rank: 15, total: 0, pick: { entrantName: 'Ethan DelGandio', picksName: 'Ethan DelGandio' }, tierScores: { t1: { score: -2, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: 10, status: null, golfer: 'Joaquin Niemann', isTop4: true }, t3: { score: -6, status: null, golfer: 'Wyndham Clark', isTop4: true }, t4: { score: -2, status: null, golfer: 'Akshay Bhatia', isTop4: true }, t5: { score: 10, status: null, golfer: 'Padraig Harrington', isTop4: false }, t6: { score: 10, status: null, golfer: 'K.J. Choi', isTop4: false } } },
+  { rank: 15, total: 0, pick: { entrantName: 'Ryne Stone', picksName: 'Ryne Stone 2' }, tierScores: { t1: { score: -1, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: -3, status: null, golfer: 'Russell Henley', isTop4: true }, t3: { score: -2, status: null, golfer: 'Nicolai Hojgaard', isTop4: true }, t4: { score: 10, status: null, golfer: 'Marco Penge', isTop4: false }, t5: { score: 10, status: null, golfer: 'Matteo Manassero', isTop4: false }, t6: { score: 6, status: null, golfer: 'Sebastian Soderberg', isTop4: true } } },
+  { rank: 20, total: 1, pick: { entrantName: 'Morgan Coleman', picksName: 'Morgan Coleman' }, tierScores: { t1: { score: -3, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -3, status: null, golfer: 'Russell Henley', isTop4: true }, t3: { score: -3, status: null, golfer: 'Daniel Berger', isTop4: true }, t4: { score: 10, status: null, golfer: 'Denny McCarthy', isTop4: true }, t5: { score: 10, status: null, golfer: 'Matt McCarty', isTop4: false }, t6: { score: 10, status: null, golfer: 'Shaun Norris', isTop4: false } } },
+  { rank: 21, total: 2, pick: { entrantName: 'Robert Stephenson', picksName: 'Robert Stephenson 2' }, tierScores: { t1: { score: 2, status: null, golfer: 'Viktor Hovland', isTop4: true }, t2: { score: -3, status: null, golfer: 'Jordan Spieth', isTop4: true }, t3: { score: -3, status: null, golfer: 'Brian Harman', isTop4: true }, t4: { score: 10, status: null, golfer: 'Thorbjorn Olesen', isTop4: false }, t5: { score: 10, status: null, golfer: 'Brian Campbell', isTop4: false }, t6: { score: 6, status: null, golfer: 'Sebastian Soderberg', isTop4: true } } },
+  { rank: 21, total: 2, pick: { entrantName: 'Paul Raymond', picksName: 'Paul Raymond' }, tierScores: { t1: { score: -3, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -2, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: 4, status: null, golfer: 'Tony Finau', isTop4: true }, t4: { score: 10, status: null, golfer: 'Thorbjorn Olesen', isTop4: false }, t5: { score: 10, status: null, golfer: 'Padraig Harrington', isTop4: false }, t6: { score: 3, status: null, golfer: 'Francesco Molinari', isTop4: true } } },
+  { rank: 23, total: 4, pick: { entrantName: 'Chris Schumann', picksName: 'Chris Schumann' }, tierScores: { t1: { score: -3, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: -2, status: null, golfer: 'Justin Rose', isTop4: true }, t3: { score: 10, status: null, golfer: 'Cameron Smith', isTop4: true }, t4: { score: 10, status: null, golfer: 'Thorbjorn Olesen', isTop4: false }, t5: { score: 10, status: null, golfer: 'Sahith Theegala', isTop4: false }, t6: { score: -1, status: null, golfer: 'Takumi Kanaya', isTop4: true } } },
+  { rank: 24, total: 5, pick: { entrantName: 'Matt Bova', picksName: 'Matt Bova 2' }, tierScores: { t1: { score: -2, status: null, golfer: 'Rory McIlroy', isTop4: true }, t2: { score: 10, status: null, golfer: 'Patrick Cantlay', isTop4: true }, t3: { score: -6, status: null, golfer: 'Wyndham Clark', isTop4: true }, t4: { score: 10, status: null, golfer: 'Michael Kim', isTop4: false }, t5: { score: 10, status: null, golfer: 'Mackenzie Hughes', isTop4: false }, t6: { score: 3, status: null, golfer: 'Francesco Molinari', isTop4: true } } },
+  { rank: 24, total: 5, pick: { entrantName: 'Sean Susa', picksName: 'Sean Susa' }, tierScores: { t1: { score: -4, status: null, golfer: 'Robert MacIntyre', isTop4: true }, t2: { score: 0, status: null, golfer: 'Keegan Bradley', isTop4: true }, t3: { score: 10, status: null, golfer: 'Si Woo Kim', isTop4: true }, t4: { score: 10, status: null, golfer: 'Denny McCarthy', isTop4: false }, t5: { score: -1, status: null, golfer: 'Matthew Jordan', isTop4: true }, t6: { score: 10, status: null, golfer: 'Ethan Fang (a)', isTop4: false } } },
+  { rank: 26, total: 6, pick: { entrantName: 'Cody Esbrandt', picksName: 'Cody Esbrandt' }, tierScores: { t1: { score: 2, status: null, golfer: 'Viktor Hovland', isTop4: true }, t2: { score: 10, status: null, golfer: 'Joaquin Niemann', isTop4: false }, t3: { score: -3, status: null, golfer: 'Brian Harman', isTop4: true }, t4: { score: 10, status: null, golfer: 'Byeong Hun An', isTop4: false }, t5: { score: 4, status: null, golfer: 'Marc Leishman', isTop4: true }, t6: { score: 3, status: null, golfer: 'Jacob Skov Olesen', isTop4: true } } },
+  { rank: 27, total: 7, pick: { entrantName: 'Keith Waters', picksName: 'Keith Waters' }, tierScores: { t1: { score: -1, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: 1, status: null, golfer: 'Sam Burns', isTop4: true }, t3: { score: -3, status: null, golfer: 'J.J. Spaun', isTop4: true }, t4: { score: 10, status: null, golfer: 'Max Greyserman', isTop4: true }, t5: { score: 10, status: null, golfer: 'Matthieu Pavon', isTop4: false }, t6: { score: 10, status: null, golfer: 'Justin Hastings (a)', isTop4: false } } },
+  { rank: 28, total: 9, pick: { entrantName: 'Robert Stephenson', picksName: 'Robert Stephenson' }, tierScores: { t1: { score: -5, status: null, golfer: 'Shane Lowry', isTop4: true }, t2: { score: 10, status: null, golfer: 'Brooks Koepka', isTop4: true }, t3: { score: -6, status: null, golfer: 'Wyndham Clark', isTop4: true }, t4: { score: 10, status: null, golfer: 'J.T. Poston', isTop4: true }, t5: { score: 10, status: null, golfer: 'Matthieu Pavon', isTop4: false }, t6: { score: 10, status: null, golfer: 'Julien Guerrier', isTop4: false } } },
+  { rank: 28, total: 9, pick: { entrantName: 'Bob Cross', picksName: 'Bob Cross 2' }, tierScores: { t1: { score: 2, status: null, golfer: 'Viktor Hovland', isTop4: true }, t2: { score: 10, status: null, golfer: 'Brooks Koepka', isTop4: true }, t3: { score: -3, status: null, golfer: 'J.J. Spaun', isTop4: true }, t4: { score: 10, status: null, golfer: 'Chris Kirk', isTop4: false }, t5: { score: 10, status: null, golfer: 'Nico Echavarria', isTop4: false }, t6: { score: 0, status: null, golfer: 'Oliver Lindell', isTop4: true } } },
+  { rank: 30, total: 13, pick: { entrantName: 'Myron Mayo', picksName: 'Myron Mayo' }, tierScores: { t1: { score: -1, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: 10, status: null, golfer: 'Brooks Koepka', isTop4: true }, t3: { score: -6, status: null, golfer: 'Rickie Fowler', isTop4: true }, t4: { score: 10, status: null, golfer: 'Thorbjorn Olesen', isTop4: true }, t5: { score: 10, status: null, golfer: 'Sahith Theegala', isTop4: false }, t6: { score: 10, status: null, golfer: 'Darren Clarke', isTop4: false } } },
+  { rank: 30, total: 13, pick: { entrantName: 'Mitch Pletcher', picksName: 'Mitch Pletcher' }, tierScores: { t1: { score: -3, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: 10, status: null, golfer: 'Patrick Reed', isTop4: true }, t3: { score: 10, status: null, golfer: 'Cameron Smith', isTop4: true }, t4: { score: 10, status: null, golfer: 'Michael Kim', isTop4: false }, t5: { score: -4, status: null, golfer: 'Phil Mickelson', isTop4: true }, t6: { score: 10, status: null, golfer: 'Ryan Peake', isTop4: false } } },
+  { rank: 32, total: 17, pick: { entrantName: 'Jeffrey Mersch', picksName: 'Jeffrey Mersch' }, tierScores: { t1: { score: -3, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: 10, status: null, golfer: 'Ben Griffin', isTop4: true }, t3: { score: 10, status: null, golfer: 'Tom McKibbin', isTop4: true }, t4: { score: 10, status: null, golfer: 'Max Greyserman', isTop4: false }, t5: { score: 0, status: null, golfer: 'Antoine Rozner', isTop4: true }, t6: { score: 10, status: null, golfer: 'Shaun Norris', isTop4: false } } },
+  { rank: 33, total: 18, pick: { entrantName: 'Matthew Tuckfield', picksName: 'Matthew Tuckfield' }, tierScores: { t1: { score: -3, status: null, golfer: 'Scottie Scheffler', isTop4: true }, t2: { score: 1, status: null, golfer: 'Sam Burns', isTop4: true }, t3: { score: 10, status: null, golfer: 'Tom McKibbin', isTop4: true }, t4: { score: 10, status: null, golfer: 'Marco Penge', isTop4: true }, t5: { score: 10, status: null, golfer: 'John Catlin', isTop4: false }, t6: { score: 10, status: null, golfer: 'Curtis Luck', isTop4: false } } },
+  { rank: 34, total: 29, pick: { entrantName: 'Matt Bova', picksName: 'Matt Bova' }, tierScores: { t1: { score: -1, status: null, golfer: 'Jon Rahm', isTop4: true }, t2: { score: 10, status: null, golfer: 'Joaquin Niemann', isTop4: true }, t3: { score: 10, status: null, golfer: 'Si Woo Kim', isTop4: true }, t4: { score: 10, status: null, golfer: 'Carlos Ortiz', isTop4: true }, t5: { score: 10, status: null, golfer: 'Matt McCarty', isTop4: false }, t6: { score: 10, status: null, golfer: 'Shaun Norris', isTop4: false } } },
+];
+
+function loadTheOpen2025TotalStandings() {
+  const container = document.getElementById('theopen-total');
+  if (!container) return;
+
+  const medals = ['🥇', '🥈', '🥉'];
+  const rows = THEOPEN_2025_TOTAL.map(entry => {
+    const rankDisplay = entry.rank <= 3 ? medals[entry.rank - 1] : entry.rank;
+    const rankClass   = entry.rank <= 3 ? `rank-${entry.rank}` : '';
+    const totalCls    = scoreClass(entry.total, null);
+    const tierCells   = [1,2,3,4,5,6].map(i => {
+      const t = entry.tierScores[`t${i}`];
+      const cls   = scoreClass(t.score, t.status);
+      const label = formatScore(t.score, t.status);
+      const top4Class = t.isTop4 ? 'top-4-pick' : '';
+      return `<td class="col-tier ${top4Class}" title="${escapeHtml(t.golfer)}"><div class="tier-cell-card"><span class="player-name-cell">${shortName(t.golfer)}</span><small class="score-val ${cls}">${label}</small></div></td>`;
+    }).join('');
+    const realName  = (entry.pick.entrantName).replace(/ \d+$/, '');
+    const picksName = entry.pick.picksName || entry.pick.entrantName;
+    const allPlayers = [1,2,3,4,5,6].map(i => entry.tierScores[`t${i}`]?.golfer || '').join(' ');
+    return `
+      <tr data-entry="${escapeHtml(picksName).toLowerCase()} ${escapeHtml(realName).toLowerCase()}" data-players="${escapeHtml(allPlayers).toLowerCase()}">
+        <td class="col-rank ${rankClass}">${rankDisplay}</td>
+        <td class="col-name">${escapeHtml(realName)}</td>
+        <td class="col-name col-picks-name">${escapeHtml(picksName)}</td>
+        <td class="col-total"><span class="score-val ${totalCls}">${formatScore(entry.total, null)}</span></td>
+        ${tierCells}
+      </tr>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="search-bar">
+      <input type="text" id="theopenTotalSearch" class="standings-search" placeholder="Search entry name or player..." />
+    </div>
+    <div class="table-wrapper">
+      <table class="standings-table">
+        <thead>
+          <tr>
+            <th>Rank</th><th>Name</th><th>Picks Name</th><th>Total</th>
+            <th class="col-tier">Tier 1</th><th class="col-tier">Tier 2</th><th class="col-tier">Tier 3</th><th class="col-tier">Tier 4</th><th class="col-tier">Tier 5</th><th class="col-tier">Tier 6</th>
+          </tr>
+        </thead>
+        <tbody id="theopenTotalBody">${rows}</tbody>
+      </table>
+    </div>`;
+
+  document.getElementById('theopenTotalSearch').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase().trim();
+    document.querySelectorAll('#theopenTotalBody tr').forEach(row => {
+      const entry = row.dataset.entry || '';
+      const players = row.dataset.players || '';
+      row.style.display = (!q || entry.includes(q) || players.includes(q)) ? '' : 'none';
+    });
+  });
+}
+
+function loadTheOpen2025Round1Standings() {
+  const container = document.getElementById('theopen-day1');
+  if (!container) return;
+
+  const sorted = [...THEOPEN_2025_R1].sort((a, b) => a.rank - b.rank || a.total - b.total);
+  const medals = ['🥇', '🥈', '🥉'];
+  const rows = sorted.map(entry => {
+    const rankDisplay = entry.rank <= 3 ? medals[entry.rank - 1] : entry.rank;
+    const rankClass   = entry.rank <= 3 ? `rank-${entry.rank}` : '';
+    const totalCls    = scoreClass(entry.total, null);
+    const tierCells   = [1,2,3,4,5,6].map(i => {
+      const t = entry.tierScores[`t${i}`];
+      const cls   = scoreClass(t.score, t.status);
+      const label = formatScore(t.score, t.status);
+      const top4Class = t.isTop4 ? 'top-4-pick' : '';
+      return `<td class="col-tier ${top4Class}" title="${escapeHtml(t.golfer)}"><div class="tier-cell-card"><span class="player-name-cell">${shortName(t.golfer)}</span><small class="score-val ${cls}">${label}</small></div></td>`;
+    }).join('');
+    const realName  = (entry.pick.entrantName).replace(/ \d+$/, '');
+    const picksName = entry.pick.picksName || entry.pick.entrantName;
+    const allPlayers = [1,2,3,4,5,6].map(i => entry.tierScores[`t${i}`]?.golfer || '').join(' ');
+    return `
+      <tr data-entry="${escapeHtml(picksName).toLowerCase()} ${escapeHtml(realName).toLowerCase()}" data-players="${escapeHtml(allPlayers).toLowerCase()}">
+        <td class="col-rank ${rankClass}">${rankDisplay}</td>
+        <td class="col-name">${escapeHtml(realName)}</td>
+        <td class="col-name col-picks-name">${escapeHtml(picksName)}</td>
+        <td class="col-total"><span class="score-val ${totalCls}">${formatScore(entry.total, null)}</span></td>
+        ${tierCells}
+      </tr>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="search-bar">
+      <input type="text" id="theopenR1Search" class="standings-search" placeholder="Search entry name or player..." />
+    </div>
+    <div class="table-wrapper">
+      <table class="standings-table">
+        <thead>
+          <tr>
+            <th>Rank</th><th>Name</th><th>Picks Name</th><th>R1 Total</th>
+            <th class="col-tier">Tier 1</th><th class="col-tier">Tier 2</th><th class="col-tier">Tier 3</th><th class="col-tier">Tier 4</th><th class="col-tier">Tier 5</th><th class="col-tier">Tier 6</th>
+          </tr>
+        </thead>
+        <tbody id="theopenR1Body">${rows}</tbody>
+      </table>
+    </div>`;
+
+  document.getElementById('theopenR1Search').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase().trim();
+    document.querySelectorAll('#theopenR1Body tr').forEach(row => {
+      const entry = row.dataset.entry || '';
+      const players = row.dataset.players || '';
+      row.style.display = (!q || entry.includes(q) || players.includes(q)) ? '' : 'none';
+    });
+  });
+}
+
+function loadTheOpen2025Round2Standings() {
+  const container = document.getElementById('theopen-day2');
+  if (!container) return;
+
+  const sorted = [...THEOPEN_2025_R2].sort((a, b) => a.rank - b.rank || a.total - b.total);
+  const medals = ['🥇', '🥈', '🥉'];
+  const rows = sorted.map(entry => {
+    const rankDisplay = entry.rank <= 3 ? medals[entry.rank - 1] : entry.rank;
+    const rankClass   = entry.rank <= 3 ? `rank-${entry.rank}` : '';
+    const totalCls    = scoreClass(entry.total, null);
+    const tierCells   = [1,2,3,4,5,6].map(i => {
+      const t = entry.tierScores[`t${i}`];
+      const cls   = scoreClass(t.score, t.status);
+      const label = formatScore(t.score, t.status);
+      const top4Class = t.isTop4 ? 'top-4-pick' : '';
+      return `<td class="col-tier ${top4Class}" title="${escapeHtml(t.golfer)}"><div class="tier-cell-card"><span class="player-name-cell">${shortName(t.golfer)}</span><small class="score-val ${cls}">${label}</small></div></td>`;
+    }).join('');
+    const realName  = (entry.pick.entrantName).replace(/ \d+$/, '');
+    const picksName = entry.pick.picksName || entry.pick.entrantName;
+    const allPlayers = [1,2,3,4,5,6].map(i => entry.tierScores[`t${i}`]?.golfer || '').join(' ');
+    return `
+      <tr data-entry="${escapeHtml(picksName).toLowerCase()} ${escapeHtml(realName).toLowerCase()}" data-players="${escapeHtml(allPlayers).toLowerCase()}">
+        <td class="col-rank ${rankClass}">${rankDisplay}</td>
+        <td class="col-name">${escapeHtml(realName)}</td>
+        <td class="col-name col-picks-name">${escapeHtml(picksName)}</td>
+        <td class="col-total"><span class="score-val ${totalCls}">${formatScore(entry.total, null)}</span></td>
+        ${tierCells}
+      </tr>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="search-bar">
+      <input type="text" id="theopenR2Search" class="standings-search" placeholder="Search entry name or player..." />
+    </div>
+    <div class="table-wrapper">
+      <table class="standings-table">
+        <thead>
+          <tr>
+            <th>Rank</th><th>Name</th><th>Picks Name</th><th>R2 Total</th>
+            <th class="col-tier">Tier 1</th><th class="col-tier">Tier 2</th><th class="col-tier">Tier 3</th><th class="col-tier">Tier 4</th><th class="col-tier">Tier 5</th><th class="col-tier">Tier 6</th>
+          </tr>
+        </thead>
+        <tbody id="theopenR2Body">${rows}</tbody>
+      </table>
+    </div>`;
+
+  document.getElementById('theopenR2Search').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase().trim();
+    document.querySelectorAll('#theopenR2Body tr').forEach(row => {
+      const entry = row.dataset.entry || '';
+      const players = row.dataset.players || '';
+      row.style.display = (!q || entry.includes(q) || players.includes(q)) ? '' : 'none';
+    });
+  });
+}
+
+function loadTheOpen2025Round3Standings() {
+  const container = document.getElementById('theopen-day3');
+  if (!container) return;
+
+  const sorted = [...THEOPEN_2025_R3].sort((a, b) => a.rank - b.rank || a.total - b.total);
+  const medals = ['🥇', '🥈', '🥉'];
+  const rows = sorted.map(entry => {
+    const rankDisplay = entry.rank <= 3 ? medals[entry.rank - 1] : entry.rank;
+    const rankClass   = entry.rank <= 3 ? `rank-${entry.rank}` : '';
+    const totalCls    = scoreClass(entry.total, null);
+    const tierCells   = [1,2,3,4,5,6].map(i => {
+      const t = entry.tierScores[`t${i}`];
+      const cls   = scoreClass(t.score, t.status);
+      const label = formatScore(t.score, t.status);
+      const top4Class = t.isTop4 ? 'top-4-pick' : '';
+      return `<td class="col-tier ${top4Class}" title="${escapeHtml(t.golfer)}"><div class="tier-cell-card"><span class="player-name-cell">${shortName(t.golfer)}</span><small class="score-val ${cls}">${label}</small></div></td>`;
+    }).join('');
+    const realName  = (entry.pick.entrantName).replace(/ \d+$/, '');
+    const picksName = entry.pick.picksName || entry.pick.entrantName;
+    const allPlayers = [1,2,3,4,5,6].map(i => entry.tierScores[`t${i}`]?.golfer || '').join(' ');
+    return `
+      <tr data-entry="${escapeHtml(picksName).toLowerCase()} ${escapeHtml(realName).toLowerCase()}" data-players="${escapeHtml(allPlayers).toLowerCase()}">
+        <td class="col-rank ${rankClass}">${rankDisplay}</td>
+        <td class="col-name">${escapeHtml(realName)}</td>
+        <td class="col-name col-picks-name">${escapeHtml(picksName)}</td>
+        <td class="col-total"><span class="score-val ${totalCls}">${formatScore(entry.total, null)}</span></td>
+        ${tierCells}
+      </tr>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="search-bar">
+      <input type="text" id="theopenR3Search" class="standings-search" placeholder="Search entry name or player..." />
+    </div>
+    <div class="table-wrapper">
+      <table class="standings-table">
+        <thead>
+          <tr>
+            <th>Rank</th><th>Name</th><th>Picks Name</th><th>R3 Total</th>
+            <th class="col-tier">Tier 1</th><th class="col-tier">Tier 2</th><th class="col-tier">Tier 3</th><th class="col-tier">Tier 4</th><th class="col-tier">Tier 5</th><th class="col-tier">Tier 6</th>
+          </tr>
+        </thead>
+        <tbody id="theopenR3Body">${rows}</tbody>
+      </table>
+    </div>`;
+
+  document.getElementById('theopenR3Search').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase().trim();
+    document.querySelectorAll('#theopenR3Body tr').forEach(row => {
+      const entry = row.dataset.entry || '';
+      const players = row.dataset.players || '';
+      row.style.display = (!q || entry.includes(q) || players.includes(q)) ? '' : 'none';
+    });
+  });
+}
+
+function loadTheOpen2025Round4Standings() {
+  const container = document.getElementById('theopen-day4');
+  if (!container) return;
+
+  const sorted = [...THEOPEN_2025_R4].sort((a, b) => a.rank - b.rank || a.total - b.total);
+  const medals = ['🥇', '🥈', '🥉'];
+  const rows = sorted.map(entry => {
+    const rankDisplay = entry.rank <= 3 ? medals[entry.rank - 1] : entry.rank;
+    const rankClass   = entry.rank <= 3 ? `rank-${entry.rank}` : '';
+    const totalCls    = scoreClass(entry.total, null);
+    const tierCells   = [1,2,3,4,5,6].map(i => {
+      const t = entry.tierScores[`t${i}`];
+      const cls   = scoreClass(t.score, t.status);
+      const label = formatScore(t.score, t.status);
+      const top4Class = t.isTop4 ? 'top-4-pick' : '';
+      return `<td class="col-tier ${top4Class}" title="${escapeHtml(t.golfer)}"><div class="tier-cell-card"><span class="player-name-cell">${shortName(t.golfer)}</span><small class="score-val ${cls}">${label}</small></div></td>`;
+    }).join('');
+    const realName  = (entry.pick.entrantName).replace(/ \d+$/, '');
+    const picksName = entry.pick.picksName || entry.pick.entrantName;
+    const allPlayers = [1,2,3,4,5,6].map(i => entry.tierScores[`t${i}`]?.golfer || '').join(' ');
+    return `
+      <tr data-entry="${escapeHtml(picksName).toLowerCase()} ${escapeHtml(realName).toLowerCase()}" data-players="${escapeHtml(allPlayers).toLowerCase()}">
+        <td class="col-rank ${rankClass}">${rankDisplay}</td>
+        <td class="col-name">${escapeHtml(realName)}</td>
+        <td class="col-name col-picks-name">${escapeHtml(picksName)}</td>
+        <td class="col-total"><span class="score-val ${totalCls}">${formatScore(entry.total, null)}</span></td>
+        ${tierCells}
+      </tr>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="search-bar">
+      <input type="text" id="theopenR4Search" class="standings-search" placeholder="Search entry name or player..." />
+    </div>
+    <div class="table-wrapper">
+      <table class="standings-table">
+        <thead>
+          <tr>
+            <th>Rank</th><th>Name</th><th>Picks Name</th><th>R4 Total</th>
+            <th class="col-tier">Tier 1</th><th class="col-tier">Tier 2</th><th class="col-tier">Tier 3</th><th class="col-tier">Tier 4</th><th class="col-tier">Tier 5</th><th class="col-tier">Tier 6</th>
+          </tr>
+        </thead>
+        <tbody id="theopenR4Body">${rows}</tbody>
+      </table>
+    </div>`;
+
+  document.getElementById('theopenR4Search').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase().trim();
+    document.querySelectorAll('#theopenR4Body tr').forEach(row => {
+      const entry = row.dataset.entry || '';
+      const players = row.dataset.players || '';
+      row.style.display = (!q || entry.includes(q) || players.includes(q)) ? '' : 'none';
+    });
+  });
+}
+
+function loadTheOpen2025Payouts() {
+  const fp = document.getElementById('theopen-finalpayouts');
+  if (!fp) return;
+
+  const finishers = [
+    { display: '🥇 1st', name: 'Erik Vermilyea', payout: '$330' },
+    { display: '🥈 2nd', name: 'Bob Cross',      payout: '$180' },
+    { display: '🥉 3rd', name: 'Cassady Glenn',  payout: '$105' },
+    { display: '4th',                name: 'Ron Pannullo',   payout: '$70'  },
+    { display: '5th',                name: 'Nathan Wood',    payout: '$40'  },
+  ];
+
+  const dailyWinners = [
+    { round: 'R1', name: 'Paul Raymond',   payout: '$25' },
+    { round: 'R2', name: 'Erik Vermilyea', payout: '$25' },
+    { round: 'R3', name: 'Nathan Wood',    payout: '$25' },
+    { round: 'R4', name: 'Ron Pannullo',   payout: '$25' },
+  ];
+
+  const finisherCards = finishers.map(f => {
+    const entry = THEOPEN_2025_TOTAL.find(e => e.pick.picksName === f.name);
+    let chipsHtml = '';
+    if (entry) {
+      chipsHtml = '<div class="fp-picks-chips">' + [1,2,3,4,5,6].map(i => {
+        const t = entry.tierScores[`t${i}`];
+        const cls = t.score < 0 ? 'score-under' : t.score > 0 ? 'score-over' : 'score-even';
+        const scoreStr = t.score === 0 ? 'E' : (t.score > 0 ? `+${t.score}` : `${t.score}`);
+        const lastName = t.golfer.split(' ').slice(1).join(' ') || t.golfer;
+        return `<span class="fp-pick-chip"><span class="fp-pick-name">${lastName}</span><span class="fp-pick-score ${cls}">${scoreStr}</span></span>`;
+      }).join('') + '</div>';
+    }
+    return `
+      <div class="fp-finisher-card">
+        <div class="fp-finisher-top">
+          <span class="fp-rank-badge">${f.display}</span>
+          <span class="fp-finisher-name">${f.name}</span>
+          <span class="fp-finisher-payout">${f.payout}</span>
+        </div>
+        <div class="fp-picks-row">${chipsHtml}</div>
+      </div>`;
+  }).join('');
+
+  const roundDataMap = { R1: THEOPEN_2025_R1, R2: THEOPEN_2025_R2, R3: THEOPEN_2025_R3, R4: THEOPEN_2025_R4 };
+
+  const dailyCards = dailyWinners.map(d => {
+    const entries = roundDataMap[d.round] || [];
+    const entry = entries.find(e => e.pick.picksName === d.name);
+    let chipsHtml = '';
+    if (entry) {
+      chipsHtml = '<div class="fp-picks-chips">' + [1,2,3,4,5,6].map(i => {
+        const t = entry.tierScores[`t${i}`];
+        const cls = t.score < 0 ? 'score-under' : t.score > 0 ? 'score-over' : 'score-even';
+        const scoreStr = t.score === 0 ? 'E' : (t.score > 0 ? `+${t.score}` : `${t.score}`);
+        const lastName = t.golfer.split(' ').slice(1).join(' ') || t.golfer;
+        return `<span class="fp-pick-chip"><span class="fp-pick-name">${lastName}</span><span class="fp-pick-score ${cls}">${scoreStr}</span></span>`;
+      }).join('') + '</div>';
+    }
+    return `
+    <div class="fp-daily-card">
+      <div class="fp-daily-card-top">
+        <span class="fp-round-badge fp-round-badge-theopen">${d.round}</span>
+        <span class="fp-winner-name">${d.name}</span>
+        <span class="fp-winner-payout">${d.payout}</span>
+      </div>
+      <div class="fp-picks-row">${chipsHtml}</div>
+    </div>`;
+  }).join('');
+
+  fp.innerHTML = `
+    <div class="fp-header fp-header-theopen">
+      <div class="fp-header-left">
+        <div class="fp-trophy-icon">🏆</div>
+        <div>
+          <h2 class="fp-title">The Open Championship 2025 — Final Results</h2>
+          <p class="fp-subtitle">Royal Portrush · Portrush, Northern Ireland · July 17—20, 2025</p>
+        </div>
+      </div>
+      <div class="fp-pool-stats">
+        <div class="fp-stat">
+          <span class="fp-stat-label">Place Payouts</span>
+          <span class="fp-stat-val">$725</span>
+        </div>
+        <div class="fp-stat">
+          <span class="fp-stat-label">Daily High Scores</span>
+          <span class="fp-stat-val">$100</span>
+        </div>
+        <div class="fp-stat">
+          <span class="fp-stat-label">Total Pool</span>
+          <span class="fp-stat-val">$825</span>
+        </div>
+      </div>
+    </div>
+    <div class="fp-two-col">
+      <div class="fp-section">
+        <h3 class="fp-section-title fp-section-title-theopen">Place Finishers</h3>
+        <div class="fp-finishers">${finisherCards}</div>
+      </div>
+      <div class="fp-section">
+        <h3 class="fp-section-title fp-section-title-theopen">Daily High Score Winners</h3>
+        <div class="fp-daily-winners">${dailyCards}</div>
+      </div>
+    </div>`;
+}
+
 // Scottie Scheffler won at -17, played at Royal Portrush, Northern Ireland
 const THEOPEN_2025_FIELD = [
   // â”€â”€ Made Cut â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

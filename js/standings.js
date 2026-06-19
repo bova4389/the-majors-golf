@@ -2831,11 +2831,19 @@ export async function loadSeasonLeaderboard() {
   if (!table) return;
 
   try {
-    // Build map keyed by normalized name (lowercase) â†’ best finishing rank per major.
-    // Case-insensitive so "matt tuck" (hardcoded) matches "Matt Tuck" (Firestore realName).
+    // Build map keyed by normalized name (lowercase) → best finishing rank per major.
     // Each major takes the first occurrence per person = best entry (arrays sorted best->worst).
     const entrantMap = {};
-    function normalKey(n) { return (n || '').toLowerCase().trim(); }
+    // Known name aliases — maps a submitted name (lowercase) to the canonical key.
+    // Needed when the same person submits under slightly different names across tournaments.
+    const NAME_ALIASES = {
+      ‘jake hammer’:    ‘jacob hammer’,
+      ‘matt tuckfield’: ‘matthew tuckfield’,
+    };
+    function normalKey(n) {
+      const k = (n || ‘’).toLowerCase().trim();
+      return NAME_ALIASES[k] || k;
+    }
 
     // Masters 2026 (hardcoded)
     const mastersSeen = new Set();

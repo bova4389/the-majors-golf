@@ -2830,20 +2830,19 @@ export async function loadSeasonLeaderboard() {
   const noData    = document.getElementById('seasonNoData');
   if (!table) return;
 
+  const NAME_ALIASES = {
+    ‘jake hammer’:    ‘jacob hammer’,
+    ‘matt tuckfield’: ‘matthew tuckfield’,
+  };
+  const normalKey = (n) => {
+    const k = (n || ‘’).toLowerCase().trim();
+    return NAME_ALIASES[k] || k;
+  };
+
   try {
     // Build map keyed by normalized name (lowercase) → best finishing rank per major.
     // Each major takes the first occurrence per person = best entry (arrays sorted best->worst).
     const entrantMap = {};
-    // Known name aliases — maps a submitted name (lowercase) to the canonical key.
-    // Needed when the same person submits under slightly different names across tournaments.
-    const NAME_ALIASES = {
-      ‘jake hammer’:    ‘jacob hammer’,
-      ‘matt tuckfield’: ‘matthew tuckfield’,
-    };
-    function normalKey(n) {
-      const k = (n || ‘’).toLowerCase().trim();
-      return NAME_ALIASES[k] || k;
-    }
 
     // Masters 2026 (hardcoded)
     const mastersSeen = new Set();

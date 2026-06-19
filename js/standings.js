@@ -708,7 +708,7 @@ function reconcilePickNames(picks, scoresMap) {
       const golfer = pick[t];
       if (golfer && !scoresMap[golfer]) {
         const espnName = normalizedLookup[normalizeName(golfer)];
-        if (espnName) { fixed[t] = espnName; remapped.push(`"${golfer}" â†’ "${espnName}"`); }
+        if (espnName) { fixed[t] = espnName; remapped.push(`"${golfer}" â†' "${espnName}"`); }
       }
     }
     return fixed;
@@ -2442,7 +2442,7 @@ export async function loadPgaPayouts() {
     // Tie-split notes
     const tieNotes = tiedGroups.map(tg => {
       const combined = tg.origAmts.reduce((s, a) => s + a, 0);
-      return `T-${tg.places[0]} Tie: ${tg.origAmts.map(a => `$${a}`).join(' + ')} = $${combined} combined, split â†’ <strong>$${tg.sharedPrize} each</strong>`;
+      return `T-${tg.places[0]} Tie: ${tg.origAmts.map(a => `$${a}`).join(' + ')} = $${combined} combined, split â†' <strong>$${tg.sharedPrize} each</strong>`;
     }).join('<br>');
 
     // Daily round winners
@@ -2831,11 +2831,11 @@ export async function loadSeasonLeaderboard() {
   if (!table) return;
 
   const NAME_ALIASES = {
-    ‘jake hammer’:    ‘jacob hammer’,
-    ‘matt tuckfield’: ‘matthew tuckfield’,
+    'jake hammer':    'jacob hammer',
+    'matt tuckfield': 'matthew tuckfield',
   };
   const normalKey = (n) => {
-    const k = (n || ‘’).toLowerCase().trim();
+    const k = (n || '').toLowerCase().trim();
     return NAME_ALIASES[k] || k;
   };
 
@@ -3127,7 +3127,7 @@ export function loadRound1Standings() {
     return { ...entry, total, fifth, sixth, top4Indices };
   });
 
-  // Sort: total â†’ 5th best â†’ 6th best
+  // Sort: total â†' 5th best â†' 6th best
   processed.sort((a, b) =>
     a.total !== b.total ? a.total - b.total :
     a.fifth !== b.fifth ? a.fifth - b.fifth :
@@ -5241,7 +5241,7 @@ export async function loadUsOpenPayouts() {
 
     const tieNotes = tiedGroups.map(tg => {
       const combined = tg.origAmts.reduce((s, a) => s + a, 0);
-      return `T-${tg.places[0]} Tie: ${tg.origAmts.map(a => `$${a}`).join(' + ')} = $${combined} combined, split â†’ <strong>$${tg.sharedPrize} each</strong>`;
+      return `T-${tg.places[0]} Tie: ${tg.origAmts.map(a => `$${a}`).join(' + ')} = $${combined} combined, split â†' <strong>$${tg.sharedPrize} each</strong>`;
     }).join('<br>');
 
     const roundCards = [1,2,3,4].map(r => {
@@ -5907,7 +5907,7 @@ export async function loadTheOpenPayouts() {
 
     const tieNotes = tiedGroups.map(tg => {
       const combined = tg.origAmts.reduce((s, a) => s + a, 0);
-      return `T-${tg.places[0]} Tie: ${tg.origAmts.map(a => `$${a}`).join(' + ')} = $${combined} combined, split â†’ <strong>$${tg.sharedPrize} each</strong>`;
+      return `T-${tg.places[0]} Tie: ${tg.origAmts.map(a => `$${a}`).join(' + ')} = $${combined} combined, split â†' <strong>$${tg.sharedPrize} each</strong>`;
     }).join('<br>');
 
     const roundCards = [1,2,3,4].map(r => {

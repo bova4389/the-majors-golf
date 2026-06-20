@@ -5362,14 +5362,18 @@ function renderUsOpenScoreboardRows() {
 
   const statusOrder = { 'Active': 0, 'CUT': 1, 'WD': 2 };
   const sorted = [...usOpenScoreboardPlayers].sort((a, b) => {
+    const sa = statusOrder[a.status] ?? 0;
+    const sb = statusOrder[b.status] ?? 0;
+    // Always group: Active first, then CUT, then WD
+    if (sa !== sb) return sa - sb;
+    // Within the same group, apply the selected sort
     let va, vb;
     if (usOpenSbSortCol === 'name') {
       return usOpenSbSortAsc
         ? a.name.localeCompare(b.name)
         : b.name.localeCompare(a.name);
     } else if (usOpenSbSortCol === 'status') {
-      va = statusOrder[a.status] ?? 0;
-      vb = statusOrder[b.status] ?? 0;
+      return 0;
     } else if (usOpenSbSortCol === 'pos') {
       va = parseFloat(a.pos) || 999;
       vb = parseFloat(b.pos) || 999;
@@ -5382,10 +5386,8 @@ function renderUsOpenScoreboardRows() {
     }
     if (va !== vb) return usOpenSbSortAsc ? va - vb : vb - va;
     // Push not-started players to bottom of active group
-    if (a.status === 'Active' && b.status === 'Active' && a.notStarted !== b.notStarted) {
-      return a.notStarted ? 1 : -1;
-    }
-    return (statusOrder[a.status] ?? 0) - (statusOrder[b.status] ?? 0);
+    if (a.notStarted !== b.notStarted) return a.notStarted ? 1 : -1;
+    return 0;
   });
 
   let selectedPickNames = null;
@@ -6028,14 +6030,18 @@ function renderTheOpenScoreboardRows() {
 
   const statusOrder = { 'Active': 0, 'CUT': 1, 'WD': 2 };
   const sorted = [...theOpenScoreboardPlayers].sort((a, b) => {
+    const sa = statusOrder[a.status] ?? 0;
+    const sb = statusOrder[b.status] ?? 0;
+    // Always group: Active first, then CUT, then WD
+    if (sa !== sb) return sa - sb;
+    // Within the same group, apply the selected sort
     let va, vb;
     if (theOpenSbSortCol === 'name') {
       return theOpenSbSortAsc
         ? a.name.localeCompare(b.name)
         : b.name.localeCompare(a.name);
     } else if (theOpenSbSortCol === 'status') {
-      va = statusOrder[a.status] ?? 0;
-      vb = statusOrder[b.status] ?? 0;
+      return 0;
     } else if (theOpenSbSortCol === 'pos') {
       va = parseFloat(a.pos) || 999;
       vb = parseFloat(b.pos) || 999;
@@ -6047,7 +6053,9 @@ function renderTheOpenScoreboardRows() {
       vb = b[theOpenSbSortCol] ?? (theOpenSbSortAsc ? Infinity : -Infinity);
     }
     if (va !== vb) return theOpenSbSortAsc ? va - vb : vb - va;
-    return (statusOrder[a.status] ?? 0) - (statusOrder[b.status] ?? 0);
+    // Push not-started players to bottom of active group
+    if (a.notStarted !== b.notStarted) return a.notStarted ? 1 : -1;
+    return 0;
   });
 
   let selectedPickNames = null;

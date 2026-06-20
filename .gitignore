@@ -10,3 +10,7 @@ Thumbs.db
 # Keep firebase-config.js out of git if it has real credentials
 # (use a firebase-config.example.js as a template instead)
 .htaccess
+
+# Firebase Admin service account key — NEVER commit this
+service-account.json
+archive-scripts/service-account.json

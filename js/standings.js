@@ -721,8 +721,11 @@ function buildRoundScoresMap(scoresMap, round) {
   const key = `r${round}`;
   const map = {};
   for (const [name, g] of Object.entries(scoresMap)) {
+    const isCutWd = g.status === 'cut' || g.status === 'wd';
     const rScore = g[key] ?? null;
-    map[name] = { score: rScore !== null ? rScore : 0, status: 'active', position: g.position };
+    // Cut/WD players with no linescore for this round (R3/R4) get the per-round penalty (+10)
+    const score = (isCutWd && rScore === null) ? 10 : (rScore !== null ? rScore : 0);
+    map[name] = { score, status: 'active', position: g.position };
   }
   return map;
 }

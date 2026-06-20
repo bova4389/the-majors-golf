@@ -3019,12 +3019,16 @@ export async function loadBonusPool() {
     const db = getDb();
     let usOpenCount = 0, theOpenCount = 0;
     try {
-      const usSnap = await getDocs(query(collection(db, 'picks'), where('tournamentId', '==', 'usopen-2026')));
-      usOpenCount = usSnap.size;
+      if (usOpenCurrentTournamentId) {
+        const usSnap = await getDocs(query(collection(db, 'picks'), where('tournamentId', '==', usOpenCurrentTournamentId)));
+        usOpenCount = usSnap.size;
+      }
     } catch { /* tournament not created yet */ }
     try {
-      const openSnap = await getDocs(query(collection(db, 'picks'), where('tournamentId', '==', 'theopen-2026')));
-      theOpenCount = openSnap.size;
+      if (theOpenCurrentTournamentId) {
+        const openSnap = await getDocs(query(collection(db, 'picks'), where('tournamentId', '==', theOpenCurrentTournamentId)));
+        theOpenCount = openSnap.size;
+      }
     } catch { /* tournament not created yet */ }
 
     const total = mastersBonusAmt + pgaCount + usOpenCount + theOpenCount;

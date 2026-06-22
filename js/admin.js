@@ -977,28 +977,54 @@ export async function generateHardcodedStandings() {
   statusEl.textContent = `Loaded ${picks.length} picks. Calculating standings…`;
 
   const mcPenalty = tournament.mcPenalty ?? 20;
-  const standings = calculateStandings(picks, scoresMap, mcPenalty);
   const prefix = `${normalizeMajorForVar(tournament.major)}_${tournament.year}`;
 
+  // q() safely quotes a string value for JS single-quoted literals
   const q = s => `'${String(s ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
 
-  const entries = standings.map(r => {
-    const tierStr = [1,2,3,4,5,6].map(i => {
-      const t = r.tierScores[`t${i}`];
-      if (!t) return `t${i}: { score: 0, status: null, golfer: '', isTop4: false }`;
-      return `t${i}: { score: ${t.score}, status: ${t.status ? q(t.status) : 'null'}, golfer: ${q(t.golfer)}, isTop4: ${t.isTop4} }`;
-    }).join(', ');
-    const realName = r.pick.realName || r.pick.entrantName || '';
-    const picksName = r.pick.entrantName || '';
-    return `  { rank: ${r.rank}, total: ${r.total}, pick: { entrantName: ${q(realName)}, picksName: ${q(picksName)} }, tierScores: { ${tierStr} } }`;
-  });
+  function buildRoundMap(round) {
+    const key = `r${round}`;
+    const map = {};
+    for (const [name, g] of Object.entries(scoresMap)) {
+      const isCutWd = g.status === 'cut' || g.status === 'wd';
+      const rScore = g[key] ?? null;
+      const score = (isCutWd && rScore === null) ? 10 : (rScore !== null ? rScore : 0);
+      map[name] = { score, status: isCutWd ? g.status : 'active', position: g.position };
+    }
+    return map;
+  }
 
-  const totalConst = `const ${prefix}_TOTAL = [\n${entries.join(',\n')}\n];`;
-  const roundConsts = ['R1','R2','R3','R4'].map(r => `const ${prefix}_${r} = [];`).join('\n');
+  function renderEntries(standings) {
+    return standings.map(r => {
+      const tierStr = [1,2,3,4,5,6].map(i => {
+        const t = r.tierScores[`t${i}`];
+        if (!t) return `t${i}: { score: 0, status: null, golfer: '', isTop4: false }`;
+        return `t${i}: { score: ${t.score}, status: ${t.status ? q(t.status) : 'null'}, golfer: ${q(t.golfer)}, isTop4: ${t.isTop4} }`;
+      }).join(', ');
+      const realName  = r.pick.realName  || r.pick.entrantName || '';
+      const picksName = r.pick.entrantName || '';
+      const fifth = r.fifth  != null ? r.fifth  : 'null';
+      const sixth = r.sixth  != null ? r.sixth  : 'null';
+      return `  { rank: ${r.rank}, total: ${r.total}, fifth: ${fifth}, sixth: ${sixth}, pick: { entrantName: ${q(realName)}, picksName: ${q(picksName)} }, tierScores: { ${tierStr} } }`;
+    });
+  }
+
+  // Total standings (uses full mcPenalty)
+  const totalStandings = calculateStandings(picks, scoresMap, mcPenalty);
+  const totalConst = `const ${prefix}_TOTAL = [\n${renderEntries(totalStandings).join(',\n')}\n];`;
+
+  // Round standings (mcPenalty = 0; cut players with no round score get +10 per round)
+  const roundConsts = [1,2,3,4].map(rNum => {
+    const roundMap  = buildRoundMap(rNum);
+    const hasData   = Object.values(roundMap).some(g => g.score !== 0 || g.status !== 'active');
+    if (!hasData) return `const ${prefix}_R${rNum} = [];`;
+    const rStandings = calculateStandings(picks, roundMap, 0);
+    return `const ${prefix}_R${rNum} = [\n${renderEntries(rStandings).join(',\n')}\n];`;
+  }).join('\n');
+
   const generated = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-
   outputEl.value = `// ${tournament.name} — generated ${generated}\n${totalConst}\n${roundConsts}`;
-  statusEl.textContent = `Done — ${standings.length} entries exported. Copy and paste into standings.js.`;
+  statusEl.textContent = `Done — ${totalStandings.length} entries exported. Copy and paste into standings.js.`;
 }
 
 // ─── Modals ───────────────────────────────────────────────────────────────────

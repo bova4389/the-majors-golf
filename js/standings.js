@@ -2452,30 +2452,36 @@ export async function loadPgaPayouts() {
     // Daily round winners
     const roundCards = [1,2,3,4].map(r => {
       const roundResults = pgaCachedRoundResults[r];
-      let winnerName = '\u2014';
+      let winnerNameHtml = '\u2014';
       let winnerTotal = null;
+      let winnerEntry = null;
       if (roundResults && roundResults.length) {
         const winner = roundResults[0];
-        winnerName = escapeHtml(winner.pick.picksName || winner.pick.entrantName);
+        winnerEntry = winner;
+        const realName  = winner.pick.realName  || winner.pick.entrantName;
+        const picksName = winner.pick.picksName || winner.pick.entrantName;
+        const isTied = roundResults.filter(x => x.rank === 1).length > 1;
+        const tiedLabel = isTied ? ' (tied)' : '';
+        winnerNameHtml = realName !== picksName
+          ? `<span class="fp-finisher-name">${escapeHtml(realName)}${tiedLabel}</span><span class="fp-finisher-picksname">${escapeHtml(picksName)}</span>`
+          : `<span class="fp-finisher-name">${escapeHtml(realName)}${tiedLabel}</span>`;
         winnerTotal = winner.total;
-        // Show tied label if multiple entries share rank 1
-        if (roundResults.filter(x => x.rank === 1).length > 1) {
-          winnerName += ' (tied)';
-        }
       }
       const hasData = roundResults && roundResults.length;
       const scoreDisp = winnerTotal !== null ? (winnerTotal === 0 ? 'E' : winnerTotal > 0 ? `+${winnerTotal}` : `${winnerTotal}`) : '';
       const scoreCls = winnerTotal !== null ? (winnerTotal < 0 ? 'score-under' : winnerTotal > 0 ? 'score-over' : 'score-even') : '';
       const roundLabel = hasData ? `R${r} F` : `R${r}`;
       const statusText = hasData ? '' : '<span style="color:var(--text-muted);font-size:.8rem"> \u2014 pending</span>';
+      const chipsHtml = winnerEntry ? buildFinisherChips(winnerEntry) : '';
       return `
         <div class="fp-daily-card">
           <div class="fp-daily-card-top">
             <span class="fp-round-badge fp-round-badge-pga">${roundLabel}</span>
-            <span class="fp-winner-name">${winnerName}${statusText}</span>
+            <div class="fp-finisher-names">${winnerNameHtml}${statusText}</div>
             <span class="fp-winner-payout">${hasData ? '$25' : '\u2014'}</span>
           </div>
           ${hasData && winnerTotal !== null ? `<div style="padding:.25rem .75rem .5rem;font-size:.8rem;color:var(--text-muted)">Round total: <span class="${scoreCls}">${scoreDisp}</span></div>` : ''}
+          ${chipsHtml}
         </div>`;
     }).join('');
 
@@ -3015,16 +3021,11 @@ export async function loadBonusPool() {
   try {
     const mastersBonusAmt = 25; // flat fee from Masters pool
     const pgaCount        = 41; // 41 entries \u00D7 $1 \u2014 PGA Championship 2026 (finalized)
+    const usOpenCount     = 43; // 43 entries \u00D7 $1 \u2014 U.S. Open 2026 (finalized)
 
-    // US Open and The Open: fetch live counts from Firestore when available
+    // The Open: fetch live count from Firestore when available
     const db = getDb();
-    let usOpenCount = 0, theOpenCount = 0;
-    try {
-      if (usOpenCurrentTournamentId) {
-        const usSnap = await getDocs(query(collection(db, 'picks'), where('tournamentId', '==', usOpenCurrentTournamentId)));
-        usOpenCount = usSnap.size;
-      }
-    } catch { /* tournament not created yet */ }
+    let theOpenCount = 0;
     try {
       if (theOpenCurrentTournamentId) {
         const openSnap = await getDocs(query(collection(db, 'picks'), where('tournamentId', '==', theOpenCurrentTournamentId)));
@@ -5279,29 +5280,36 @@ export async function loadUsOpenPayouts() {
 
     const roundCards = [1,2,3,4].map(r => {
       const roundResults = usOpenCachedRoundResults[r];
-      let winnerName = '\u2014';
+      let winnerNameHtml = '\u2014';
       let winnerTotal = null;
+      let winnerEntry = null;
       if (roundResults && roundResults.length) {
         const winner = roundResults[0];
-        winnerName = escapeHtml(winner.pick.picksName || winner.pick.entrantName);
+        winnerEntry = winner;
+        const realName  = winner.pick.realName  || winner.pick.entrantName;
+        const picksName = winner.pick.picksName || winner.pick.entrantName;
+        const isTied = roundResults.filter(x => x.rank === 1).length > 1;
+        const tiedLabel = isTied ? ' (tied)' : '';
+        winnerNameHtml = realName !== picksName
+          ? `<span class="fp-finisher-name">${escapeHtml(realName)}${tiedLabel}</span><span class="fp-finisher-picksname">${escapeHtml(picksName)}</span>`
+          : `<span class="fp-finisher-name">${escapeHtml(realName)}${tiedLabel}</span>`;
         winnerTotal = winner.total;
-        if (roundResults.filter(x => x.rank === 1).length > 1) {
-          winnerName += ' (tied)';
-        }
       }
       const hasData = roundResults && roundResults.length;
       const scoreDisp = winnerTotal !== null ? (winnerTotal === 0 ? 'E' : winnerTotal > 0 ? `+${winnerTotal}` : `${winnerTotal}`) : '';
       const scoreCls = winnerTotal !== null ? (winnerTotal < 0 ? 'score-under' : winnerTotal > 0 ? 'score-over' : 'score-even') : '';
       const roundLabel = hasData ? `R${r} F` : `R${r}`;
       const statusText = hasData ? '' : '<span style="color:var(--text-muted);font-size:.8rem"> \u2014 pending</span>';
+      const chipsHtml = winnerEntry ? buildFinisherChips(winnerEntry) : '';
       return `
         <div class="fp-daily-card">
           <div class="fp-daily-card-top">
             <span class="fp-round-badge fp-round-badge-usopen">${roundLabel}</span>
-            <span class="fp-winner-name">${winnerName}${statusText}</span>
+            <div class="fp-finisher-names">${winnerNameHtml}${statusText}</div>
             <span class="fp-winner-payout">${hasData ? '$25' : '\u2014'}</span>
           </div>
           ${hasData && winnerTotal !== null ? `<div style="padding:.25rem .75rem .5rem;font-size:.8rem;color:var(--text-muted)">Round total: <span class="${scoreCls}">${scoreDisp}</span></div>` : ''}
+          ${chipsHtml}
         </div>`;
     }).join('');
 
@@ -5947,29 +5955,36 @@ export async function loadTheOpenPayouts() {
 
     const roundCards = [1,2,3,4].map(r => {
       const roundResults = theOpenCachedRoundResults[r];
-      let winnerName = '\u2014';
+      let winnerNameHtml = '\u2014';
       let winnerTotal = null;
+      let winnerEntry = null;
       if (roundResults && roundResults.length) {
         const winner = roundResults[0];
-        winnerName = escapeHtml(winner.pick.picksName || winner.pick.entrantName);
+        winnerEntry = winner;
+        const realName  = winner.pick.realName  || winner.pick.entrantName;
+        const picksName = winner.pick.picksName || winner.pick.entrantName;
+        const isTied = roundResults.filter(x => x.rank === 1).length > 1;
+        const tiedLabel = isTied ? ' (tied)' : '';
+        winnerNameHtml = realName !== picksName
+          ? `<span class="fp-finisher-name">${escapeHtml(realName)}${tiedLabel}</span><span class="fp-finisher-picksname">${escapeHtml(picksName)}</span>`
+          : `<span class="fp-finisher-name">${escapeHtml(realName)}${tiedLabel}</span>`;
         winnerTotal = winner.total;
-        if (roundResults.filter(x => x.rank === 1).length > 1) {
-          winnerName += ' (tied)';
-        }
       }
       const hasData = roundResults && roundResults.length;
       const scoreDisp = winnerTotal !== null ? (winnerTotal === 0 ? 'E' : winnerTotal > 0 ? `+${winnerTotal}` : `${winnerTotal}`) : '';
       const scoreCls = winnerTotal !== null ? (winnerTotal < 0 ? 'score-under' : winnerTotal > 0 ? 'score-over' : 'score-even') : '';
       const roundLabel = hasData ? `R${r} F` : `R${r}`;
       const statusText = hasData ? '' : '<span style="color:var(--text-muted);font-size:.8rem"> \u2014 pending</span>';
+      const chipsHtml = winnerEntry ? buildFinisherChips(winnerEntry) : '';
       return `
         <div class="fp-daily-card">
           <div class="fp-daily-card-top">
             <span class="fp-round-badge fp-round-badge-theopen">${roundLabel}</span>
-            <span class="fp-winner-name">${winnerName}${statusText}</span>
+            <div class="fp-finisher-names">${winnerNameHtml}${statusText}</div>
             <span class="fp-winner-payout">${hasData ? '$25' : '\u2014'}</span>
           </div>
           ${hasData && winnerTotal !== null ? `<div style="padding:.25rem .75rem .5rem;font-size:.8rem;color:var(--text-muted)">Round total: <span class="${scoreCls}">${scoreDisp}</span></div>` : ''}
+          ${chipsHtml}
         </div>`;
     }).join('');
 

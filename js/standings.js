@@ -1094,6 +1094,7 @@ async function loadPgaTournamentData(tournamentId) {
       if (PGA_2026_TOTAL.length === 0) {
         if (noDataEl) { noDataEl.textContent = 'PGA Championship 2026 final standings coming soon.'; noDataEl.classList.remove('hidden'); }
       } else {
+        pgaCachedResults = PGA_2026_TOTAL;
         renderPgaTable(PGA_2026_TOTAL, {});
         const pgaRounds = [PGA_2026_R1, PGA_2026_R2, PGA_2026_R3, PGA_2026_R4];
         pgaRounds.forEach((rd, i) => {
@@ -2373,7 +2374,7 @@ export async function loadPgaPayouts() {
     const entryCount = pgaCachedResults.length;
     const pool = Math.floor(entryCount * netPerEntry);
     const dailyPool = 4 * 25; // $25 \u00D7 4 rounds
-    const placePool = pool; // all goes to place finishers
+    const placePool = pool - dailyPool;
 
     const payoutSplit = tournament?.prizePayouts ?? DEFAULT_PAYOUT_SPLIT;
     const isFinal = pgaCurrentTournamentStatus === 'final';
@@ -2397,13 +2398,14 @@ export async function loadPgaPayouts() {
         return sum + (cfg ? cfg.pct : 0);
       }, 0);
       const rawPrize = (placePool * totalPct) / 100;
-      const sharedPrize = rawPrize > 0 ? Math.floor(rawPrize / group.length) : 0;
+      const perPerson = rawPrize / group.length;
+      const sharedPrize = rawPrize > 0 ? (group.length === 1 ? Math.round(perPerson) : Math.round(perPerson * 100) / 100) : 0;
 
       if (group.length > 1 && sharedPrize > 0) {
         const splitTotal = Math.floor(rawPrize);
         const origAmts = places.map(p => {
           const cfg = payoutSplit.find(c => c.place === p);
-          return cfg ? Math.floor(placePool * cfg.pct / 100) : 0;
+          return cfg ? (placePool * cfg.pct / 100) : 0;
         }).filter(a => a > 0);
         if (origAmts.length > 1) {
           tiedGroups.push({ places, origAmts, sharedPrize });
@@ -2446,7 +2448,8 @@ export async function loadPgaPayouts() {
     // Tie-split notes
     const tieNotes = tiedGroups.map(tg => {
       const combined = tg.origAmts.reduce((s, a) => s + a, 0);
-      return `T-${tg.places[0]} Tie: ${tg.origAmts.map(a => `$${a}`).join(' + ')} = $${combined} combined, split → <strong>$${tg.sharedPrize} each</strong>`;
+      const fmt = n => Number.isInteger(n) ? n : n.toFixed(2);
+      return `T-${tg.places[0]} Tie: ${tg.origAmts.map(a => `$${fmt(a)}`).join(' + ')} = $${fmt(combined)} combined, split → <strong>$${fmt(tg.sharedPrize)} each</strong>`;
     }).join('<br>');
 
     // Daily round winners
@@ -4866,6 +4869,7 @@ async function loadUsOpenTournamentData(tournamentId) {
       if (US_OPEN_2026_TOTAL.length === 0) {
         if (noDataEl) { noDataEl.textContent = 'U.S. Open 2026 final standings coming soon.'; noDataEl.classList.remove('hidden'); }
       } else {
+        usOpenCachedResults = US_OPEN_2026_TOTAL;
         renderUsOpenTable(US_OPEN_2026_TOTAL, {});
         const usOpenRounds = [US_OPEN_2026_R1, US_OPEN_2026_R2, US_OPEN_2026_R3, US_OPEN_2026_R4];
         usOpenRounds.forEach((rd, i) => {
@@ -5205,7 +5209,7 @@ export async function loadUsOpenPayouts() {
     const entryCount = usOpenCachedResults.length;
     const pool = Math.floor(entryCount * netPerEntry);
     const dailyPool = 4 * 25;
-    const placePool = pool;
+    const placePool = pool - dailyPool;
 
     const payoutSplit = tournament?.prizePayouts ?? DEFAULT_PAYOUT_SPLIT;
     const isFinal = usOpenCurrentTournamentStatus === 'final';
@@ -5227,13 +5231,14 @@ export async function loadUsOpenPayouts() {
         return sum + (cfg ? cfg.pct : 0);
       }, 0);
       const rawPrize = (placePool * totalPct) / 100;
-      const sharedPrize = rawPrize > 0 ? Math.floor(rawPrize / group.length) : 0;
+      const perPerson = rawPrize / group.length;
+      const sharedPrize = rawPrize > 0 ? (group.length === 1 ? Math.round(perPerson) : Math.round(perPerson * 100) / 100) : 0;
 
       if (group.length > 1 && sharedPrize > 0) {
         const splitTotal = Math.floor(rawPrize);
         const origAmts = places.map(p => {
           const cfg = payoutSplit.find(c => c.place === p);
-          return cfg ? Math.floor(placePool * cfg.pct / 100) : 0;
+          return cfg ? (placePool * cfg.pct / 100) : 0;
         }).filter(a => a > 0);
         if (origAmts.length > 1) {
           tiedGroups.push({ places, origAmts, sharedPrize });
@@ -5275,7 +5280,8 @@ export async function loadUsOpenPayouts() {
 
     const tieNotes = tiedGroups.map(tg => {
       const combined = tg.origAmts.reduce((s, a) => s + a, 0);
-      return `T-${tg.places[0]} Tie: ${tg.origAmts.map(a => `$${a}`).join(' + ')} = $${combined} combined, split → <strong>$${tg.sharedPrize} each</strong>`;
+      const fmt = n => Number.isInteger(n) ? n : n.toFixed(2);
+      return `T-${tg.places[0]} Tie: ${tg.origAmts.map(a => `$${fmt(a)}`).join(' + ')} = $${fmt(combined)} combined, split → <strong>$${fmt(tg.sharedPrize)} each</strong>`;
     }).join('<br>');
 
     const roundCards = [1,2,3,4].map(r => {
@@ -5880,7 +5886,7 @@ export async function loadTheOpenPayouts() {
     const entryCount = theOpenCachedResults.length;
     const pool = Math.floor(entryCount * netPerEntry);
     const dailyPool = 4 * 25;
-    const placePool = pool;
+    const placePool = pool - dailyPool;
 
     const payoutSplit = tournament?.prizePayouts ?? DEFAULT_PAYOUT_SPLIT;
     const isFinal = theOpenCurrentTournamentStatus === 'final';
@@ -5902,13 +5908,14 @@ export async function loadTheOpenPayouts() {
         return sum + (cfg ? cfg.pct : 0);
       }, 0);
       const rawPrize = (placePool * totalPct) / 100;
-      const sharedPrize = rawPrize > 0 ? Math.floor(rawPrize / group.length) : 0;
+      const perPerson = rawPrize / group.length;
+      const sharedPrize = rawPrize > 0 ? (group.length === 1 ? Math.round(perPerson) : Math.round(perPerson * 100) / 100) : 0;
 
       if (group.length > 1 && sharedPrize > 0) {
         const splitTotal = Math.floor(rawPrize);
         const origAmts = places.map(p => {
           const cfg = payoutSplit.find(c => c.place === p);
-          return cfg ? Math.floor(placePool * cfg.pct / 100) : 0;
+          return cfg ? (placePool * cfg.pct / 100) : 0;
         }).filter(a => a > 0);
         if (origAmts.length > 1) {
           tiedGroups.push({ places, origAmts, sharedPrize });
@@ -5950,7 +5957,8 @@ export async function loadTheOpenPayouts() {
 
     const tieNotes = tiedGroups.map(tg => {
       const combined = tg.origAmts.reduce((s, a) => s + a, 0);
-      return `T-${tg.places[0]} Tie: ${tg.origAmts.map(a => `$${a}`).join(' + ')} = $${combined} combined, split → <strong>$${tg.sharedPrize} each</strong>`;
+      const fmt = n => Number.isInteger(n) ? n : n.toFixed(2);
+      return `T-${tg.places[0]} Tie: ${tg.origAmts.map(a => `$${fmt(a)}`).join(' + ')} = $${fmt(combined)} combined, split → <strong>$${fmt(tg.sharedPrize)} each</strong>`;
     }).join('<br>');
 
     const roundCards = [1,2,3,4].map(r => {

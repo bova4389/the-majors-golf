@@ -3081,16 +3081,7 @@ export async function loadBonusPool() {
     const mastersBonusAmt = 25; // flat fee from Masters pool
     const pgaCount        = 41; // 41 entries \u00D7 $1 \u2014 PGA Championship 2026 (finalized)
     const usOpenCount     = 43; // 43 entries \u00D7 $1 \u2014 U.S. Open 2026 (finalized)
-
-    // The Open: fetch live count from Firestore when available
-    const db = getDb();
-    let theOpenCount = 0;
-    try {
-      if (theOpenCurrentTournamentId) {
-        const openSnap = await getDocs(query(collection(db, 'picks'), where('tournamentId', '==', theOpenCurrentTournamentId)));
-        theOpenCount = openSnap.size;
-      }
-    } catch { /* tournament not created yet */ }
+    const theOpenCount    = 47; // 47 entries \u00D7 $1 \u2014 The Open Championship 2026 (picks locked 2026-07-16)
 
     const total = mastersBonusAmt + pgaCount + usOpenCount + theOpenCount;
     amountEl.textContent = `$${total}`;

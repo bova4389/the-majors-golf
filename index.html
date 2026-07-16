@@ -760,6 +760,7 @@
   <script>
     var pgaTabLoaded = false;
     var usOpenTabLoaded = false;
+    var theOpenTabLoaded = false;
 
     window.switchMajor = function(major) {
       document.querySelectorAll('.major-panel').forEach(function(p) {
@@ -786,6 +787,10 @@
       if (major === 'usopen' && !usOpenTabLoaded) {
         usOpenTabLoaded = true;
         if (window.loadUsOpenScoreboard) window.loadUsOpenScoreboard();
+      }
+      if (major === 'theopen' && !theOpenTabLoaded) {
+        theOpenTabLoaded = true;
+        if (window.loadTheOpenScoreboard) window.loadTheOpenScoreboard();
       }
     };
 
@@ -826,7 +831,7 @@
   <!-- ===== FIREBASE + APP SCRIPTS ===== -->
   <script type="module">
     import { initFirebase } from './js/firebase-config.js?v=20260528';
-    import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings, pgaSbSort, pgaPoolSort, pgaSbEntryFilter, usOpenPoolSort, usOpenSbSort, usOpenSbEntryFilter, usOpenManualRefresh, loadUsOpenScoreboard, loadUsOpenPayouts, theOpenPoolSort, theOpenSbSort, theOpenSbEntryFilter, theOpenManualRefresh, loadTheOpenPayouts } from './js/standings.js?v=20260623';
+    import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings, pgaSbSort, pgaPoolSort, pgaSbEntryFilter, usOpenPoolSort, usOpenSbSort, usOpenSbEntryFilter, usOpenManualRefresh, loadUsOpenScoreboard, loadUsOpenPayouts, theOpenPoolSort, theOpenSbSort, theOpenSbEntryFilter, theOpenManualRefresh, loadTheOpenPayouts, loadTheOpenScoreboard } from './js/standings.js?v=20260716';
 
     initFirebase();
     window.sortBy = sortBy;
@@ -844,6 +849,7 @@
     window.theOpenSbSort = theOpenSbSort;
     window.theOpenPoolSort = theOpenPoolSort;
     window.theOpenSbEntryFilter = theOpenSbEntryFilter;
+    window.loadTheOpenScoreboard = loadTheOpenScoreboard;
     window.switchMajorYear = switchMajorYear;
     const footerYearEl = document.getElementById('footerYear');
     if (footerYearEl) footerYearEl.textContent = new Date().getFullYear();
@@ -921,7 +927,7 @@
       const container = document.getElementById('playerAnalysisContent');
       if (!container) return;
       try {
-        const { getPlayerAnalysisData } = await import('./js/standings.js?v=20260623');
+        const { getPlayerAnalysisData } = await import('./js/standings.js?v=20260716');
         const data = await getPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {
@@ -1014,7 +1020,7 @@
       const container = document.getElementById('pgaPlayerAnalysisContent');
       if (!container) return;
       try {
-        const { getPgaPlayerAnalysisData } = await import('./js/standings.js?v=20260623');
+        const { getPgaPlayerAnalysisData } = await import('./js/standings.js?v=20260716');
         const data = getPgaPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {
@@ -1046,7 +1052,7 @@
       const container = document.getElementById('usOpenPlayerAnalysisContent');
       if (!container) return;
       try {
-        const { getUsOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260623');
+        const { getUsOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260716');
         const data = getUsOpenPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {
@@ -1078,7 +1084,7 @@
       const container = document.getElementById('theOpenPlayerAnalysisContent');
       if (!container) return;
       try {
-        const { getTheOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260623');
+        const { getTheOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260716');
         const data = getTheOpenPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {

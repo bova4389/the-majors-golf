@@ -123,6 +123,7 @@ export async function loadStandings() {
     theOpenCurrentTournamentId = theOpenList[0].id;
     setYearTabActive('theopen', theOpenList[0].year);
     loadTheOpenTournamentData(theOpenList[0].id);
+    loadTheOpenScoreboard();
   }
 
   const searchInput = document.getElementById('standingsSearch');
@@ -341,6 +342,7 @@ export function switchMajorYear(major, year) {
         if (totalBtn) totalBtn.classList.add('active');
       }
     } else {
+      clearTheOpenPoolPanels();
       const theOpenPanel = document.getElementById('panel-theopen');
       if (theOpenPanel) {
         theOpenPanel.querySelectorAll('.inner-panel').forEach(p => { p.classList.remove('inner-panel-active'); p.classList.add('hidden'); });
@@ -516,6 +518,60 @@ function clearUsOpenPoolPanels() {
   ['usopen-day1','usopen-day2','usopen-day3','usopen-day4','usopen-finalpayouts'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.innerHTML = placeholder;
+  });
+}
+
+function clearTheOpenPoolPanels() {
+  // Restore theopen-total to its original live-standings structure (needed when switching away from 2025)
+  const theOpenTotal = document.getElementById('theopen-total');
+  if (theOpenTotal) {
+    theOpenTotal.innerHTML = `
+      <div class="search-bar search-bar-with-btn">
+        <input type="text" id="theOpenStandingsSearch" class="standings-search" placeholder="Search entry name or player..." />
+        <button class="btn btn-analysis" id="theOpenPlayerAnalysisBtn" onclick="toggleTheOpenPlayerAnalysis()">Player Analysis</button>
+      </div>
+      <div id="theOpenPlayerAnalysisView" class="player-analysis-view hidden">
+        <div id="theOpenPlayerAnalysisContent" class="pa-content">
+          <div class="fp-loading">Building analysis…</div>
+        </div>
+      </div>
+      <section class="table-wrapper" id="theOpenStandingsTableWrapper">
+        <div id="theOpenLoadingMsg" class="loading-msg">Loading standings...</div>
+        <table id="theOpenStandingsTable" class="standings-table hidden">
+          <thead>
+            <tr>
+              <th class="col-rank sortable" data-sort="rank" onclick="theOpenPoolSort('total','rank')">Rank <span class="sort-icon"></span></th>
+              <th class="col-name sortable" data-sort="name" onclick="theOpenPoolSort('total','name')">Name <span class="sort-icon"></span></th>
+              <th class="col-name col-picks-name sortable" data-sort="picksName" onclick="theOpenPoolSort('total','picksName')">Picks Name <span class="sort-icon"></span></th>
+              <th class="col-total sortable" data-sort="total" onclick="theOpenPoolSort('total','total')">Total <span class="sort-icon"></span></th>
+              <th class="col-tier">Tier 1</th>
+              <th class="col-tier">Tier 2</th>
+              <th class="col-tier">Tier 3</th>
+              <th class="col-tier">Tier 4</th>
+              <th class="col-tier">Tier 5</th>
+              <th class="col-tier">Tier 6</th>
+            </tr>
+          </thead>
+          <tbody id="theOpenStandingsBody"></tbody>
+        </table>
+        <div id="theOpenNoDataMsg" class="no-data hidden">No picks found for this tournament.</div>
+      </section>`;
+    const searchInput = document.getElementById('theOpenStandingsSearch');
+    if (searchInput) {
+      searchInput.addEventListener('input', e => {
+        const q = e.target.value.toLowerCase().trim();
+        document.querySelectorAll('#theOpenStandingsBody tr').forEach(row => {
+          const entry   = row.dataset.entry   || '';
+          const players = row.dataset.players || '';
+          row.style.display = (!q || entry.includes(q) || players.includes(q)) ? '' : 'none';
+        });
+      });
+    }
+  }
+  const placeholder2 = '<p style="padding:1.5rem;color:#666;font-style:italic;">Pool standings not yet available for this year.</p>';
+  ['theopen-day1','theopen-day2','theopen-day3','theopen-day4','theopen-finalpayouts'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = placeholder2;
   });
 }
 
@@ -7891,9 +7947,12 @@ export async function loadTheOpenScoreboard() {
   if (theOpenActiveYear === 2025) {
     players = THEOPEN_2025_FIELD;
   } else {
-    // Try ESPN API (2026 event 401811957)
+    // Try ESPN API (2026 event 401811957) with 10-second timeout
     try {
-      const res = await fetch('https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?event=401811957');
+      const ctrl = new AbortController();
+      const timeoutId = setTimeout(() => ctrl.abort(), 10000);
+      const res = await fetch('https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?event=401811957', { signal: ctrl.signal });
+      clearTimeout(timeoutId);
       if (res.ok) {
         const data = await res.json();
         const competitors = data?.events?.[0]?.competitions?.[0]?.competitors ?? [];
@@ -7909,29 +7968,62 @@ export async function loadTheOpenScoreboard() {
               const v = parseFloat(dv);
               return isNaN(v) ? null : v;
             });
-            const status = c.status?.type?.name?.toLowerCase() ?? 'active';
+            const statusTypeName = c.status?.type?.name ?? '';
+            const statusLower = statusTypeName.toLowerCase();
             let dispStatus = 'Active';
-            if (status.includes('cut')) dispStatus = 'CUT';
-            else if (status.includes('wd') || status.includes('withdrew')) dispStatus = 'WD';
+            if (statusLower.includes('cut')) dispStatus = 'CUT';
+            else if (statusLower.includes('wd') || statusLower.includes('withdrew')) dispStatus = 'WD';
+            // Build richer status detail for active players
+            let statusDetail = dispStatus;
+            if (dispStatus === 'Active') {
+              const thru    = c.status?.thru ?? 0;
+              const period  = c.status?.period ?? 0;
+              const teeTime = c.teeTime ?? null;
+              if (statusTypeName.includes('PLAY_COMPLETE') || thru === 18) {
+                statusDetail = period ? `R${period} F` : 'F';
+              } else if (thru > 0) {
+                statusDetail = `Hole ${thru}`;
+              } else if (teeTime) {
+                try {
+                  const dt = new Date(teeTime);
+                  statusDetail = dt.toLocaleTimeString('en-US', {
+                    hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/New_York'
+                  }).replace(':00 ', ' ') + ' ET';
+                } catch { statusDetail = 'Scheduled'; }
+              } else if (statusTypeName.includes('SCHEDULED')) {
+                statusDetail = 'Scheduled';
+              } else {
+                statusDetail = 'Active';
+              }
+            }
+            // Compute total from completed round linescores \u2014 ESPN's total field shows "E" mid-round
+            const completedRounds = rounds.filter(r => r !== null);
             const totalStr = c.score?.displayValue ?? 'E';
-            const total = totalStr === 'E' ? 0 : (parseFloat(totalStr) || 0);
+            const total = completedRounds.length > 0
+              ? completedRounds.reduce((sum, r) => sum + r, 0)
+              : (totalStr === 'E' ? 0 : (parseFloat(totalStr) || 0));
+            const notStarted = dispStatus === 'Active' && completedRounds.length === 0;
             return {
               pos: c.status?.position?.displayName ?? '-',
               name: c.athlete?.displayName ?? '',
               total,
               r1: rounds[0], r2: rounds[1], r3: rounds[2], r4: rounds[3],
               status: dispStatus,
+              statusDetail,
+              notStarted,
             };
           }).filter(p => p.name).sort((a, b) => {
             const statusOrder = { 'Active': 0, 'CUT': 1, 'WD': 2 };
             const sa = statusOrder[a.status] ?? 0;
             const sb = statusOrder[b.status] ?? 0;
             if (sa !== sb) return sa - sb;
+            // Push not-started players to bottom of active group
+            if (a.notStarted !== b.notStarted) return a.notStarted ? 1 : -1;
             return a.total - b.total;
           });
         }
       }
-    } catch { /* fall through \u2014 no hardcoded 2026 fallback yet */ }
+    } catch (e) { /* fetch failed \u2014 leave players empty so fallback message shows */ }
   }
 
   if (!players.length) {
@@ -7940,10 +8032,14 @@ export async function loadTheOpenScoreboard() {
   }
 
   theOpenScoreboardPlayers = players;
+  theOpenSbSortCol = 'total';
+  theOpenSbSortAsc = true;
+  try {
+    enrichTheOpenScoreboardWithPickData();
+    updateTheOpenSbSortHeaders();
+  } catch (e) { /* enrichment failed \u2014 still show raw table */ }
   if (loadingEl) loadingEl.classList.add('hidden');
   table.classList.remove('hidden');
-  enrichTheOpenScoreboardWithPickData();
-  updateTheOpenSbSortHeaders();
 }
 
 // â”€â”€â”€ Utilities â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

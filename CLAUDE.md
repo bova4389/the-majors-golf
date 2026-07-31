@@ -93,8 +93,13 @@ Any code change to `picks.js` during an active submission window risks breaking 
 
 Safari on mobile caches pages aggressively. To prevent users from seeing stale versions after a deployment:
 
-1. **`.htaccess`** (already in this repo) — sends `no-cache` headers for all HTML/JS/CSS files. Never delete it.
-2. **`?v=` query string on every local JS/CSS `<script src>` and `<link rel="stylesheet">` tag** — must be bumped on every change to that file.
+1. **`.htaccess`** — sends `no-cache` headers for all HTML/JS/CSS files. Never delete it, and
+   never add it to `.gitignore`. `deploy.yml` also needs its dedicated "Deploy .htaccess" step,
+   because the sftp `put -r ./*` glob skips dotfiles — don't remove that step as redundant.
+2. **`?v=` query string on local JS/CSS `<script src>` and `<link rel="stylesheet">` tags** —
+   bumped on every change to that file. **Two exceptions, both mandatory:**
+   `js/firebase-config.js` and `js/scoring.js` are shared ES modules imported by other modules,
+   and must **never** carry a `?v=` — see Known Failure Mode 2 for why this breaks `getDb()`.
 
 ### Version string rule (critical — follow exactly)
 
@@ -405,10 +410,19 @@ The public page writes ESPN scores to Firestore to cache them. If the `scores` c
 - Check: Firebase Console → Firestore → Rules — confirm `match /scores/{id} { allow write: if true; }`
 - Full required rules are in the "Firestore security rules" section below
 
-**2. firebase-config.js version mismatch → getDb() returns null**
-`index.html` and `standings.js` must import `firebase-config.js` with the SAME `?v=` query string. Different strings = different module instances = `db` is never set in the instance that standings.js uses.
+**2. firebase-config.js import mismatch → getDb() returns null**
+A query string is part of an ES module's identity, so `firebase-config.js?v=1` and
+`firebase-config.js` are two *separate instances* with separate module-level variables.
+`index.html` calls `initFirebase()` on whichever instance it imported; if `standings.js`
+imported a differently-spelled URL, its `getDb()` reads a different `db` that was never set.
 - Symptom: "Firestore unavailable — Expected first argument to collection() to be a CollectionReference" in browser console; page stuck on "Loading standings..."
-- Fix: whenever `firebase-config.js?v=` is bumped in `index.html`, update the same string in line 1 of `standings.js` to match
+- **Resolved structurally as of 2026-07-31:** `firebase-config.js` and `scoring.js` are now
+  imported with **no `?v=` at all** — from `index.html`, `admin.html`, `picks.html`,
+  `standings.js`, `admin.js` and `picks.js` alike. With nothing to keep in sync, the mismatch
+  cannot recur. The `.htaccess` no-cache headers keep both files fresh.
+- **Never re-add a `?v=` to a `firebase-config.js` or `scoring.js` import.** Doing so
+  reintroduces this outage. Entry-point modules (`standings.js`, `admin.js`) are still
+  versioned normally — only shared/stateful modules must stay unversioned.
 
 **3. Wrong tournament status → nothing works**
 Valid statuses are ONLY `"open"`, `"locked"`, `"final"`. Any other value (e.g. `"in-progress"`) is not recognized — auto-refresh won't start, ESPN won't be fetched on schedule.
@@ -503,8 +517,12 @@ match /tournaments/{id} { allow read: if true; allow write: if request.auth != n
 match /tiers/{id}       { allow read: if true; allow write: if request.auth != null; }
 ```
 
-**Step 2 — Verify firebase-config version strings match**
-Open `js/standings.js` line 1. The `?v=` date on `firebase-config.js` must match what `index.html` line ~823 has. If they differ, update standings.js and push.
+**Step 2 — Verify no `?v=` has crept onto a shared module import**
+Run `grep -rn "firebase-config.js?v=\|scoring.js?v=" *.html js/` — it must return **nothing**.
+Any hit means someone re-added a version string to a shared stateful module, which breaks
+`getDb()` and takes the standings page down (see Known Failure Mode 2). Remove it.
+While you're there, confirm one file never carries two different versions across pages:
+`grep -rn "styles.css?v=" *.html` should show the same value on all three.
 
 **Step 3 — Verify tournament record**
 In admin.html or Firestore Console, confirm the tournament has:

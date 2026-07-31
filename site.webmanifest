@@ -1,0 +1,17 @@
+{
+  "name": "Basic Bros Majors Pick'em",
+  "short_name": "BB Pick'em",
+  "description": "The official Basic Bros Majors Pick'em pool site.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a6b3a",
+  "icons": [
+    {
+      "src": "Basic_Bros_Logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

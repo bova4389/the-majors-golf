@@ -6,11 +6,12 @@ Thumbs.db
 .vscode/
 *.code-workspace
 
-# Secrets — never commit real Firebase keys to a public repo
-# Keep firebase-config.js out of git if it has real credentials
-# (use a firebase-config.example.js as a template instead)
-.htaccess
+# NOTE: js/firebase-config.js IS tracked on purpose. A Firebase *web* API key is a
+# public client identifier, not a secret — the site cannot load without it. Access is
+# controlled by Firestore security rules, not by hiding this key.
+# Do NOT add .htaccess here — it is required in the repo so GitHub Actions deploys it
+# (it is Layer 1 of cache busting; see CLAUDE.md).
 
-# Firebase Admin service account key — NEVER commit this
+# Firebase Admin service account key — this one IS a real secret. NEVER commit it.
 service-account.json
 archive-scripts/service-account.json

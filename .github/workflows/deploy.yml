@@ -23,3 +23,18 @@ jobs:
           remote_path: /home/mattbova/basic-bros-pga-pickems.com/
           sftp_only: true
           delete_remote_files: false
+
+      # Second step is required: the action runs `put -r ./* <remote>`, and sftp's glob
+      # does not match leading dots, so ./* silently skips .htaccess. Without this step
+      # the no-cache headers (Layer 1 of cache busting) never reach the server.
+      - name: Deploy .htaccess
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 22
+          local_path: './.htaccess'
+          remote_path: /home/mattbova/basic-bros-pga-pickems.com/
+          sftp_only: true
+          delete_remote_files: false

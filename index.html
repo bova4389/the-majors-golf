@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" href="Basic_Bros_Logo.png">
   <link rel="apple-touch-icon" href="Basic_Bros_Logo.png">
   <link rel="manifest" href="site.webmanifest">
-  <link rel="stylesheet" href="css/styles.css?v=20260528" />
+  <link rel="stylesheet" href="css/styles.css?v=20260731" />
 </head>
 <body>
 
@@ -830,8 +830,9 @@
 
   <!-- ===== FIREBASE + APP SCRIPTS ===== -->
   <script type="module">
-    import { initFirebase } from './js/firebase-config.js?v=20260528';
-    import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings, pgaSbSort, pgaPoolSort, pgaSbEntryFilter, usOpenPoolSort, usOpenSbSort, usOpenSbEntryFilter, usOpenManualRefresh, loadUsOpenScoreboard, loadUsOpenPayouts, theOpenPoolSort, theOpenSbSort, theOpenSbEntryFilter, theOpenManualRefresh, loadTheOpenPayouts, loadTheOpenScoreboard } from './js/standings.js?v=20260731';
+    // firebase-config.js is intentionally imported with NO ?v= — see note at top of js/standings.js
+    import { initFirebase } from './js/firebase-config.js';
+    import { loadStandings, sortBy, manualRefresh, pgaManualRefresh, switchMajorYear, loadMastersPayouts, loadMastersScoreboard, loadSeasonLeaderboard, loadBonusPool, loadRound1Standings, loadRound2Standings, loadRound3Standings, loadRound4Standings, pgaSbSort, pgaPoolSort, pgaSbEntryFilter, usOpenPoolSort, usOpenSbSort, usOpenSbEntryFilter, usOpenManualRefresh, loadUsOpenScoreboard, loadUsOpenPayouts, theOpenPoolSort, theOpenSbSort, theOpenSbEntryFilter, theOpenManualRefresh, loadTheOpenPayouts, loadTheOpenScoreboard } from './js/standings.js?v=20260731b';
 
     initFirebase();
     window.sortBy = sortBy;
@@ -927,7 +928,7 @@
       const container = document.getElementById('playerAnalysisContent');
       if (!container) return;
       try {
-        const { getPlayerAnalysisData } = await import('./js/standings.js?v=20260731');
+        const { getPlayerAnalysisData } = await import('./js/standings.js?v=20260731b');
         const data = await getPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {
@@ -1020,7 +1021,7 @@
       const container = document.getElementById('pgaPlayerAnalysisContent');
       if (!container) return;
       try {
-        const { getPgaPlayerAnalysisData } = await import('./js/standings.js?v=20260731');
+        const { getPgaPlayerAnalysisData } = await import('./js/standings.js?v=20260731b');
         const data = getPgaPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {
@@ -1052,7 +1053,7 @@
       const container = document.getElementById('usOpenPlayerAnalysisContent');
       if (!container) return;
       try {
-        const { getUsOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260731');
+        const { getUsOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260731b');
         const data = getUsOpenPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {
@@ -1084,7 +1085,7 @@
       const container = document.getElementById('theOpenPlayerAnalysisContent');
       if (!container) return;
       try {
-        const { getTheOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260731');
+        const { getTheOpenPlayerAnalysisData } = await import('./js/standings.js?v=20260731b');
         const data = getTheOpenPlayerAnalysisData();
         container.innerHTML = renderPlayerAnalysis(data);
       } catch(e) {

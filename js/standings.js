@@ -1,8 +1,13 @@
-import { getDb } from './firebase-config.js?v=20260528';
+// NOTE: firebase-config.js and scoring.js are imported WITHOUT a ?v= query string,
+// and must stay that way. A query string is part of a module's identity, so a
+// versioned import here would be a different instance than the one index.html
+// initialises — getDb() would return null and every Firestore call would fail.
+// These files are kept fresh by the no-cache headers in .htaccess instead.
+import { getDb } from './firebase-config.js';
 import {
   collection, doc, getDocs, getDoc, query, where, setDoc
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-import { calculateStandings, formatScore, scoreClass } from './scoring.js?v=20260524b';
+import { calculateStandings, formatScore, scoreClass } from './scoring.js';
 
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 let currentTournamentId = null;
@@ -473,35 +478,35 @@ function clearUsOpenPoolPanels() {
   const usOpenTotal = document.getElementById('usopen-total');
   if (usOpenTotal) {
     usOpenTotal.innerHTML = `
-      <div class=”search-bar search-bar-with-btn”>
-        <input type=”text” id=”usOpenStandingsSearch” class=”standings-search” placeholder=”Search entry name or player...” />
-        <button class=”btn btn-analysis” id=”usOpenPlayerAnalysisBtn” onclick=”toggleUsOpenPlayerAnalysis()”>Player Analysis</button>
+      <div class="search-bar search-bar-with-btn">
+        <input type="text" id="usOpenStandingsSearch" class="standings-search" placeholder="Search entry name or player..." />
+        <button class="btn btn-analysis" id="usOpenPlayerAnalysisBtn" onclick="toggleUsOpenPlayerAnalysis()">Player Analysis</button>
       </div>
-      <div id=”usOpenPlayerAnalysisView” class=”player-analysis-view hidden”>
-        <div id=”usOpenPlayerAnalysisContent” class=”pa-content”>
-          <div class=”fp-loading”>Building analysis…</div>
+      <div id="usOpenPlayerAnalysisView" class="player-analysis-view hidden">
+        <div id="usOpenPlayerAnalysisContent" class="pa-content">
+          <div class="fp-loading">Building analysis…</div>
         </div>
       </div>
-      <section class=”table-wrapper” id=”usOpenStandingsTableWrapper”>
-        <div id=”usOpenLoadingMsg” class=”loading-msg”>Loading standings...</div>
-        <table id=”usOpenStandingsTable” class=”standings-table hidden”>
+      <section class="table-wrapper" id="usOpenStandingsTableWrapper">
+        <div id="usOpenLoadingMsg" class="loading-msg">Loading standings...</div>
+        <table id="usOpenStandingsTable" class="standings-table hidden">
           <thead>
             <tr>
-              <th class=”col-rank sortable” data-sort=”rank” onclick=”usOpenPoolSort('total','rank')”>Rank <span class=”sort-icon”></span></th>
-              <th class=”col-name sortable” data-sort=”name” onclick=”usOpenPoolSort('total','name')”>Name <span class=”sort-icon”></span></th>
-              <th class=”col-name col-picks-name sortable” data-sort=”picksName” onclick=”usOpenPoolSort('total','picksName')”>Picks Name <span class=”sort-icon”></span></th>
-              <th class=”col-total sortable” data-sort=”total” onclick=”usOpenPoolSort('total','total')”>Total <span class=”sort-icon”></span></th>
-              <th class=”col-tier”>Tier 1</th>
-              <th class=”col-tier”>Tier 2</th>
-              <th class=”col-tier”>Tier 3</th>
-              <th class=”col-tier”>Tier 4</th>
-              <th class=”col-tier”>Tier 5</th>
-              <th class=”col-tier”>Tier 6</th>
+              <th class="col-rank sortable" data-sort="rank" onclick="usOpenPoolSort('total','rank')">Rank <span class="sort-icon"></span></th>
+              <th class="col-name sortable" data-sort="name" onclick="usOpenPoolSort('total','name')">Name <span class="sort-icon"></span></th>
+              <th class="col-name col-picks-name sortable" data-sort="picksName" onclick="usOpenPoolSort('total','picksName')">Picks Name <span class="sort-icon"></span></th>
+              <th class="col-total sortable" data-sort="total" onclick="usOpenPoolSort('total','total')">Total <span class="sort-icon"></span></th>
+              <th class="col-tier">Tier 1</th>
+              <th class="col-tier">Tier 2</th>
+              <th class="col-tier">Tier 3</th>
+              <th class="col-tier">Tier 4</th>
+              <th class="col-tier">Tier 5</th>
+              <th class="col-tier">Tier 6</th>
             </tr>
           </thead>
-          <tbody id=”usOpenStandingsBody”></tbody>
+          <tbody id="usOpenStandingsBody"></tbody>
         </table>
-        <div id=”usOpenNoDataMsg” class=”no-data hidden”>No picks found for this tournament.</div>
+        <div id="usOpenNoDataMsg" class="no-data hidden">No picks found for this tournament.</div>
       </section>`;
     const searchInput = document.getElementById('usOpenStandingsSearch');
     if (searchInput) {
@@ -515,7 +520,7 @@ function clearUsOpenPoolPanels() {
       });
     }
   }
-  const placeholder = '<p style=”padding:1.5rem;color:#666;font-style:italic;”>Pool standings not yet available for this year.</p>';
+  const placeholder = '<p style="padding:1.5rem;color:#666;font-style:italic;">Pool standings not yet available for this year.</p>';
   ['usopen-day1','usopen-day2','usopen-day3','usopen-day4','usopen-finalpayouts'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.innerHTML = placeholder;

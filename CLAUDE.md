@@ -367,10 +367,13 @@ No rank, no total, no isTop4 — just team name and 6 player/score pairs.
 
 **U.S. Open 2025** (J.J. Spaun -1, Oakmont) — All rounds + payouts + scoreboard ✅ — `USOPEN_2025_TOTAL`, `USOPEN_2025_R1`–`R4` all hardcoded
 
-**The Open Championship 2025** (Scheffler -17, Royal Portrush) — Scoreboard ✅ | Pool standings ❌ not yet hardcoded (`THEOPEN_2025_TOTAL` and rounds still needed)
+**The Open Championship 2025** (Scheffler -17, Royal Portrush) — All rounds + payouts + scoreboard ✅ — `THEOPEN_2025_TOTAL`, `THEOPEN_2025_R1`–`R4` all hardcoded
 
-**U.S. Open 2026** — Next upcoming tournament (ESPN event ID `401811952`)
-**The Open Championship 2026** — Future (ESPN event ID `401811957`)
+**U.S. Open 2026** — All rounds + payouts + scoreboard ✅ — `US_OPEN_2026_TOTAL`, `US_OPEN_2026_R1`–`R4` all hardcoded. Pool winner: Bobby Cross ("Bobby 2")
+
+**The Open Championship 2026** (Royal Birkdale) — All rounds + payouts + scoreboard ✅ — `THE_OPEN_2026_TOTAL`, `THE_OPEN_2026_R1`–`R4` all hardcoded 2026-07-31. Pool winner: Cameron Schnick ("Schnick 2", -22). Registry id `the-open-2026`; the live Firestore tournament (`NRMXw9q99ZBJ4Wwn5Urd`) and its ~47 picks/scores are still present but redundant — clean up once the hardcoded standings are confirmed live.
+
+This was the final major of the 2026 season — all 4 majors (Masters, PGA, U.S. Open, The Open) are now hardcoded. The Season leaderboard tab computes final season standings automatically from these four constants (see `loadSeasonLeaderboard()`) — there is no separate "mark season final" step needed.
 
 ## CSS Gotchas
 
@@ -551,7 +554,7 @@ With status `open` and a future `pickDeadline`, navigating to the major's tab sh
 7. Clean up old Firestore records if desired (tournament, picks, tiers, scores for that tournament)
 
 ### Still needs pool standings hardcoded
-- **The Open Championship 2025** — `THEOPEN_2025_TOTAL` and `THEOPEN_2025_R1`–`R4` not yet added
+- None — all 2025 and 2026 majors are hardcoded as of 2026-07-31.
 
 ## Data Archive System
 
@@ -595,6 +598,8 @@ No dependencies beyond the standard library — `requirements.txt` only lists `r
 ### 2026 archive state
 - **Masters 2026**: scoreboard ✅, picks ✅ (51 entries), standings ✅
 - **PGA 2026**: scoreboard ✅, picks ✅ (41 entries), standings ✅
+- **U.S. Open 2026**: scoreboard ✅, picks ✅ (43 entries), standings ❌ — `archive_standings.py`'s parser reports "found but no entries parsed" for `US_OPEN_2026_*`; the constants use double-quoted strings which the current regex doesn't handle. Needs a parser fix.
+- **The Open 2026**: scoreboard ✅, picks ✅ (47 entries), standings ✅ (archived 2026-07-31)
 
 ### Firebase credentials for scripting
 The web API key in `js/firebase-config.js` works directly with the Firestore REST API:

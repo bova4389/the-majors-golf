@@ -1,0 +1,48 @@
+Rank,Picks Name,Real Name,Total,T1 Golfer,T1 Score,T1 Counts,T2 Golfer,T2 Score,T2 Counts,T3 Golfer,T3 Score,T3 Counts,T4 Golfer,T4 Score,T4 Counts,T5 Golfer,T5 Score,T5 Counts,T6 Golfer,T6 Score,T6 Counts
+1,Jake Bogardus,Jake Bogardus,-12,Scottie Scheffler,-3,true,Jordan Spieth,-2,true,Cameron Smith,5,false,Sungjae Im,-3,true,Max Homa,-1,false,Bubba Watson,-4,true
+2,Myron Mayo,Myron Mayo,-11,Scottie Scheffler,-3,true,Tommy Fleetwood,-3,true,Akshay Bhatia,-1,true,Daniel Berger,-3,true,Denny McCarthy,-1,true,Kevin Yu,6,false
+3,Paul Raymond,Paul Raymond,-9,Scottie Scheffler,-3,true,Viktor Hovland,1,false,Sahith Theegala,-1,true,Phil Mickelson,5,false,Max Homa,-1,true,Bubba Watson,-4,true
+3,Brandon Syde,Brandon Syde,-9,Collin Morikawa,0,true,Patrick Cantlay,-1,true,Will Zalatoris,8,false,Billy Horschel,5,false,Harris English,-4,true,Bubba Watson,-4,true
+5,Robert Stephenson 2,Robert Stephenson,-7,Rory McIlroy,1,true,Jordan Spieth,-2,true,Justin Rose,-6,true,Adam Scott,5,false,Tom Hoge,-1,true,Danny Willett,1,true
+5,Ryne Stone 2,Ryne Stone,-8,Jon Rahm,-3,true,Patrick Cantlay,-1,true,Will Zalatoris,8,false,Keegan Bradley,3,false,Harris English,-4,true,Charl Schwartzel,0,true
+7,Mitch Pletcher,Mitch Pletcher,-6,Scottie Scheffler,-3,true,Min Woo Lee,2,true,Will Zalatoris,8,false,Billy Horschel,5,false,Max Homa,-1,true,Bubba Watson,-4,true
+7,Matthew Tuckfield,Matthew Tuckfield,-3,Scottie Scheffler,-3,true,Russell Henley,3,true,Corey Conners,3,true,Aaron Rai,-2,true,Harris English,-4,true,Jhonattan Vegas,6,false
+7,Cassady Glenn,Cassady Glenn,-6,Ludvig Ã…berg,0,true,Jordan Spieth,-2,true,Will Zalatoris,8,false,Daniel Berger,-3,true,Michael Kim,-1,true,Kevin Yu,6,false
+7,Brandon Syde 2,Brandon Syde,-6,Scottie Scheffler,-3,true,Jordan Spieth,-2,true,Sepp Straka,5,false,Maverick McNealy,1,false,Max Homa,-1,true,Charl Schwartzel,0,true
+11,Erik Vermilyea,Erik Vermilyea,-5,Scottie Scheffler,-3,true,Shane Lowry,9,false,Jason Day,0,true,Billy Horschel,5,false,Max Homa,-1,true,Matt McCarty,-1,true
+11,Morgan 3,Morgan,-5,Rory McIlroy,1,false,JoaquÃ­n Niemann,0,true,Patrick Reed,-3,true,Keegan Bradley,3,false,Michael Kim,-1,true,Matt McCarty,-1,true
+13,Robert Stephenson,Robert Stephenson,-4,Bryson DeChambeau,3,true,Jordan Spieth,-2,true,Sepp Straka,5,false,Phil Mickelson,5,false,Michael Kim,-1,true,Bubba Watson,-4,true
+13,Jaymes Cole,Jaymes Cole,-4,Scottie Scheffler,-3,true,Tommy Fleetwood,-3,true,Tony Finau,4,false,Keegan Bradley,3,true,Max Homa,-1,true,Nick Dunlap,17,false
+13,Robert Stephenson 3,Robert Stephenson,-4,Scottie Scheffler,-3,true,Tommy Fleetwood,-3,true,Sepp Straka,5,true,Sungjae Im,-3,true,Thomas Detry,9,false,Nick Dunlap,17,false
+13,Matt Bova 2,Matt Bova,-4,Bryson DeChambeau,3,false,Jordan Spieth,-2,true,Corey Conners,3,false,Aaron Rai,-2,true,Max Homa,-1,true,Danny Willett,1,true
+13,Morgan Coleman,Morgan Coleman,-1,Scottie Scheffler,-3,true,Tommy Fleetwood,-3,true,Corey Conners,3,true,Keegan Bradley,3,true,Denny McCarthy,-1,true,Jose Luis Ballester (a),10,false
+18,Mike Davis,Mike Davis,-2,Collin Morikawa,0,true,JoaquÃ­n Niemann,0,true,Akshay Bhatia,-1,true,Keegan Bradley,3,false,Rasmus HÃ¸jgaard,2,false,Matt McCarty,-1,true
+18,Nick Bova,Nick Bova,-2,Ludvig Ã…berg,0,true,Min Woo Lee,2,true,Akshay Bhatia,-1,true,Daniel Berger,-3,true,Cameron Young,7,false,Matthieu Pavon,10,false
+18,Ian,Ian,-2,Rory McIlroy,1,true,Tommy Fleetwood,-3,true,Will Zalatoris,8,false,Billy Horschel,5,false,Denny McCarthy,-1,true,Danny Willett,1,true
+18,Ryne Stone,Ryne Stone,-2,Scottie Scheffler,-3,true,JoaquÃ­n Niemann,0,true,Cameron Smith,5,false,Keegan Bradley,3,false,J.T. Poston,1,true,Charl Schwartzel,0,true
+22,Chris Schumann,Chris Schumann,-1,Rory McIlroy,1,true,JoaquÃ­n Niemann,0,true,Akshay Bhatia,-1,true,Taylor Pendrith,8,false,Max Homa,-1,true,Nick Dunlap,17,false
+22,Bobby Cross,Bobby Cross,-1,Scottie Scheffler,-3,true,Viktor Hovland,1,true,Wyndham Clark,2,true,Adam Scott,5,false,Max Homa,-1,true,Adam Schenk,4,false
+22,Jeff Mersch,Jeff Mersch,-1,Scottie Scheffler,-3,true,Min Woo Lee,2,true,Sepp Straka,5,false,Maverick McNealy,1,true,Denny McCarthy,-1,true,Matthieu Pavon,10,false
+22,Tim Hurst,Tim Hurst,-1,Collin Morikawa,0,true,Min Woo Lee,2,true,Sepp Straka,5,false,Aaron Rai,-2,true,Nicolai HÃ¸jgaard,6,false,Matt McCarty,-1,true
+22,Jeff Bagnasco,Jeff Bagnasco,4,Rory McIlroy,1,true,Tommy Fleetwood,-3,true,Cameron Smith,5,true,Adam Scott,5,true,Cameron Young,7,false,Bubba Watson,-4,true
+22,Ron Pannullo,Ron Pannullo,-1,Bryson DeChambeau,3,true,Viktor Hovland,1,true,Cameron Smith,5,false,Adam Scott,5,false,Max Homa,-1,true,Bubba Watson,-4,true
+28,Ed Angulo 2,Ed Angulo,0,Collin Morikawa,0,true,JoaquÃ­n Niemann,0,true,Sepp Straka,5,false,J.J. Spaun,3,false,Michael Kim,-1,true,Danny Willett,1,true
+28,Nathan Wood,Nathan Wood,0,Rory McIlroy,1,true,Min Woo Lee,2,true,Tony Finau,4,false,Matt Fitzpatrick,1,true,Austin Eckroat,6,false,Bubba Watson,-4,true
+28,Ben Oliva,Ben Oliva,0,Justin Thomas,-2,true,Tommy Fleetwood,-3,true,Sergio Garcia,4,true,Billy Horschel,5,false,Nicolas Echavarria,12,false,Danny Willett,1,true
+31,Kyle Sheldon,Kyle Sheldon,6,Scottie Scheffler,-3,true,Tommy Fleetwood,-3,true,Cameron Smith,5,true,Adam Scott,5,true,Rasmus HÃ¸jgaard,2,true,Kevin Yu,6,false
+31,Bobby Cross 2,Bobby Cross,1,Bryson DeChambeau,3,true,Min Woo Lee,2,true,Will Zalatoris,8,false,Billy Horschel,5,false,Michael Kim,-1,true,Davis Riley,-3,true
+31,Gregory J Smith,Gregory J Smith,1,Rory McIlroy,1,true,Jordan Spieth,-2,true,Will Zalatoris,8,false,Keegan Bradley,3,true,Max Homa,-1,true,Rafael Campos,4,false
+34,Morgan 2,Morgan,2,Collin Morikawa,0,true,Russell Henley,3,true,Sepp Straka,5,false,Byeong Hun An,-1,true,Laurie Canter,10,false,Charl Schwartzel,0,true
+35,Sean Susa,Sean Susa,4,Scottie Scheffler,-3,true,JoaquÃ­n Niemann,0,true,Sepp Straka,5,false,Keegan Bradley,3,true,Cameron Young,7,false,Adam Schenk,4,true
+35,Luke S,Luke S,4,Xander Schauffele,-1,true,Robert MacIntyre,6,true,Will Zalatoris,8,false,Keegan Bradley,3,true,Christiaan Bezuidenhout,7,false,Bubba Watson,-4,true
+37,Joe Bushey,Joe Bushey,5,Rory McIlroy,1,true,Shane Lowry,9,false,Sepp Straka,5,true,J.J. Spaun,3,true,Nicolas Echavarria,12,false,Bubba Watson,-4,true
+37,Sarah Crowell,Sarah Crowell,5,Scottie Scheffler,-3,true,Jordan Spieth,-2,true,Cameron Smith,5,true,Adam Scott,5,true,Cameron Young,7,false,Matthieu Pavon,10,false
+37,Zach DelGandio,Zach DelGandio,5,Collin Morikawa,0,true,Russell Henley,3,true,Sepp Straka,5,false,Keegan Bradley,3,true,Denny McCarthy,-1,true,Kevin Yu,6,false
+37,Jeff Stout,Jeff Stout,5,Scottie Scheffler,-3,true,Patrick Cantlay,-1,true,Will Zalatoris,8,false,Adam Scott,5,true,Thomas Detry,9,false,Fred Couples,4,true
+41,Jake Hammer,Jake Hammer,6,Bryson DeChambeau,3,true,Shane Lowry,9,false,Wyndham Clark,2,true,Adam Scott,5,true,Cam Davis,9,false,Brian Campbell,-4,true
+41,Cody Esbrandt,Cody Esbrandt,6,Rory McIlroy,1,true,Robert MacIntyre,6,false,Corey Conners,3,true,Sam Burns,3,true,Michael Kim,-1,true,Matthieu Pavon,10,false
+41,Joseph Woodworth,Joseph Woodworth,6,Rory McIlroy,1,true,Russell Henley,3,true,Will Zalatoris,8,false,Keegan Bradley,3,true,Denny McCarthy,-1,true,Kevin Yu,6,false
+44,Ed Angulo,Ed Angulo,9,Rory McIlroy,1,true,JoaquÃ­n Niemann,0,true,Sepp Straka,5,true,J.J. Spaun,3,true,Thomas Detry,9,false,Nick Dunlap,17,false
+45,Matt Bova,Matt Bova,13,Collin Morikawa,0,true,Russell Henley,3,true,Sepp Straka,5,true,Phil Mickelson,5,true,Thomas Detry,9,false,Jhonattan Vegas,6,false
+45,Karsten Meyer,Karsten Meyer,18,Bryson DeChambeau,3,true,Viktor Hovland,1,true,Cameron Smith,5,true,Phil Mickelson,5,true,Christiaan Bezuidenhout,7,false,Adam Schenk,4,true
+47,Jacob Stout,Jacob Stout,15,Brooks Koepka,5,true,JoaquÃ­n Niemann,0,true,Cameron Smith,5,true,Billy Horschel,5,true,Cam Davis,9,false,Nick Dunlap,17,false

@@ -1,0 +1,36 @@
+Rank,Picks Name,Real Name,Total,T1 Golfer,T1 Score,T1 Counts,T2 Golfer,T2 Score,T2 Counts,T3 Golfer,T3 Score,T3 Counts,T4 Golfer,T4 Score,T4 Counts,T5 Golfer,T5 Score,T5 Counts,T6 Golfer,T6 Score,T6 Counts
+1,Bob Cross 2,Bobby Cross,18,Xander Schauffele,6,true,Brooks Koepka,6,true,J.J. Spaun,-1,true,Tom Kim,9,false,Emiliano Grillo,7,true,Brian Campbell,34,false
+2,Zach DelGandio,Zach DelGandio,21,Scottie Scheffler,4,true,Viktor Hovland,2,true,Taylor Pendrith,11,false,Max Greyserman,8,true,Emiliano Grillo,7,true,Jinichiro Kozuma,18,false
+3,Bob Cross 1,Bobby Cross,33,Scottie Scheffler,4,true,Viktor Hovland,2,true,Wyndham Clark,16,true,Marc Leishman,11,true,Erik van Rooyen,18,false,Nick Dunlap,22,false
+4,Jeffrey Mersch,Jeffrey Mersch,34,Scottie Scheffler,4,true,Ben Griffin,5,true,Akshay Bhatia,20,false,Bud Cauley,18,true,Emiliano Grillo,7,true,Guido Migliozzi,36,false
+4,Sean Susa 2,Sean Susa,34,Bryson DeChambeau,20,false,Ben Griffin,5,true,Aaron Rai,9,true,Ryan Gerard,14,true,Christiaan Bezuidenhout,6,true,Jose Luis Ballester Barrio,24,false
+6,Sean Susa 1,Sean Susa,35,Scottie Scheffler,4,true,Harris English,18,false,Aaron Rai,9,true,Davis Thompson,16,true,Christiaan Bezuidenhout,6,true,Matt Vogt (a),46,false
+6,Ron Pannullo,Ron Pannullo,35,Bryson DeChambeau,20,false,Viktor Hovland,2,true,Adam Scott,6,true,Tom Kim,9,true,Cam Davis,22,false,Lanto Griffin,18,true
+8,Nathan Wood,Nathan Wood,36,Scottie Scheffler,4,true,Patrick Cantlay,16,true,Aaron Rai,9,true,Lucas Glover,16,false,Emiliano Grillo,7,true,Nick Dunlap,22,false
+8,joseph woodworth,joseph woodworth,36,Scottie Scheffler,4,true,Shane Lowry,34,false,Cameron Young,3,true,Michael Kim,14,true,Matthieu Pavon,22,false,Justin Hastings (a),15,true
+10,Mike Davis 1,Mike Davis,37,Scottie Scheffler,4,true,Shane Lowry,34,false,Matt Fitzpatrick,11,true,Davis Thompson,16,true,Christiaan Bezuidenhout,6,true,Mason Howell (a),26,false
+11,Greg Smith,Greg Smith,38,Scottie Scheffler,4,true,Hideki Matsuyama,12,true,Dustin Johnson,20,false,Tom Kim,9,true,Jhonattan Vegas,13,true,Matt Vogt (a),46,false
+11,Paul Raymond,Paul Raymond,38,Scottie Scheffler,4,true,Keegan Bradley,9,true,Matt Fitzpatrick,11,true,Michael Kim,14,true,Davis Riley,30,false,Edoardo Molinari,16,false
+13,Matthew Tuckfield,Matthew Tuckfield,39,Scottie Scheffler,4,true,Patrick Reed,8,true,Cameron Young,3,true,Eric Cole,24,true,Davis Riley,30,false,Jose Luis Ballester Barrio,24,false
+14,Mitch Pletcher,Mitch Pletcher,42,Scottie Scheffler,4,true,Shane Lowry,34,false,Jason Day,8,true,Michael Kim,14,true,Cam Davis,22,false,Edoardo Molinari,16,true
+15,Myron Mayo,Myron Mayo,43,Scottie Scheffler,4,true,Shane Lowry,34,false,Ryan Fox,7,true,Michael Kim,14,true,Erik van Rooyen,18,true,Nick Dunlap,22,false
+15,Matt Bova,Matt Bova,43,Scottie Scheffler,4,true,Justin Rose,28,false,Adam Scott,6,true,Gary Woodland,20,true,Jhonattan Vegas,13,true,Mason Howell (a),26,false
+17,Cody Esbrandt,Cody Esbrandt,44,Tommy Fleetwood,18,true,Tyrrell Hatton,3,true,Aaron Rai,9,true,Michael Kim,14,true,Matthieu Pavon,22,false,Nick Dunlap,22,false
+18,Jeff Bagnasco,Jeff Bagnasco,45,Jon Rahm,4,true,Ben Griffin,5,true,Min Woo Lee,18,true,Stephan Jaeger,18,true,Mark Hubbard,18,false,Alistair Docherty,36,false
+19,Jake Bogardus,Jake Bogardus,46,Scottie Scheffler,4,true,Si Woo Kim,12,true,Min Woo Lee,18,false,Tom Hoge,16,true,Cam Davis,22,false,Adam Schenk,14,true
+20,Kyle Sheldon,Kyle Sheldon,47,Scottie Scheffler,4,true,Sepp Straka,22,false,Taylor Pendrith,11,true,Mackenzie Hughes,14,true,Erik van Rooyen,18,true,Jinichiro Kozuma,18,false
+20,Keith Waters,Keith Waters,47,Scottie Scheffler,4,true,Corey Conners,156,false,Aaron Rai,9,true,Bud Cauley,18,true,Davis Riley,30,false,Edoardo Molinari,16,true
+22,Nick Bova,Nick Bova,48,Scottie Scheffler,4,true,Brooks Koepka,6,true,Akshay Bhatia,20,true,Gary Woodland,20,false,Erik van Rooyen,18,true,Frederic Lacroix,26,false
+22,Robert Stephenson,Robert Stephenson,48,Bryson DeChambeau,20,true,Viktor Hovland,6,true,Wyndham Clark,16,true,Gary Woodland,20,false,Matthieu Pavon,22,false,Thriston Lawrence,6,true
+24,Ryne Stone,Ryne Stone,51,Scottie Scheffler,4,true,Shane Lowry,34,false,Daniel Berger,13,true,Bud Cauley,18,true,Davis Riley,30,false,Edoardo Molinari,16,true
+25,Erik Vermilyea,Erik Vermilyea,52,Scottie Scheffler,4,true,Hideki Matsuyama,12,true,Brian Harman,18,true,Eric Cole,24,false,Erik van Rooyen,18,true,Zac Blair,22,false
+25,Jason Damiani,Jason Damiani,52,Scottie Scheffler,4,true,Shane Lowry,34,true,Taylor Pendrith,11,true,Carlos Ortiz,3,true,Matt McCarty,40,false,Brian Campbell,34,false
+27,Mike Davis 2,Mike Davis,53,Bryson DeChambeau,20,true,Tony Finau,11,true,Akshay Bhatia,20,false,Michael Kim,14,true,Chris Gotterup,8,true,Nick Dunlap,22,false
+28,Robert Stephenson 2,Robert Stephenson,54,Scottie Scheffler,4,true,Shane Lowry,34,false,Akshay Bhatia,20,true,Matt Wallace,8,true,Matthieu Pavon,22,true,Alvaro Ortiz,34,false
+28,Karsten Meyer,Karsten Meyer,54,Bryson DeChambeau,20,true,Viktor Hovland,2,true,Wyndham Clark,16,true,Thorbjorn Olesen,16,true,Matthieu Pavon,22,false,Jackson Buchanan,20,false
+30,Jacob D Hammer 1,Jacob Hammer,57,Bryson DeChambeau,20,true,Shane Lowry,34,false,Ryan Fox,7,true,Phil Mickelson,16,true,Davis Riley,30,false,Ryan McCormick,14,true
+31,Morgan C,Morgan,60,Scottie Scheffler,4,true,Sepp Straka,22,true,Denny McCarthy,16,true,Bud Cauley,18,true,Matt McCarty,40,false,Guido Migliozzi,36,false
+31,Morgan 2,Morgan,60,Bryson DeChambeau,20,true,Shane Lowry,34,false,Daniel Berger,13,true,Marc Leishman,11,true,Matt McCarty,40,false,Edoardo Molinari,16,true
+33,Cassady Glenn,Cassady Glenn,61,Bryson DeChambeau,20,true,Patrick Cantlay,16,true,Matt Fitzpatrick,11,true,Ryan Gerard,14,true,Matt McCarty,40,false,Guido Migliozzi,36,false
+34,Chris Schumann,Chris Schumann,63,Bryson DeChambeau,20,true,Corey Conners,156,false,Aaron Rai,9,true,Gary Woodland,20,true,Cam Davis,22,false,Ryan McCormick,14,true
+35,Jacob D Hammer 2,Jacob Hammer,66,Scottie Scheffler,4,true,Shane Lowry,34,true,Nick Taylor,8,true,Gary Woodland,20,true,Matt McCarty,40,false,Brian Campbell,34,false

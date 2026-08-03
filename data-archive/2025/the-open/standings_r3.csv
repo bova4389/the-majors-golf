@@ -1,0 +1,35 @@
+Rank,Picks Name,Real Name,Total,T1 Golfer,T1 Score,T1 Counts,T2 Golfer,T2 Score,T2 Counts,T3 Golfer,T3 Score,T3 Counts,T4 Golfer,T4 Score,T4 Counts,T5 Golfer,T5 Score,T5 Counts,T6 Golfer,T6 Score,T6 Counts
+1,Nathan Wood,Nathan Wood,-15,Scottie Scheffler,-4,true,Russell Henley,-6,true,Sungjae Im,-4,true,J.T. Poston,10,false,Jhonattan Vegas,-1,true,Shaun Norris,10,false
+2,Bob Cross,Bob Cross,-11,Scottie Scheffler,-4,true,Patrick Reed,10,false,Wyndham Clark,-5,true,Akshay Bhatia,-1,true,Jhonattan Vegas,-1,true,Rikuya Hoshino,10,false
+3,Mike Davis,Mike Davis,-10,Ludvig Aberg,-3,true,Justin Rose,-3,true,Tony Finau,1,false,Akshay Bhatia,-1,true,Kristoffer Reitan,-3,true,Ethan Fang (a),10,false
+4,Erik Vermilyea,Erik Vermilyea,-9,Scottie Scheffler,-4,true,Russell Henley,-6,true,Brian Harman,2,true,Akshay Bhatia,-1,true,Nico Echavarria,10,false,Ryggs Johnston,3,false
+4,Ron Pannullo,Ron Pannullo,-9,Bryson DeChambeau,-3,true,Justin Rose,-3,true,Maverick McNealy,-2,true,Sergio Garcia,-1,true,Mackenzie Hughes,10,false,Francesco Molinari,0,false
+4,Jake Bogardus,Jake Bogardus,-9,Rory McIlroy,-5,true,Justin Rose,-3,true,Rasmus Hojgaard,-1,true,Thorbjorn Olesen,10,false,Matthias Schmid,8,false,Francesco Molinari,0,true
+4,Sean Susa 2,Sean Susa,-9,Rory McIlroy,-5,true,Chris Gotterup,-3,true,Taylor Pendrith,10,false,Thriston Lawrence,-3,true,Sahith Theegala,10,false,Jacob Skov Olesen,2,true
+8,Cassady Glenn,Cassady Glenn,-8,Scottie Scheffler,-4,true,Jordan Spieth,1,true,Maverick McNealy,-2,true,Marco Penge,10,false,Kristoffer Reitan,-3,true,Sebastian Soderberg,4,false
+9,Nick Bova,Nick Bova,-6,Jon Rahm,-2,true,Brooks Koepka,10,false,Nicolai Hojgaard,-2,true,Akshay Bhatia,-1,true,Jhonattan Vegas,-1,true,Shaun Norris,10,false
+9,Paul Raymond,Paul Raymond,-6,Scottie Scheffler,-4,true,Justin Rose,-3,true,Tony Finau,1,true,Thorbjorn Olesen,10,false,Padraig Harrington,10,false,Francesco Molinari,0,true
+9,Ryne Stone 2,Ryne Stone,-6,Jon Rahm,-2,true,Russell Henley,-6,true,Nicolai Hojgaard,-2,true,Marco Penge,10,false,Matteo Manassero,10,false,Sebastian Soderberg,4,true
+12,Gregory J Smith,Gregory J Smith,-4,Jon Rahm,-2,true,Ben Griffin,10,false,J.J. Spaun,-3,true,Akshay Bhatia,-1,true,Padraig Harrington,10,false,Jacob Skov Olesen,2,true
+13,Jacob D Hammer,Jacob D Hammer,-3,Rory McIlroy,-5,true,Brooks Koepka,10,true,Wyndham Clark,-5,true,Lucas Glover,-3,true,Sahith Theegala,10,false,Connor Graham (a),10,false
+14,Ryne Stone,Ryne Stone,-2,Scottie Scheffler,-4,true,Jordan Spieth,1,true,Si Woo Kim,10,false,Dean Burmester,5,false,Kristoffer Reitan,-3,true,Sebastian Soderberg,4,true
+14,Luke S,Luke S,-2,Tommy Fleetwood,-2,true,Cameron Young,10,false,Jordan Smith,1,true,Akshay Bhatia,-1,true,Nico Echavarria,10,false,Francesco Molinari,0,true
+16,Ethan DelGandio,Ethan DelGandio,-1,Rory McIlroy,-5,true,Joaquin Niemann,10,true,Wyndham Clark,-5,true,Akshay Bhatia,-1,true,Padraig Harrington,10,false,K.J. Choi,10,false
+16,Morgan Coleman,Morgan Coleman,-1,Scottie Scheffler,-4,true,Russell Henley,-6,true,Daniel Berger,-1,true,Denny McCarthy,10,true,Matt McCarty,10,false,Shaun Norris,10,false
+18,Jeff Bagnasco,Jeff Bagnasco,0,Tommy Fleetwood,-2,true,Jason Day,10,false,J.J. Spaun,-3,true,Andrew Novak,3,true,Antoine Rozner,2,true,Justin Hastings (a),10,false
+18,Matt Bova 2,Matt Bova,0,Rory McIlroy,-5,true,Patrick Cantlay,10,true,Wyndham Clark,-5,true,Michael Kim,10,false,Mackenzie Hughes,10,false,Francesco Molinari,0,true
+20,Chris Schumann,Chris Schumann,1,Scottie Scheffler,-4,true,Justin Rose,-3,true,Cameron Smith,10,true,Thorbjorn Olesen,10,false,Sahith Theegala,10,false,Takumi Kanaya,-2,true
+21,Cody Esbrandt,Cody Esbrandt,3,Viktor Hovland,2,true,Joaquin Niemann,10,false,Brian Harman,2,true,Byeong Hun An,10,false,Marc Leishman,-3,true,Jacob Skov Olesen,2,true
+22,Zach DelGandio,Zach DelGandio,4,Rory McIlroy,-5,true,Jordan Spieth,1,true,Maverick McNealy,-2,true,Marco Penge,10,true,Padraig Harrington,10,false,Rikuya Hoshino,10,false
+23,Kyle Sheldon,Kyle Sheldon,5,Rory McIlroy,-5,true,Jordan Spieth,1,true,Rickie Fowler,-1,true,Michael Kim,10,true,Zach Johnson,10,false,Darren Clarke,10,false
+23,Jake Hammer 2,Jacob D Hammer,5,Bryson DeChambeau,-3,true,Jordan Spieth,1,true,Cameron Smith,10,true,Lucas Glover,-3,true,Brian Campbell,10,false,Young-han Song,10,false
+25,Bob Cross 2,Bob Cross,6,Viktor Hovland,2,true,Brooks Koepka,10,true,J.J. Spaun,-3,true,Chris Kirk,10,false,Nico Echavarria,10,false,Oliver Lindell,-3,true
+25,Keith Waters,Keith Waters,6,Jon Rahm,-2,true,Sam Burns,1,true,J.J. Spaun,-3,true,Max Greyserman,10,true,Matthieu Pavon,10,false,Justin Hastings (a),10,false
+27,Robert Stephenson 2,Robert Stephenson,9,Viktor Hovland,2,true,Jordan Spieth,1,true,Brian Harman,2,true,Thorbjorn Olesen,10,false,Brian Campbell,10,false,Sebastian Soderberg,4,true
+28,Sean Susa,Sean Susa,10,Robert MacIntyre,-1,true,Keegan Bradley,-1,true,Si Woo Kim,10,true,Denny McCarthy,10,false,Matthew Jordan,2,true,Ethan Fang (a),10,false
+29,Myron Mayo,Myron Mayo,17,Jon Rahm,-2,true,Brooks Koepka,10,true,Rickie Fowler,-1,true,Thorbjorn Olesen,10,true,Sahith Theegala,10,false,Darren Clarke,10,false
+29,Matthew Tuckfield,Matthew Tuckfield,17,Scottie Scheffler,-4,true,Sam Burns,1,true,Tom McKibbin,10,true,Marco Penge,10,true,John Catlin,10,false,Curtis Luck,10,false
+31,Robert Stephenson,Robert Stephenson,18,Shane Lowry,3,true,Brooks Koepka,10,true,Wyndham Clark,-5,true,J.T. Poston,10,true,Matthieu Pavon,10,false,Julien Guerrier,10,false
+31,Jeffrey Mersch,Jeffrey Mersch,18,Scottie Scheffler,-4,true,Ben Griffin,10,true,Tom McKibbin,10,true,Max Greyserman,10,false,Antoine Rozner,2,true,Shaun Norris,10,false
+33,Mitch Pletcher,Mitch Pletcher,21,Scottie Scheffler,-4,true,Patrick Reed,10,true,Cameron Smith,10,true,Michael Kim,10,false,Phil Mickelson,5,true,Ryan Peake,10,false
+34,Matt Bova,Matt Bova,28,Jon Rahm,-2,true,Joaquin Niemann,10,true,Si Woo Kim,10,true,Carlos Ortiz,10,true,Matt McCarty,10,false,Shaun Norris,10,false

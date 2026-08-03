@@ -6,6 +6,10 @@ Thumbs.db
 .vscode/
 *.code-workspace
 
+# Python bytecode
+__pycache__/
+*.pyc
+
 # NOTE: js/firebase-config.js IS tracked on purpose. A Firebase *web* API key is a
 # public client identifier, not a secret — the site cannot load without it. Access is
 # controlled by Firestore security rules, not by hiding this key.
@@ -15,3 +19,20 @@ Thumbs.db
 # Firebase Admin service account key — this one IS a real secret. NEVER commit it.
 service-account.json
 archive-scripts/service-account.json
+
+# ─── ENTRANT PII — NEVER COMMIT ANY OF THIS ─────────────────────────────────
+# This repo is PUBLIC, and deploy.yml uploads ./* to the public webroot. Anything
+# committed here is published twice over: readable in git history forever, and
+# downloadable from basic-bros-pga-pickems.com.
+#
+# These files hold real entrant email addresses and phone numbers (~137 unique
+# emails and ~131 phone numbers as of 2026-07-31). Committing them would be a far
+# worse leak than the Firestore exposure described under "Priority: PII Data Split"
+# in CLAUDE.md, because it needs no API call at all — just a URL.
+#
+# The non-PII archives (standings_*.csv, scoreboard.csv, the ESPN/scores raw JSON)
+# ARE tracked: they contain only names and golfer picks, which the public
+# leaderboard already displays.
+data-archive/**/picks.csv
+data-archive/*picks_raw*.json
+Picks/

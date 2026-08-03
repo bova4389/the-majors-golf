@@ -1,0 +1,4222 @@
+{
+  "name": "projects/basic-bros-majors-golf/databases/(default)/documents/scores/Y4mgiIA4RJjF6JLaHuH0",
+  "fields": {
+    "Corey Conners": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "1"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "3"
+          },
+          "score": {
+            "integerValue": "5"
+          },
+          "r2": {
+            "integerValue": "2"
+          },
+          "position": {
+            "stringValue": "T23"
+          },
+          "r1": {
+            "integerValue": "-1"
+          }
+        }
+      }
+    },
+    "Pierceson Coody": {
+      "mapValue": {
+        "fields": {
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "1"
+          },
+          "score": {
+            "integerValue": "5"
+          },
+          "r3": {
+            "integerValue": "1"
+          },
+          "r1": {
+            "integerValue": "2"
+          },
+          "r2": {
+            "integerValue": "1"
+          },
+          "position": {
+            "stringValue": "T23"
+          }
+        }
+      }
+    },
+    "Nathan Kimsey": {
+      "mapValue": {
+        "fields": {
+          "score": {
+            "integerValue": "6"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r1": {
+            "integerValue": "6"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "0"
+          }
+        }
+      }
+    },
+    "Marek Fleming": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "4"
+          },
+          "r4": {
+            "integerValue": "2"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "score": {
+            "integerValue": "10"
+          },
+          "r2": {
+            "integerValue": "2"
+          },
+          "position": {
+            "stringValue": "T56"
+          },
+          "r1": {
+            "integerValue": "2"
+          }
+        }
+      }
+    },
+    "Dustin Johnson": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "1"
+          },
+          "r4": {
+            "integerValue": "2"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "score": {
+            "integerValue": "6"
+          },
+          "r2": {
+            "integerValue": "7"
+          },
+          "position": {
+            "stringValue": "T32"
+          },
+          "r1": {
+            "integerValue": "-4"
+          }
+        }
+      }
+    },
+    "Chris Gotterup": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "5"
+          },
+          "r2": {
+            "integerValue": "-1"
+          },
+          "position": {
+            "stringValue": "T43"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "1"
+          },
+          "score": {
+            "integerValue": "8"
+          },
+          "r3": {
+            "integerValue": "3"
+          }
+        }
+      }
+    },
+    "Harry Hall": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "4"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "7"
+          },
+          "score": {
+            "integerValue": "11"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r3": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "Peter Uihlein": {
+      "mapValue": {
+        "fields": {
+          "r2": {
+            "integerValue": "0"
+          },
+          "position": {
+            "stringValue": "T56"
+          },
+          "r1": {
+            "integerValue": "4"
+          },
+          "r3": {
+            "integerValue": "10"
+          },
+          "r4": {
+            "integerValue": "-4"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "score": {
+            "integerValue": "10"
+          }
+        }
+      }
+    },
+    "Ben Silverman": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "8"
+          },
+          "r2": {
+            "integerValue": "4"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r1": {
+            "integerValue": "4"
+          }
+        }
+      }
+    },
+    "Sam Burns": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "1"
+          },
+          "score": {
+            "integerValue": "-3"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "-3"
+          },
+          "position": {
+            "stringValue": "2"
+          },
+          "r2": {
+            "integerValue": "-2"
+          },
+          "r1": {
+            "integerValue": "1"
+          }
+        }
+      }
+    },
+    "Mason Howell": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "8"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "0"
+          },
+          "r1": {
+            "integerValue": "8"
+          }
+        }
+      }
+    },
+    "Billy Horschel": {
+      "mapValue": {
+        "fields": {
+          "score": {
+            "integerValue": "5"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r1": {
+            "integerValue": "3"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "2"
+          }
+        }
+      }
+    },
+    "Jason Day": {
+      "mapValue": {
+        "fields": {
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "nullValue": null
+          },
+          "r1": {
+            "integerValue": "7"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "7"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "Robert MacIntyre": {
+      "mapValue": {
+        "fields": {
+          "score": {
+            "integerValue": "7"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "0"
+          },
+          "r3": {
+            "integerValue": "3"
+          },
+          "r1": {
+            "integerValue": "0"
+          },
+          "position": {
+            "stringValue": "T39"
+          },
+          "r2": {
+            "integerValue": "4"
+          }
+        }
+      }
+    },
+    "Brandon Holtz": {
+      "mapValue": {
+        "fields": {
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "10"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r1": {
+            "integerValue": "6"
+          },
+          "r2": {
+            "integerValue": "4"
+          },
+          "position": {
+            "stringValue": "-"
+          }
+        }
+      }
+    },
+    "Laurie Canter": {
+      "mapValue": {
+        "fields": {
+          "position": {
+            "stringValue": "T43"
+          },
+          "r2": {
+            "integerValue": "2"
+          },
+          "r1": {
+            "integerValue": "2"
+          },
+          "r3": {
+            "integerValue": "1"
+          },
+          "score": {
+            "integerValue": "8"
+          },
+          "r4": {
+            "integerValue": "3"
+          },
+          "status": {
+            "stringValue": "active"
+          }
+        }
+      }
+    },
+    "Cameron Young": {
+      "mapValue": {
+        "fields": {
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "3"
+          },
+          "score": {
+            "integerValue": "8"
+          },
+          "r3": {
+            "integerValue": "3"
+          },
+          "r1": {
+            "integerValue": "2"
+          },
+          "r2": {
+            "integerValue": "0"
+          },
+          "position": {
+            "stringValue": "T43"
+          }
+        }
+      }
+    },
+    "Chandler Phillips": {
+      "mapValue": {
+        "fields": {
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "9"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r1": {
+            "integerValue": "4"
+          },
+          "r2": {
+            "integerValue": "5"
+          },
+          "position": {
+            "stringValue": "-"
+          }
+        }
+      }
+    },
+    "Zac Blair": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "1"
+          },
+          "position": {
+            "stringValue": "T32"
+          },
+          "r2": {
+            "integerValue": "0"
+          },
+          "score": {
+            "integerValue": "6"
+          },
+          "r4": {
+            "integerValue": "3"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r3": {
+            "integerValue": "2"
+          }
+        }
+      }
+    },
+    "Brandon Wu": {
+      "mapValue": {
+        "fields": {
+          "score": {
+            "integerValue": "7"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r1": {
+            "integerValue": "8"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "-1"
+          }
+        }
+      }
+    },
+    "Ludvig Åberg": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "-1"
+          },
+          "r2": {
+            "integerValue": "2"
+          },
+          "position": {
+            "stringValue": "T17"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "-4"
+          },
+          "score": {
+            "integerValue": "3"
+          },
+          "r3": {
+            "integerValue": "6"
+          }
+        }
+      }
+    },
+    "Graeme McDowell": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "6"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "6"
+          },
+          "score": {
+            "integerValue": "12"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "r3": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "Tyrrell Hatton": {
+      "mapValue": {
+        "fields": {
+          "r2": {
+            "integerValue": "-2"
+          },
+          "position": {
+            "stringValue": "T7"
+          },
+          "r1": {
+            "integerValue": "4"
+          },
+          "r3": {
+            "integerValue": "2"
+          },
+          "r4": {
+            "integerValue": "-3"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "score": {
+            "integerValue": "1"
+          }
+        }
+      }
+    },
+    "Marcelo Rozo": {
+      "mapValue": {
+        "fields": {
+          "score": {
+            "integerValue": "8"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r1": {
+            "integerValue": "4"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "4"
+          }
+        }
+      }
+    },
+    "Aaron Rai": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "4"
+          },
+          "r2": {
+            "integerValue": "-3"
+          },
+          "position": {
+            "stringValue": "T11"
+          },
+          "r4": {
+            "integerValue": "-1"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "score": {
+            "integerValue": "2"
+          },
+          "r3": {
+            "integerValue": "2"
+          }
+        }
+      }
+    },
+    "Keith Mitchell": {
+      "mapValue": {
+        "fields": {
+          "position": {
+            "stringValue": "T4"
+          },
+          "r2": {
+            "integerValue": "0"
+          },
+          "r1": {
+            "integerValue": "0"
+          },
+          "r3": {
+            "integerValue": "0"
+          },
+          "score": {
+            "integerValue": "0"
+          },
+          "r4": {
+            "integerValue": "0"
+          },
+          "status": {
+            "stringValue": "active"
+          }
+        }
+      }
+    },
+    "Shane Lowry": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "6"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "3"
+          },
+          "r1": {
+            "integerValue": "3"
+          }
+        }
+      }
+    },
+    "Robbie Higgins": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "12"
+          },
+          "r2": {
+            "integerValue": "7"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "19"
+          },
+          "r3": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "Padraig Harrington": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "11"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "4"
+          },
+          "r1": {
+            "integerValue": "7"
+          }
+        }
+      }
+    },
+    "Jacob Bridgeman": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "4"
+          },
+          "r4": {
+            "integerValue": "-1"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "score": {
+            "integerValue": "7"
+          },
+          "r2": {
+            "integerValue": "1"
+          },
+          "position": {
+            "stringValue": "T39"
+          },
+          "r1": {
+            "integerValue": "3"
+          }
+        }
+      }
+    },
+    "Emiliano Grillo": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "3"
+          },
+          "position": {
+            "stringValue": "T23"
+          },
+          "r2": {
+            "integerValue": "0"
+          },
+          "score": {
+            "integerValue": "5"
+          },
+          "r4": {
+            "integerValue": "5"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r3": {
+            "integerValue": "-3"
+          }
+        }
+      }
+    },
+    "Eric Lee": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "4"
+          },
+          "position": {
+            "stringValue": "T63"
+          },
+          "r2": {
+            "integerValue": "0"
+          },
+          "score": {
+            "integerValue": "13"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "1"
+          },
+          "r3": {
+            "integerValue": "8"
+          }
+        }
+      }
+    },
+    "Nick Hardy": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "12"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "3"
+          },
+          "r1": {
+            "integerValue": "9"
+          }
+        }
+      }
+    },
+    "Ryan Fox": {
+      "mapValue": {
+        "fields": {
+          "position": {
+            "stringValue": "T23"
+          },
+          "r2": {
+            "integerValue": "3"
+          },
+          "r1": {
+            "integerValue": "0"
+          },
+          "r3": {
+            "integerValue": "4"
+          },
+          "score": {
+            "integerValue": "5"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "-2"
+          }
+        }
+      }
+    },
+    "Nicolai Højgaard": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "9"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "5"
+          },
+          "r1": {
+            "integerValue": "4"
+          }
+        }
+      }
+    },
+    "Adrien Dumont de Chassart": {
+      "mapValue": {
+        "fields": {
+          "position": {
+            "stringValue": "T53"
+          },
+          "r2": {
+            "integerValue": "1"
+          },
+          "r1": {
+            "integerValue": "1"
+          },
+          "r3": {
+            "integerValue": "7"
+          },
+          "score": {
+            "integerValue": "9"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "0"
+          }
+        }
+      }
+    },
+    "Keegan Bradley": {
+      "mapValue": {
+        "fields": {
+          "r2": {
+            "integerValue": "1"
+          },
+          "position": {
+            "stringValue": "T32"
+          },
+          "r1": {
+            "integerValue": "0"
+          },
+          "r3": {
+            "integerValue": "1"
+          },
+          "r4": {
+            "integerValue": "4"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "score": {
+            "integerValue": "6"
+          }
+        }
+      }
+    },
+    "Scottie Scheffler": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "-1"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "1"
+          },
+          "score": {
+            "integerValue": "0"
+          },
+          "r2": {
+            "integerValue": "-2"
+          },
+          "position": {
+            "stringValue": "T4"
+          },
+          "r1": {
+            "integerValue": "2"
+          }
+        }
+      }
+    },
+    "Andrew Putnam": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "4"
+          },
+          "score": {
+            "integerValue": "14"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "8"
+          },
+          "position": {
+            "stringValue": "T65"
+          },
+          "r2": {
+            "integerValue": "-2"
+          },
+          "r1": {
+            "integerValue": "4"
+          }
+        }
+      }
+    },
+    "Collin Morikawa": {
+      "mapValue": {
+        "fields": {
+          "score": {
+            "integerValue": "3"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "2"
+          },
+          "r3": {
+            "integerValue": "3"
+          },
+          "r1": {
+            "integerValue": "3"
+          },
+          "position": {
+            "stringValue": "T17"
+          },
+          "r2": {
+            "integerValue": "-5"
+          }
+        }
+      }
+    },
+    "Jackson Herrington": {
+      "mapValue": {
+        "fields": {
+          "score": {
+            "integerValue": "9"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r1": {
+            "integerValue": "5"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "4"
+          }
+        }
+      }
+    },
+    "J.J. Spaun": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "8"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "1"
+          },
+          "r1": {
+            "integerValue": "7"
+          }
+        }
+      }
+    },
+    "Jake Sollon": {
+      "mapValue": {
+        "fields": {
+          "r2": {
+            "integerValue": "1"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r1": {
+            "integerValue": "12"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "13"
+          }
+        }
+      }
+    },
+    "Ugo Coussaud": {
+      "mapValue": {
+        "fields": {
+          "r2": {
+            "integerValue": "3"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r1": {
+            "integerValue": "6"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "9"
+          }
+        }
+      }
+    },
+    "Ryder Cowan": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "-2"
+          },
+          "r2": {
+            "integerValue": "2"
+          },
+          "position": {
+            "stringValue": "T23"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "3"
+          },
+          "score": {
+            "integerValue": "5"
+          },
+          "r3": {
+            "integerValue": "2"
+          }
+        }
+      }
+    },
+    "Hideki Matsuyama": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "1"
+          },
+          "position": {
+            "stringValue": "T65"
+          },
+          "r2": {
+            "integerValue": "3"
+          },
+          "score": {
+            "integerValue": "14"
+          },
+          "r4": {
+            "integerValue": "3"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r3": {
+            "integerValue": "7"
+          }
+        }
+      }
+    },
+    "Patrick Reed": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "5"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "3"
+          },
+          "r1": {
+            "integerValue": "2"
+          }
+        }
+      }
+    },
+    "Rory McIlroy": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "3"
+          },
+          "score": {
+            "integerValue": "6"
+          },
+          "r4": {
+            "integerValue": "3"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "position": {
+            "stringValue": "T32"
+          },
+          "r2": {
+            "integerValue": "1"
+          },
+          "r1": {
+            "integerValue": "-1"
+          }
+        }
+      }
+    },
+    "Rocco Repetto Taylor": {
+      "mapValue": {
+        "fields": {
+          "score": {
+            "integerValue": "17"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r1": {
+            "integerValue": "11"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "6"
+          }
+        }
+      }
+    },
+    "Caleb Surratt": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "5"
+          },
+          "score": {
+            "integerValue": "13"
+          },
+          "r4": {
+            "integerValue": "4"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "position": {
+            "stringValue": "T63"
+          },
+          "r2": {
+            "integerValue": "-1"
+          },
+          "r1": {
+            "integerValue": "5"
+          }
+        }
+      }
+    },
+    "Niklas Nørgaard": {
+      "mapValue": {
+        "fields": {
+          "r2": {
+            "integerValue": "0"
+          },
+          "position": {
+            "stringValue": "T43"
+          },
+          "r1": {
+            "integerValue": "1"
+          },
+          "r3": {
+            "integerValue": "3"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "4"
+          },
+          "score": {
+            "integerValue": "8"
+          }
+        }
+      }
+    },
+    "Ben James": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "7"
+          },
+          "score": {
+            "integerValue": "5"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "-3"
+          },
+          "position": {
+            "stringValue": "T23"
+          },
+          "r2": {
+            "integerValue": "2"
+          },
+          "r1": {
+            "integerValue": "-1"
+          }
+        }
+      }
+    },
+    "Maverick McNealy": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "3"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "3"
+          },
+          "score": {
+            "integerValue": "6"
+          },
+          "r2": {
+            "integerValue": "-2"
+          },
+          "position": {
+            "stringValue": "T32"
+          },
+          "r1": {
+            "integerValue": "2"
+          }
+        }
+      }
+    },
+    "Jordan Spieth": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "3"
+          },
+          "r2": {
+            "integerValue": "0"
+          },
+          "position": {
+            "stringValue": "T56"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "4"
+          },
+          "score": {
+            "integerValue": "10"
+          },
+          "r3": {
+            "integerValue": "3"
+          }
+        }
+      }
+    },
+    "Matthew Jordan": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "5"
+          },
+          "r2": {
+            "integerValue": "3"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r1": {
+            "integerValue": "2"
+          }
+        }
+      }
+    },
+    "Hamilton Coleman": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "11"
+          },
+          "r2": {
+            "integerValue": "0"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r1": {
+            "integerValue": "11"
+          }
+        }
+      }
+    },
+    "Arni Sveinsson": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "21"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "7"
+          },
+          "r1": {
+            "integerValue": "14"
+          }
+        }
+      }
+    },
+    "Johnny Keefer": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "6"
+          },
+          "score": {
+            "integerValue": "7"
+          },
+          "r4": {
+            "integerValue": "0"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "position": {
+            "stringValue": "T39"
+          },
+          "r2": {
+            "integerValue": "0"
+          },
+          "r1": {
+            "integerValue": "1"
+          }
+        }
+      }
+    },
+    "Justin Thomas": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "1"
+          },
+          "position": {
+            "stringValue": "T17"
+          },
+          "r2": {
+            "integerValue": "-2"
+          },
+          "score": {
+            "integerValue": "3"
+          },
+          "r4": {
+            "integerValue": "-1"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r3": {
+            "integerValue": "5"
+          }
+        }
+      }
+    },
+    "Jackson Ormond": {
+      "mapValue": {
+        "fields": {
+          "r2": {
+            "integerValue": "10"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r1": {
+            "integerValue": "10"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "20"
+          }
+        }
+      }
+    },
+    "David Puig": {
+      "mapValue": {
+        "fields": {
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "9"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r1": {
+            "integerValue": "7"
+          },
+          "r2": {
+            "integerValue": "2"
+          },
+          "position": {
+            "stringValue": "-"
+          }
+        }
+      }
+    },
+    "Ryuichi Oiwa": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "8"
+          },
+          "r2": {
+            "integerValue": "2"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "10"
+          },
+          "r3": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "Sahith Theegala": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "2"
+          },
+          "r2": {
+            "integerValue": "-3"
+          },
+          "position": {
+            "stringValue": "T11"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "3"
+          },
+          "score": {
+            "integerValue": "2"
+          },
+          "r3": {
+            "integerValue": "0"
+          }
+        }
+      }
+    },
+    "Harry Higgs": {
+      "mapValue": {
+        "fields": {
+          "r2": {
+            "integerValue": "-2"
+          },
+          "position": {
+            "stringValue": "T43"
+          },
+          "r1": {
+            "integerValue": "1"
+          },
+          "r3": {
+            "integerValue": "7"
+          },
+          "r4": {
+            "integerValue": "2"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "score": {
+            "integerValue": "8"
+          }
+        }
+      }
+    },
+    "Jackson Koivun": {
+      "mapValue": {
+        "fields": {
+          "position": {
+            "stringValue": "T23"
+          },
+          "r2": {
+            "integerValue": "1"
+          },
+          "r1": {
+            "integerValue": "2"
+          },
+          "r3": {
+            "integerValue": "4"
+          },
+          "score": {
+            "integerValue": "5"
+          },
+          "r4": {
+            "integerValue": "-2"
+          },
+          "status": {
+            "stringValue": "active"
+          }
+        }
+      }
+    },
+    "Matt McCarty": {
+      "mapValue": {
+        "fields": {
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "12"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r1": {
+            "integerValue": "2"
+          },
+          "r2": {
+            "integerValue": "10"
+          },
+          "position": {
+            "stringValue": "-"
+          }
+        }
+      }
+    },
+    "Giuseppe Puebla": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "7"
+          },
+          "r2": {
+            "integerValue": "3"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r1": {
+            "integerValue": "4"
+          }
+        }
+      }
+    },
+    "Taylor Montgomery": {
+      "mapValue": {
+        "fields": {
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "4"
+          },
+          "r1": {
+            "integerValue": "7"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "11"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "J.T. Poston": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "1"
+          },
+          "position": {
+            "stringValue": "T4"
+          },
+          "r2": {
+            "integerValue": "1"
+          },
+          "score": {
+            "integerValue": "0"
+          },
+          "r4": {
+            "integerValue": "-3"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r3": {
+            "integerValue": "1"
+          }
+        }
+      }
+    },
+    "Bryson DeChambeau": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "5"
+          },
+          "r2": {
+            "integerValue": "5"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r1": {
+            "integerValue": "0"
+          }
+        }
+      }
+    },
+    "Tom Kim": {
+      "mapValue": {
+        "fields": {
+          "score": {
+            "integerValue": "-1"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "0"
+          },
+          "r3": {
+            "integerValue": "2"
+          },
+          "r1": {
+            "integerValue": "0"
+          },
+          "position": {
+            "stringValue": "3"
+          },
+          "r2": {
+            "integerValue": "-3"
+          }
+        }
+      }
+    },
+    "Patrick Cantlay": {
+      "mapValue": {
+        "fields": {
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "2"
+          },
+          "r1": {
+            "integerValue": "4"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "6"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          }
+        }
+      }
+    },
+    "Cole Hammer": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "6"
+          },
+          "r2": {
+            "integerValue": "3"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r1": {
+            "integerValue": "3"
+          }
+        }
+      }
+    },
+    "Nick Taylor": {
+      "mapValue": {
+        "fields": {
+          "r2": {
+            "integerValue": "1"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r1": {
+            "integerValue": "4"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "5"
+          }
+        }
+      }
+    },
+    "Logan Reilly": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "9"
+          },
+          "r2": {
+            "integerValue": "2"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "11"
+          },
+          "r3": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "Brian Harman": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "-1"
+          },
+          "position": {
+            "stringValue": "T32"
+          },
+          "r2": {
+            "integerValue": "1"
+          },
+          "score": {
+            "integerValue": "6"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "3"
+          },
+          "r3": {
+            "integerValue": "3"
+          }
+        }
+      }
+    },
+    "Alejandro Tosti": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "8"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "0"
+          },
+          "score": {
+            "integerValue": "8"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r3": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "_lastUpdated": {
+      "timestampValue": "2026-06-22T16:36:44.658Z"
+    },
+    "Kurt Kitayama": {
+      "mapValue": {
+        "fields": {
+          "position": {
+            "stringValue": "T53"
+          },
+          "r2": {
+            "integerValue": "-2"
+          },
+          "r1": {
+            "integerValue": "4"
+          },
+          "r3": {
+            "integerValue": "6"
+          },
+          "score": {
+            "integerValue": "9"
+          },
+          "r4": {
+            "integerValue": "1"
+          },
+          "status": {
+            "stringValue": "active"
+          }
+        }
+      }
+    },
+    "Alex Smalley": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "6"
+          },
+          "r2": {
+            "integerValue": "3"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "9"
+          },
+          "r3": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "Max Greyserman": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "6"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "0"
+          },
+          "score": {
+            "integerValue": "8"
+          },
+          "r2": {
+            "integerValue": "3"
+          },
+          "position": {
+            "stringValue": "T43"
+          },
+          "r1": {
+            "integerValue": "-1"
+          }
+        }
+      }
+    },
+    "Wyndham Clark": {
+      "mapValue": {
+        "fields": {
+          "r4": {
+            "integerValue": "3"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "score": {
+            "integerValue": "-4"
+          },
+          "r3": {
+            "integerValue": "0"
+          },
+          "r1": {
+            "integerValue": "-6"
+          },
+          "r2": {
+            "integerValue": "-1"
+          },
+          "position": {
+            "stringValue": "1"
+          }
+        }
+      }
+    },
+    "Joaquín Niemann": {
+      "mapValue": {
+        "fields": {
+          "score": {
+            "integerValue": "1"
+          },
+          "r4": {
+            "integerValue": "-4"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r3": {
+            "integerValue": "2"
+          },
+          "r1": {
+            "integerValue": "8"
+          },
+          "position": {
+            "stringValue": "T7"
+          },
+          "r2": {
+            "integerValue": "-5"
+          }
+        }
+      }
+    },
+    "Mateo Pulcini": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "4"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "7"
+          },
+          "score": {
+            "integerValue": "11"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r3": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "Kaito Onishi": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "7"
+          },
+          "r2": {
+            "integerValue": "0"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r1": {
+            "integerValue": "7"
+          }
+        }
+      }
+    },
+    "Bryan Lee": {
+      "mapValue": {
+        "fields": {
+          "score": {
+            "integerValue": "7"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r1": {
+            "integerValue": "3"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "4"
+          }
+        }
+      }
+    },
+    "Matt Fitzpatrick": {
+      "mapValue": {
+        "fields": {
+          "score": {
+            "integerValue": "4"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "3"
+          },
+          "r3": {
+            "integerValue": "4"
+          },
+          "r1": {
+            "integerValue": "-3"
+          },
+          "position": {
+            "stringValue": "22"
+          },
+          "r2": {
+            "integerValue": "0"
+          }
+        }
+      }
+    },
+    "Justin Rose": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "3"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "-2"
+          },
+          "score": {
+            "integerValue": "2"
+          },
+          "r2": {
+            "integerValue": "0"
+          },
+          "position": {
+            "stringValue": "T11"
+          },
+          "r1": {
+            "integerValue": "1"
+          }
+        }
+      }
+    },
+    "Carlos Ortiz": {
+      "mapValue": {
+        "fields": {
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "6"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r1": {
+            "integerValue": "2"
+          },
+          "r2": {
+            "integerValue": "4"
+          },
+          "position": {
+            "stringValue": "-"
+          }
+        }
+      }
+    },
+    "Ryo Hisatsune": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "3"
+          },
+          "score": {
+            "integerValue": "8"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "5"
+          },
+          "position": {
+            "stringValue": "T43"
+          },
+          "r2": {
+            "integerValue": "-1"
+          },
+          "r1": {
+            "integerValue": "1"
+          }
+        }
+      }
+    },
+    "John Parry": {
+      "mapValue": {
+        "fields": {
+          "score": {
+            "integerValue": "2"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "-1"
+          },
+          "r3": {
+            "integerValue": "1"
+          },
+          "r1": {
+            "integerValue": "1"
+          },
+          "position": {
+            "stringValue": "T11"
+          },
+          "r2": {
+            "integerValue": "1"
+          }
+        }
+      }
+    },
+    "Alex Fitzpatrick": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "2"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "3"
+          },
+          "score": {
+            "integerValue": "5"
+          },
+          "r2": {
+            "integerValue": "-1"
+          },
+          "position": {
+            "stringValue": "T23"
+          },
+          "r1": {
+            "integerValue": "1"
+          }
+        }
+      }
+    },
+    "Max McGreevy": {
+      "mapValue": {
+        "fields": {
+          "position": {
+            "stringValue": "T32"
+          },
+          "r2": {
+            "integerValue": "3"
+          },
+          "r1": {
+            "integerValue": "-2"
+          },
+          "r3": {
+            "integerValue": "3"
+          },
+          "score": {
+            "integerValue": "6"
+          },
+          "r4": {
+            "integerValue": "2"
+          },
+          "status": {
+            "stringValue": "active"
+          }
+        }
+      }
+    },
+    "Manav Shah": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "3"
+          },
+          "r2": {
+            "integerValue": "4"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "7"
+          },
+          "r3": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "Hennie Du Plessis": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "12"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "6"
+          },
+          "r1": {
+            "integerValue": "6"
+          }
+        }
+      }
+    },
+    "Sam Stevens": {
+      "mapValue": {
+        "fields": {
+          "score": {
+            "integerValue": "1"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "2"
+          },
+          "r3": {
+            "integerValue": "2"
+          },
+          "r1": {
+            "integerValue": "-2"
+          },
+          "position": {
+            "stringValue": "T7"
+          },
+          "r2": {
+            "integerValue": "-1"
+          }
+        }
+      }
+    },
+    "Russell Henley": {
+      "mapValue": {
+        "fields": {
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "1"
+          },
+          "score": {
+            "integerValue": "14"
+          },
+          "r3": {
+            "integerValue": "10"
+          },
+          "r1": {
+            "integerValue": "0"
+          },
+          "r2": {
+            "integerValue": "3"
+          },
+          "position": {
+            "stringValue": "T65"
+          }
+        }
+      }
+    },
+    "Patrick Rodgers": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "2"
+          },
+          "r2": {
+            "integerValue": "1"
+          },
+          "position": {
+            "stringValue": "71"
+          },
+          "r4": {
+            "integerValue": "4"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "score": {
+            "integerValue": "17"
+          },
+          "r3": {
+            "integerValue": "10"
+          }
+        }
+      }
+    },
+    "Gary Woodland": {
+      "mapValue": {
+        "fields": {
+          "r2": {
+            "integerValue": "3"
+          },
+          "position": {
+            "stringValue": "T7"
+          },
+          "r1": {
+            "integerValue": "-3"
+          },
+          "r3": {
+            "integerValue": "3"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "-2"
+          },
+          "score": {
+            "integerValue": "1"
+          }
+        }
+      }
+    },
+    "Chase Kyes": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "5"
+          },
+          "r2": {
+            "integerValue": "7"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "12"
+          },
+          "r3": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "Cameron Smith": {
+      "mapValue": {
+        "fields": {
+          "score": {
+            "integerValue": "6"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r1": {
+            "integerValue": "5"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "1"
+          }
+        }
+      }
+    },
+    "Preston Stout": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "2"
+          },
+          "r2": {
+            "integerValue": "7"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "9"
+          },
+          "r3": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "Akshay Bhatia": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "3"
+          },
+          "r4": {
+            "integerValue": "0"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "score": {
+            "integerValue": "3"
+          },
+          "r2": {
+            "integerValue": "0"
+          },
+          "position": {
+            "stringValue": "T17"
+          },
+          "r1": {
+            "integerValue": "0"
+          }
+        }
+      }
+    },
+    "Rickie Fowler": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "5"
+          },
+          "r2": {
+            "integerValue": "4"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r1": {
+            "integerValue": "1"
+          }
+        }
+      }
+    },
+    "Brooks Koepka": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "10"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "7"
+          },
+          "r1": {
+            "integerValue": "3"
+          }
+        }
+      }
+    },
+    "Sudarshan Yellamaraju": {
+      "mapValue": {
+        "fields": {
+          "r2": {
+            "integerValue": "2"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r1": {
+            "integerValue": "3"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "5"
+          }
+        }
+      }
+    },
+    "Jon Rahm": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "-2"
+          },
+          "r2": {
+            "integerValue": "8"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "6"
+          },
+          "r3": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "Cooper Dossey": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "9"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "2"
+          },
+          "score": {
+            "integerValue": "11"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "r3": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "Jack Schoenberger": {
+      "mapValue": {
+        "fields": {
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "3"
+          },
+          "r1": {
+            "integerValue": "3"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "6"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "Matthew Robles": {
+      "mapValue": {
+        "fields": {
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "16"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r1": {
+            "integerValue": "7"
+          },
+          "r2": {
+            "integerValue": "9"
+          },
+          "position": {
+            "stringValue": "-"
+          }
+        }
+      }
+    },
+    "Miles Russell": {
+      "mapValue": {
+        "fields": {
+          "r4": {
+            "integerValue": "0"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "score": {
+            "integerValue": "7"
+          },
+          "r3": {
+            "integerValue": "4"
+          },
+          "r1": {
+            "integerValue": "2"
+          },
+          "r2": {
+            "integerValue": "1"
+          },
+          "position": {
+            "stringValue": "T39"
+          }
+        }
+      }
+    },
+    "Ryan Gerard": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "5"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "2"
+          },
+          "r1": {
+            "integerValue": "3"
+          }
+        }
+      }
+    },
+    "Nico Echavarria": {
+      "mapValue": {
+        "fields": {
+          "r4": {
+            "integerValue": "1"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "score": {
+            "integerValue": "10"
+          },
+          "r3": {
+            "integerValue": "5"
+          },
+          "r1": {
+            "integerValue": "1"
+          },
+          "r2": {
+            "integerValue": "3"
+          },
+          "position": {
+            "stringValue": "T56"
+          }
+        }
+      }
+    },
+    "Jimmy Stanger": {
+      "mapValue": {
+        "fields": {
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "7"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r1": {
+            "integerValue": "4"
+          },
+          "r2": {
+            "integerValue": "3"
+          },
+          "position": {
+            "stringValue": "-"
+          }
+        }
+      }
+    },
+    "Neal Shipley": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "1"
+          },
+          "r2": {
+            "integerValue": "3"
+          },
+          "position": {
+            "stringValue": "T65"
+          },
+          "r4": {
+            "integerValue": "3"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "score": {
+            "integerValue": "14"
+          },
+          "r3": {
+            "integerValue": "7"
+          }
+        }
+      }
+    },
+    "Taihei Sato": {
+      "mapValue": {
+        "fields": {
+          "r2": {
+            "integerValue": "4"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r1": {
+            "integerValue": "5"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "9"
+          }
+        }
+      }
+    },
+    "Greyson Leach": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "9"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "12"
+          },
+          "score": {
+            "integerValue": "21"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r3": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "T.K. Kim": {
+      "mapValue": {
+        "fields": {
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "16"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r1": {
+            "integerValue": "9"
+          },
+          "r2": {
+            "integerValue": "7"
+          },
+          "position": {
+            "stringValue": "-"
+          }
+        }
+      }
+    },
+    "Jackson Suber": {
+      "mapValue": {
+        "fields": {
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "5"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r1": {
+            "integerValue": "4"
+          },
+          "r2": {
+            "integerValue": "1"
+          },
+          "position": {
+            "stringValue": "-"
+          }
+        }
+      }
+    },
+    "William Mouw": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "0"
+          },
+          "position": {
+            "stringValue": "T65"
+          },
+          "r2": {
+            "integerValue": "0"
+          },
+          "score": {
+            "integerValue": "14"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "10"
+          },
+          "r3": {
+            "integerValue": "4"
+          }
+        }
+      }
+    },
+    "J.B. Holmes": {
+      "mapValue": {
+        "fields": {
+          "score": {
+            "integerValue": "9"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r1": {
+            "integerValue": "5"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "4"
+          }
+        }
+      }
+    },
+    "Bud Cauley": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "2"
+          },
+          "r4": {
+            "integerValue": "4"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "score": {
+            "integerValue": "10"
+          },
+          "r2": {
+            "integerValue": "2"
+          },
+          "position": {
+            "stringValue": "T56"
+          },
+          "r1": {
+            "integerValue": "2"
+          }
+        }
+      }
+    },
+    "Dylan Wu": {
+      "mapValue": {
+        "fields": {
+          "position": {
+            "stringValue": "72"
+          },
+          "r2": {
+            "integerValue": "1"
+          },
+          "r1": {
+            "integerValue": "3"
+          },
+          "r3": {
+            "integerValue": "12"
+          },
+          "score": {
+            "integerValue": "18"
+          },
+          "r4": {
+            "integerValue": "2"
+          },
+          "status": {
+            "stringValue": "active"
+          }
+        }
+      }
+    },
+    "Alex Noren": {
+      "mapValue": {
+        "fields": {
+          "r2": {
+            "integerValue": "2"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r1": {
+            "integerValue": "4"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "6"
+          }
+        }
+      }
+    },
+    "Adrien Saddier": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "2"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "5"
+          },
+          "score": {
+            "integerValue": "7"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "r3": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "James Nicholas": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "1"
+          },
+          "r2": {
+            "integerValue": "2"
+          },
+          "position": {
+            "stringValue": "T65"
+          },
+          "r4": {
+            "integerValue": "-1"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "score": {
+            "integerValue": "14"
+          },
+          "r3": {
+            "integerValue": "12"
+          }
+        }
+      }
+    },
+    "Si Woo Kim": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "7"
+          },
+          "r2": {
+            "integerValue": "-1"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "6"
+          },
+          "r3": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "Davis Thompson": {
+      "mapValue": {
+        "fields": {
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "10"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r1": {
+            "integerValue": "4"
+          },
+          "r2": {
+            "integerValue": "6"
+          },
+          "position": {
+            "stringValue": "-"
+          }
+        }
+      }
+    },
+    "Sepp Straka": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "7"
+          },
+          "r2": {
+            "integerValue": "5"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r1": {
+            "integerValue": "2"
+          }
+        }
+      }
+    },
+    "Viktor Hovland": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "6"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "-1"
+          },
+          "score": {
+            "integerValue": "5"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r3": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "Ethan Fang": {
+      "mapValue": {
+        "fields": {
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "7"
+          },
+          "r1": {
+            "integerValue": "4"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "11"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "Xander Schauffele": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "3"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "2"
+          },
+          "score": {
+            "integerValue": "2"
+          },
+          "r2": {
+            "integerValue": "-4"
+          },
+          "position": {
+            "stringValue": "T11"
+          },
+          "r1": {
+            "integerValue": "1"
+          }
+        }
+      }
+    },
+    "Ben Griffin": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "2"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "-1"
+          },
+          "score": {
+            "integerValue": "3"
+          },
+          "r2": {
+            "integerValue": "0"
+          },
+          "position": {
+            "stringValue": "T17"
+          },
+          "r1": {
+            "integerValue": "2"
+          }
+        }
+      }
+    },
+    "Filippo Celli": {
+      "mapValue": {
+        "fields": {
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "0"
+          },
+          "r1": {
+            "integerValue": "5"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "5"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "Vaughn Harber": {
+      "mapValue": {
+        "fields": {
+          "r2": {
+            "integerValue": "7"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r1": {
+            "integerValue": "5"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "12"
+          }
+        }
+      }
+    },
+    "Michael Kim": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "0"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "5"
+          },
+          "score": {
+            "integerValue": "8"
+          },
+          "r2": {
+            "integerValue": "2"
+          },
+          "position": {
+            "stringValue": "T43"
+          },
+          "r1": {
+            "integerValue": "1"
+          }
+        }
+      }
+    },
+    "Jake Peacock": {
+      "mapValue": {
+        "fields": {
+          "score": {
+            "integerValue": "11"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r1": {
+            "integerValue": "6"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "5"
+          }
+        }
+      }
+    },
+    "Tommy Fleetwood": {
+      "mapValue": {
+        "fields": {
+          "r2": {
+            "integerValue": "1"
+          },
+          "position": {
+            "stringValue": "T11"
+          },
+          "r1": {
+            "integerValue": "0"
+          },
+          "r3": {
+            "integerValue": "0"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "1"
+          },
+          "score": {
+            "integerValue": "2"
+          }
+        }
+      }
+    },
+    "Jake Knapp": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "7"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "1"
+          },
+          "score": {
+            "integerValue": "8"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r3": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "Matti Schmid": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "14"
+          },
+          "r2": {
+            "integerValue": "7"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r1": {
+            "integerValue": "7"
+          }
+        }
+      }
+    },
+    "Jayden Schaper": {
+      "mapValue": {
+        "fields": {
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "5"
+          },
+          "r1": {
+            "integerValue": "5"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "10"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          }
+        }
+      }
+    },
+    "Angel Hidalgo": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "4"
+          },
+          "r4": {
+            "integerValue": "2"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "score": {
+            "integerValue": "9"
+          },
+          "r2": {
+            "integerValue": "4"
+          },
+          "position": {
+            "stringValue": "T53"
+          },
+          "r1": {
+            "integerValue": "-1"
+          }
+        }
+      }
+    },
+    "Spencer Tibbits": {
+      "mapValue": {
+        "fields": {
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "3"
+          },
+          "score": {
+            "integerValue": "11"
+          },
+          "r3": {
+            "integerValue": "6"
+          },
+          "r1": {
+            "integerValue": "-2"
+          },
+          "r2": {
+            "integerValue": "4"
+          },
+          "position": {
+            "stringValue": "T61"
+          }
+        }
+      }
+    },
+    "Lucas Herbert": {
+      "mapValue": {
+        "fields": {
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "2"
+          },
+          "r1": {
+            "integerValue": "4"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "6"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "Daniel Berger": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "10"
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "3"
+          },
+          "r1": {
+            "integerValue": "7"
+          }
+        }
+      }
+    },
+    "Min Woo Lee": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "4"
+          },
+          "r2": {
+            "integerValue": "3"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "7"
+          },
+          "r3": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "Sungjae Im": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "1"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "5"
+          },
+          "score": {
+            "integerValue": "8"
+          },
+          "r2": {
+            "integerValue": "-2"
+          },
+          "position": {
+            "stringValue": "T43"
+          },
+          "r1": {
+            "integerValue": "4"
+          }
+        }
+      }
+    },
+    "Ben Kohles": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "0"
+          },
+          "position": {
+            "stringValue": "T23"
+          },
+          "r2": {
+            "integerValue": "1"
+          },
+          "score": {
+            "integerValue": "5"
+          },
+          "r4": {
+            "integerValue": "0"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r3": {
+            "integerValue": "4"
+          }
+        }
+      }
+    },
+    "Jackson Van Paris": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "integerValue": "6"
+          },
+          "score": {
+            "integerValue": "11"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "3"
+          },
+          "position": {
+            "stringValue": "T61"
+          },
+          "r2": {
+            "integerValue": "2"
+          },
+          "r1": {
+            "integerValue": "0"
+          }
+        }
+      }
+    },
+    "Harris English": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "2"
+          },
+          "r2": {
+            "integerValue": "3"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "5"
+          },
+          "r3": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "Kristoffer Reitan": {
+      "mapValue": {
+        "fields": {
+          "score": {
+            "integerValue": "6"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r1": {
+            "integerValue": "0"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "6"
+          }
+        }
+      }
+    },
+    "Carl Yuan": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "9"
+          },
+          "r2": {
+            "integerValue": "2"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r1": {
+            "integerValue": "7"
+          }
+        }
+      }
+    },
+    "Kevin Roy": {
+      "mapValue": {
+        "fields": {
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "9"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "r1": {
+            "integerValue": "2"
+          },
+          "r2": {
+            "integerValue": "7"
+          },
+          "position": {
+            "stringValue": "-"
+          }
+        }
+      }
+    },
+    "Andrew Novak": {
+      "mapValue": {
+        "fields": {
+          "position": {
+            "stringValue": "-"
+          },
+          "r2": {
+            "integerValue": "2"
+          },
+          "r1": {
+            "integerValue": "3"
+          },
+          "r3": {
+            "nullValue": null
+          },
+          "score": {
+            "integerValue": "5"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          }
+        }
+      }
+    },
+    "Adam Scott": {
+      "mapValue": {
+        "fields": {
+          "r3": {
+            "nullValue": null
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "8"
+          },
+          "r2": {
+            "integerValue": "5"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r1": {
+            "integerValue": "3"
+          }
+        }
+      }
+    },
+    "Chris Kirk": {
+      "mapValue": {
+        "fields": {
+          "r1": {
+            "integerValue": "8"
+          },
+          "r2": {
+            "integerValue": "1"
+          },
+          "position": {
+            "stringValue": "-"
+          },
+          "r4": {
+            "nullValue": null
+          },
+          "status": {
+            "stringValue": "cut"
+          },
+          "score": {
+            "integerValue": "9"
+          },
+          "r3": {
+            "nullValue": null
+          }
+        }
+      }
+    },
+    "Michael Brennan": {
+      "mapValue": {
+        "fields": {
+          "score": {
+            "integerValue": "8"
+          },
+          "status": {
+            "stringValue": "active"
+          },
+          "r4": {
+            "integerValue": "2"
+          },
+          "r3": {
+            "integerValue": "3"
+          },
+          "r1": {
+            "integerValue": "2"
+          },
+          "position": {
+            "stringValue": "T43"
+          },
+          "r2": {
+            "integerValue": "1"
+          }
+        }
+      }
+    }
+  },
+  "createTime": "2026-06-18T12:37:22.945017Z",
+  "updateTime": "2026-06-22T16:36:46.820565Z"
+}

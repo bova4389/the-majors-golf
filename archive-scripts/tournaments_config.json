@@ -1,0 +1,62 @@
+[
+  {
+    "firestoreId": "",
+    "name": "Masters 2025",
+    "major": "masters",
+    "year": 2025,
+    "espnEventId": ""
+  },
+  {
+    "firestoreId": "",
+    "name": "PGA Championship 2025",
+    "major": "pga",
+    "year": 2025,
+    "espnEventId": ""
+  },
+  {
+    "firestoreId": "",
+    "name": "The Open Championship 2025",
+    "major": "the-open",
+    "year": 2025,
+    "espnEventId": ""
+  },
+  {
+    "firestoreId": "",
+    "name": "U.S. Open 2025",
+    "major": "us-open",
+    "year": 2025,
+    "espnEventId": ""
+  },
+  {
+    "firestoreId": "masters-2026",
+    "name": "2026 Masters",
+    "major": "masters",
+    "year": 2026,
+    "espnEventId": "401811941",
+    "status": "final"
+  },
+  {
+    "firestoreId": "AMcWqXqIGQN605XypuDI",
+    "name": "2026 PGA Championship",
+    "major": "pga",
+    "year": 2026,
+    "espnEventId": "401811947",
+    "status": "final"
+  },
+  {
+    "firestoreId": "NRMXw9q99ZBJ4Wwn5Urd",
+    "name": "2026 Open Championship",
+    "major": "the-open",
+    "year": 2026,
+    "espnEventId": "401811957",
+    "status": "final"
+  },
+  {
+    "firestoreId": "Y4mgiIA4RJjF6JLaHuH0",
+    "name": "2026 US Open",
+    "major": "us-open",
+    "year": 2026,
+    "espnEventId": "401811952",
+    "status": "final"
+  }
+]

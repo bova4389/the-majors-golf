@@ -8,7 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Firebase project**: `basic-bros-majors-golf` (projectId in `js/firebase-config.js`)
 - **Domain**: https://basic-bros-pga-pickems.com
 - **Hosting**: DreamHost (fully hosted) — push to `main` and GitHub Actions automatically deploys via SFTP
-- **Deploy workflow**: `.github/workflows/deploy.yml` uses `wlixcc/SFTP-Deploy-Action` → uploads to `/home/mattbova/basic-bros-pga-pickems.com/` on DreamHost
+- **Deploy workflow**: `.github/workflows/deploy.yml` uses `wlixcc/SFTP-Deploy-Action` → uploads to `/home/mattbova/basic-bros-pga-pickems.com/` on DreamHost. A **"Stage deployable files"** step first rsyncs the repo into `_deploy/` minus `CLAUDE.md`, `.github`, `.gitignore`, `data-archive/` and `archive-scripts/`, and both upload steps read from `_deploy/`. Without it the action publishes everything tracked — `/CLAUDE.md` used to be live on the domain. Add an `--exclude` when introducing a new internal-only file.
+- **This repo is PUBLIC and deploys to a public webroot** — a committed file is published twice over (git history forever, plus a plain URL). Entrant emails/phones live in `data-archive/**/picks.csv`, `data-archive/*picks_raw*.json` and `Picks/`; all three are gitignored, and a `PreToolUse` hook scans staged blobs to block a PII commit as a backstop. The non-PII archives (standings/scoreboard CSVs) *are* tracked so the 2025 record — the only surviving copy of that year's picks — is backed up.
 - **GitHub Actions secrets required**: `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD` (set in repo Settings → Secrets → Actions)
 
 ## Key Contacts

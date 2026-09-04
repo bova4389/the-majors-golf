@@ -848,7 +848,7 @@ td.top-4-pick {
 
 .major-card--locked { opacity: .52; cursor: default; }
 
-/* Per-major accent colours */
+/* Per-major accent colors */
 .major-card--masters  { --mc-color: #1a6b3c; }
 .major-card--pga      { --mc-color: #003087; }
 .major-card--usopen   { --mc-color: #3c638e; }
